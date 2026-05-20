@@ -14,3 +14,50 @@
 | 19/05/2026 | 6 | Rédaction du fichier `styles.css` : reset CSS, variables de palette, design mobile-first avec breakpoints à 480px/768px/1024px, composants (topbar, stats, cards, tables, tabs, timeline, badges, formulaires, toasts). Transitions et états hover/active. | Aucun | — |
 | 19/05/2026 | 7 | Rédaction du fichier `script.js` : données mockées (3 campagnes, 15 locataires), hash routing SPA, interactions CRUD (création/suppression campagne), onglets détail, génération planning avec RG3/RG4/RG9, fonctions toast, timeline visuelle, relance individuelle/masse, export simulé, modification créneaux avec formulaire. | Aucun | — |
 | 20/05/2026 | 8 | Restructuration complète de l'arborescence du projet Planif'Audit. Création dossiers Agent.ia/, skills/, prompts/, specifications/, docs/, backup/. Déplacement des .md racine vers docs/. Création de 6 fichiers specs modulaires (user-stories, personas, wireframes, regles-gestion, cas-utilisation, glossaire). Création config.json agent IA. Déplacement brief-projet.md vers specifications/. Mise à jour du journal de bord. | Aucun | — |
+| 20/05/2026 | 9 | Refonte du formulaire de création de campagne : passage en 2 étapes (immeuble → locataires), ajout champs nom/email/téléphone/digicode, colonne Nom dans tous les tableaux, mise à jour mock data avec noms et emails. | Aucun | — |
+
+---
+
+## 20/05/2026 — Séance n°9 - Revue de conception
+
+### Constat / Problème identifié :
+Le formulaire de création de campagne actuel est trop limité. Il ne permet pas de saisir :
+- Les noms des locataires
+- Leurs adresses email (indispensable pour envoyer les invitations)
+- Leurs numéros de téléphone
+- Les codes d'accès / digicode
+
+### Décision majeure :
+**Refonte du formulaire de création de campagne** avec saisie individuelle des locataires.
+
+### Nouveaux champs à ajouter par locataire :
+| Champ | Obligatoire | Utilité |
+|-------|-------------|---------|
+| Nom complet | ✅ | Personnalisation |
+| Email | ✅ | Envoi des liens d'invitation |
+| Téléphone | ❌ | Relance SMS future |
+| Numéro appartement | ✅ | Identification |
+| Étage | ✅ | Planning (RG3) |
+| Code d'accès | ❌ | Instructions visite |
+
+### Architecture technique retenue :
+- **Base de données** : MySQL
+- **Backend** : Node.js + Express
+- **Frontend** : HTML/CSS/JS (actuel à modifier)
+- **Types d'utilisateurs** : 
+  - Entrepreneur (admin) : création campagnes, consultation planning
+  - Locataire : formulaire public pour choisir créneau
+
+### Prochaines actions immédiates :
+1. [x] Modifier le formulaire HTML en 2 étapes (immeuble → locataires)
+2. [x] Ajouter la saisie dynamique des locataires en JavaScript
+3. [x] Mettre à jour les mock data avec noms et emails
+4. [x] Adapter l'affichage détail campagne pour montrer les noms
+5. [ ] Modifier le schéma MySQL (ajout colonnes locataires)
+
+### Blocages éventuels :
+- Aucun blocage identifié, mais la modification du frontend est prioritaire avant le backend
+
+### Notes complémentaires :
+- L'import CSV sera une fonctionnalité secondaire (plus tard)
+- Les emails d'invitation seront gérés après la refonte du formulaire

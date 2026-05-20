@@ -1,0 +1,163 @@
+# HISTORIQUE DES PROMPTS — Planif'Audit
+
+Dernière mise à jour : 20/05/2026
+
+---
+
+## PROMPT N°1 — Restructuration complète du dossier projet
+**Date :** 20/05/2026
+**Objectif :** Réorganiser l'arborescence complète du projet Planif'Audit
+
+**Contenu :**
+```
+RESTRUCTURATION COMPLÈTE DU DOSSIER PROJET
+
+Je souhaite réorganiser l'arborescence de mon projet "Planif'Audit" sans modifier aucun fichier de code (HTML/CSS/JS).
+Structure cible : index.html, styles.css, script.js à la racine, + dossiers Agent.ia/, skills/, prompts/, specifications/ (avec 6 fichiers .md), docs/, backup/.
+
+Actions :
+1. CRÉER les dossiers (Agent.ia, skills, prompts, specifications, docs, backup)
+2. CRÉER prompts/prompts.log (vide)
+3. CRÉER les 6 fichiers markdown dans specifications/
+4. DÉPLACER les .md existants vers docs/ ou specifications/
+5. CONSERVER index.html, styles.css, script.js
+```
+
+---
+
+## PROMPT N°2 — Remplissage des fichiers markdown de spécifications
+**Date :** 20/05/2026
+**Objectif :** Alimenter les 6 fichiers de spécifications avec le contenu du projet
+
+**Contenu :**
+```
+Maintenant, remplis les fichiers markdown dans specifications/ avec le contenu du projet Planif'Audit :
+
+- user-stories.md → liste toutes les user stories
+- personas.md → décrit les rôles (gestionnaire, locataire, auditeur)
+- wireframes.md → décrit les écrans (dashboard, détail, planning)
+- regles-gestion.md → liste les RG3, RG4, RG9 et autres règles métier
+- cas-utilisation.md → diagramme texte des cas d'utilisation
+- glossaire.md → définit les termes (campagne, créneau, relance, etc.)
+```
+
+---
+
+## PROMPT N°3 — Création de la configuration agent IA
+**Date :** 20/05/2026
+**Objectif :** Créer un fichier config.json pour l'agent assistant
+
+**Contenu :**
+```
+Crée un fichier Agent.ia/config.json avec une configuration minimale pour un agent assistant capable de répondre aux questions sur la planification d'audits.
+```
+
+---
+
+## PROMPT N°4 — Recherche et déplacement du fichier brief.md
+**Date :** 20/05/2026
+**Objectif :** Localiser et déplacer brief.md (ou variantes) dans specifications/
+
+**Contenu :**
+```
+RECHERCHE ET DÉPLACEMENT DU FICHIER BRIEF.MD
+
+1. RECHERCHER tous les fichiers dont le nom contient "brief"
+2. SI TROUVÉ(S) → déplacer dans specifications/, renommer en brief-projet.md
+3. SI NON TROUVÉ → créer specifications/brief.md avec en-tête minimal
+```
+
+---
+
+## PROMPT N°5 — Modification du formulaire de création campagne
+**Date :** 20/05/2026
+**Objectif :** Refondre le formulaire en 2 étapes avec saisie individuelle des locataires
+
+**Contenu :**
+```
+MODIFICATION DU FORMULAIRE DE CRÉATION CAMPAGNE
+
+1. Remplacer le formulaire actuel par un formulaire en 2 étapes :
+   - Étape 1 : informations immeuble (adresse, dates, nb logements)
+   - Étape 2 : formulaire dynamique pour saisir chaque locataire
+
+2. Pour chaque locataire : nom, email, téléphone, appartement, étage, digicode
+
+3. Ajouter boutons "Ajouter un locataire" et "Importer CSV"
+
+Modifications script.js :
+1. Remplacer la fonction de création pour récupérer la liste des locataires
+2. Mettre à jour les mock data avec nom et email
+3. Afficher le nom dans le détail campagne
+```
+
+---
+
+## PROMPT N°6 — Actualisation du journal de bord (restructuration)
+**Date :** 20/05/2026
+**Objectif :** Ajouter une entrée au journal pour la séance de restructuration
+
+**Contenu :**
+```
+ACTUALISATION DU JOURNAL DE BORD
+
+Chemin : C:\Users\wassi\projet-audit-energetique\docs\03_Journal_de_Bord.md
+
+1. LIRE le contenu actuel
+2. METTRE À JOUR avec une nouvelle entrée pour aujourd'hui :
+   - Date du jour
+   - Actions réalisées (restructuration, création dossiers)
+   - Décisions prises
+   - Prochaines étapes
+```
+
+---
+
+## PROMPT N°7 — Actualisation du journal de bord (refonte formulaire)
+**Date :** 20/05/2026
+**Objectif :** Ajouter l'entrée sur la refonte du formulaire au journal
+
+**Contenu :**
+```
+ACTUALISATION DU JOURNAL DE BORD
+
+Chemin : C:\Users\wassi\projet-audit-energetique\docs\03_Journal_de_Bord.md
+
+AJOUTER une nouvelle entrée pour la séance d'aujourd'hui :
+
+### Constat / Problème identifié :
+Le formulaire de création de campagne actuel est trop limité.
+
+### Décision majeure :
+Refonte du formulaire de création de campagne avec saisie individuelle des locataires.
+
+### Nouveaux champs par locataire :
+Nom, Email, Téléphone, Appartement, Étage, Code d'accès
+
+### Architecture technique retenue :
+MySQL, Node.js + Express, HTML/CSS/JS
+
+### Prochaines actions :
+1. Modifier le formulaire HTML en 2 étapes
+2. Ajouter la saisie dynamique des locataires
+3. Mettre à jour les mock data
+4. Adapter l'affichage détail campagne
+5. Modifier le schéma MySQL
+```
+
+---
+
+## PROMPT N°8 — Sauvegarde de l'historique des prompts
+**Date :** 20/05/2026
+**Objectif :** Enregistrer l'historique complet des prompts dans prompts.log
+
+**Contenu :**
+```
+SAUVEGARDE DE L'HISTORIQUE DES PROMPTS
+
+Chemin : C:\Users\wassi\projet-audit-energetique\prompts\prompts.log
+
+1. EXTRAIRE de la conversation tous les prompts formulés
+2. LISTER les prompts dans l'ordre chronologique
+3. FORMATER avec titre, date, objectif, contenu pour chaque entrée
+```
