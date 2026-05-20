@@ -53,31 +53,50 @@
         </div>
       </div>
 
-      <!-- FORMULAIRE CRÉATION CAMPAGNE -->
+      <!-- FORMULAIRE CRÉATION CAMPAGNE (2 étapes) -->
       <div class="card" id="createForm" style="display:none">
         <h2 class="card__title">Nouvelle campagne de visites</h2>
         <form id="campaignForm">
-          <div class="form-group">
-            <label class="form-label" for="campAdresse">Adresse de l'immeuble</label>
-            <input class="form-input" type="text" id="campAdresse" placeholder="12 Rue des Lilas, Paris 75011" required>
-          </div>
-          <div class="form-row">
+          <!-- ÉTAPE 1 : Informations immeuble -->
+          <div id="formStep1">
             <div class="form-group">
-              <label class="form-label" for="campDebut">Date de début</label>
-              <input class="form-input" type="date" id="campDebut" required>
+              <label class="form-label" for="campAdresse">Adresse de l'immeuble</label>
+              <input class="form-input" type="text" id="campAdresse" placeholder="12 Rue des Lilas, Paris 75011" required>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="campDebut">Date de début</label>
+                <input class="form-input" type="date" id="campDebut" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="campFin">Date de fin</label>
+                <input class="form-input" type="date" id="campFin" required>
+              </div>
             </div>
             <div class="form-group">
-              <label class="form-label" for="campFin">Date de fin</label>
-              <input class="form-input" type="date" id="campFin" required>
+              <label class="form-label" for="campNbLogements">Nombre d'appartements</label>
+              <input class="form-input" type="number" id="campNbLogements" min="1" max="100" value="8" required>
+            </div>
+            <div class="form-actions">
+              <button type="button" class="btn btn--outline" id="cancelForm">Annuler</button>
+              <button type="button" class="btn btn--primary" id="toStep2">Continuer →</button>
             </div>
           </div>
-          <div class="form-group">
-            <label class="form-label" for="campNbLogements">Nombre d'appartements</label>
-            <input class="form-input" type="number" id="campNbLogements" min="1" max="100" value="8" required>
-          </div>
-          <div class="form-actions">
-            <button type="button" class="btn btn--outline" id="cancelForm">Annuler</button>
-            <button type="submit" class="btn btn--primary">Créer la campagne</button>
+
+          <!-- ÉTAPE 2 : Saisie des locataires -->
+          <div id="formStep2" style="display:none">
+            <div class="form-group">
+              <label class="form-label">Locataires <span id="tenantCount" style="color:#7a8a9e">(0)</span></label>
+            </div>
+            <div id="tenantList"></div>
+            <div style="display:flex;gap:8px;margin:12px 0 16px">
+              <button type="button" class="btn btn--outline btn--sm" id="addTenantBtn">+ Ajouter un locataire</button>
+              <button type="button" class="btn btn--outline btn--sm" id="importCsvBtn" disabled title="Fonctionnalité à venir">📄 Importer CSV</button>
+            </div>
+            <div class="form-actions">
+              <button type="button" class="btn btn--outline" id="backToStep1">← Retour</button>
+              <button type="submit" class="btn btn--primary">Créer la campagne</button>
+            </div>
           </div>
         </form>
       </div>
@@ -157,6 +176,7 @@
               <thead>
                 <tr>
                   <th>Logement</th>
+                  <th>Nom</th>
                   <th>Étage</th>
                   <th>Statut</th>
                   <th>Créneau choisi</th>
@@ -193,6 +213,7 @@
                   <th>Fin</th>
                   <th>Étage</th>
                   <th>Logement</th>
+                  <th>Nom</th>
                   <th class="th-actions">Modifier</th>
                 </tr>
               </thead>
@@ -238,13 +259,14 @@
           <table class="table">
             <thead>
               <tr>
-                <th>#</th>
-                <th>Date</th>
-                <th>Créneau</th>
-                <th>Étage</th>
-                <th>Logement</th>
-                <th>Durée</th>
-                <th class="th-actions">Actions</th>
+                  <th>#</th>
+                  <th>Date</th>
+                  <th>Créneau</th>
+                  <th>Étage</th>
+                  <th>Logement</th>
+                  <th>Nom</th>
+                  <th>Durée</th>
+                  <th class="th-actions">Actions</th>
               </tr>
             </thead>
             <tbody id="planningDetailList"></tbody>

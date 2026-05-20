@@ -16,12 +16,12 @@ const APP = {
       nbLogements: 6,
       statut: 'active',
       locataires: [
-        { id: 'l1', logement: 'A1', etage: 0, etageLabel: 'RDC', statut: 'repondu', creneau: { date: '2026-06-02', debut: '09:00', fin: '09:30' } },
-        { id: 'l2', logement: 'A2', etage: 0, etageLabel: 'RDC', statut: 'repondu', creneau: { date: '2026-06-02', debut: '09:45', fin: '10:15' } },
-        { id: 'l3', logement: 'B3', etage: 1, etageLabel: '1er', statut: 'repondu', creneau: { date: '2026-06-02', debut: '10:30', fin: '11:00' } },
-        { id: 'l4', logement: 'B4', etage: 1, etageLabel: '1er', statut: 'attente', creneau: null },
-        { id: 'l5', logement: 'C5', etage: 2, etageLabel: '2e', statut: 'repondu', creneau: { date: '2026-06-03', debut: '09:00', fin: '09:30' } },
-        { id: 'l6', logement: 'C6', etage: 2, etageLabel: '2e', statut: 'attente', creneau: null },
+        { id: 'l1', nom: 'Sophie Moreau', email: 'sophie.moreau@email.fr', tel: '', logement: 'A1', etage: 0, etageLabel: 'RDC', digicode: '1234', statut: 'repondu', creneau: { date: '2026-06-02', debut: '09:00', fin: '09:30' } },
+        { id: 'l2', nom: 'Pierre Durand', email: 'pierre.durand@email.fr', tel: '0611223344', logement: 'A2', etage: 0, etageLabel: 'RDC', digicode: '', statut: 'repondu', creneau: { date: '2026-06-02', debut: '09:45', fin: '10:15' } },
+        { id: 'l3', nom: 'Camille Laurent', email: 'camille.l@email.fr', tel: '', logement: 'B3', etage: 1, etageLabel: '1er', digicode: '5678', statut: 'repondu', creneau: { date: '2026-06-02', debut: '10:30', fin: '11:00' } },
+        { id: 'l4', nom: 'Marc Lefèvre', email: 'marc.lefevre@email.fr', tel: '0622334455', logement: 'B4', etage: 1, etageLabel: '1er', digicode: '', statut: 'attente', creneau: null },
+        { id: 'l5', nom: 'Julie Petit', email: 'julie.petit@email.fr', tel: '', logement: 'C5', etage: 2, etageLabel: '2e', digicode: '9012', statut: 'repondu', creneau: { date: '2026-06-03', debut: '09:00', fin: '09:30' } },
+        { id: 'l6', nom: 'Thomas Roux', email: 'thomas.roux@email.fr', tel: '0633445566', logement: 'C6', etage: 2, etageLabel: '2e', digicode: '', statut: 'attente', creneau: null },
       ]
     },
     {
@@ -32,10 +32,10 @@ const APP = {
       nbLogements: 4,
       statut: 'active',
       locataires: [
-        { id: 'l7', logement: 'D1', etage: -1, etageLabel: 'Sous-sol', statut: 'repondu', creneau: { date: '2026-07-17', debut: '10:00', fin: '10:30' } },
-        { id: 'l8', logement: 'E2', etage: 0, etageLabel: 'RDC', statut: 'repondu', creneau: { date: '2026-07-17', debut: '10:45', fin: '11:15' } },
-        { id: 'l9', logement: 'F3', etage: 1, etageLabel: '1er', statut: 'relance', creneau: null },
-        { id: 'l10', logement: 'G4', etage: 2, etageLabel: '2e', statut: 'repondu', creneau: { date: '2026-07-18', debut: '09:00', fin: '09:30' } },
+        { id: 'l7', nom: 'Nathalie Dupuis', email: 'nathalie.dupuis@email.fr', tel: '', logement: 'D1', etage: -1, etageLabel: 'Sous-sol', digicode: '', statut: 'repondu', creneau: { date: '2026-07-17', debut: '10:00', fin: '10:30' } },
+        { id: 'l8', nom: 'Antoine Girard', email: 'antoine.girard@email.fr', tel: '0644556677', logement: 'E2', etage: 0, etageLabel: 'RDC', digicode: '3456', statut: 'repondu', creneau: { date: '2026-07-17', debut: '10:45', fin: '11:15' } },
+        { id: 'l9', nom: 'Élodie Fontaine', email: 'elodie.fontaine@email.fr', tel: '', logement: 'F3', etage: 1, etageLabel: '1er', digicode: '', statut: 'relance', creneau: null },
+        { id: 'l10', nom: 'David Mercier', email: 'david.mercier@email.fr', tel: '0655667788', logement: 'G4', etage: 2, etageLabel: '2e', digicode: '7890', statut: 'repondu', creneau: { date: '2026-07-18', debut: '09:00', fin: '09:30' } },
       ]
     },
     {
@@ -46,11 +46,11 @@ const APP = {
       nbLogements: 5,
       statut: 'termine',
       locataires: [
-        { id: 'l11', logement: 'H1', etage: 0, etageLabel: 'RDC', statut: 'repondu', creneau: { date: '2026-05-03', debut: '08:00', fin: '08:30' } },
-        { id: 'l12', logement: 'H2', etage: 0, etageLabel: 'RDC', statut: 'repondu', creneau: { date: '2026-05-03', debut: '08:45', fin: '09:15' } },
-        { id: 'l13', logement: 'I3', etage: 1, etageLabel: '1er', statut: 'repondu', creneau: { date: '2026-05-03', debut: '09:30', fin: '10:00' } },
-        { id: 'l14', logement: 'I4', etage: 1, etageLabel: '1er', statut: 'repondu', creneau: { date: '2026-05-03', debut: '10:15', fin: '10:45' } },
-        { id: 'l15', logement: 'J5', etage: 2, etageLabel: '2e', statut: 'repondu', creneau: { date: '2026-05-04', debut: '09:00', fin: '09:30' } },
+        { id: 'l11', nom: 'Isabelle Martinez', email: 'isabelle.m@email.fr', tel: '', logement: 'H1', etage: 0, etageLabel: 'RDC', digicode: '', statut: 'repondu', creneau: { date: '2026-05-03', debut: '08:00', fin: '08:30' } },
+        { id: 'l12', nom: 'François Bernard', email: 'francois.b@email.fr', tel: '0677889900', logement: 'H2', etage: 0, etageLabel: 'RDC', digicode: '1122', statut: 'repondu', creneau: { date: '2026-05-03', debut: '08:45', fin: '09:15' } },
+        { id: 'l13', nom: 'Sarah Cohen', email: 'sarah.cohen@email.fr', tel: '', logement: 'I3', etage: 1, etageLabel: '1er', digicode: '', statut: 'repondu', creneau: { date: '2026-05-03', debut: '09:30', fin: '10:00' } },
+        { id: 'l14', nom: 'Lucas Dubois', email: 'lucas.dubois@email.fr', tel: '0699001122', logement: 'I4', etage: 1, etageLabel: '1er', digicode: '3344', statut: 'repondu', creneau: { date: '2026-05-03', debut: '10:15', fin: '10:45' } },
+        { id: 'l15', nom: 'Marie Lambert', email: 'marie.lambert@email.fr', tel: '', logement: 'J5', etage: 2, etageLabel: '2e', digicode: '', statut: 'repondu', creneau: { date: '2026-05-04', debut: '09:00', fin: '09:30' } },
       ]
     },
   ],
@@ -145,6 +145,7 @@ function generatePlanning(locataires) {
       etage: l.etage,
       etageLabel: l.etageLabel,
       logement: l.logement,
+      nom: l.nom || '',
       duree: `${timeToMinutes(fin) - timeToMinutes(debut)} min`,
       locataireId: l.id,
     });
@@ -244,55 +245,184 @@ function updateStats() {
   $('#statDone').textContent = terminees;
 }
 
-/* ---------- CRÉATION CAMPAGNE ---------- */
+/* ---------- CRÉATION CAMPAGNE (2 ÉTAPES) ---------- */
+let tenantRowIndex = 0;
+
 $('#showCreateForm').addEventListener('click', () => {
   $('#createForm').style.display = 'block';
   $('#showCreateForm').style.display = 'none';
+  resetCampaignForm();
 });
 
 $('#cancelForm').addEventListener('click', () => {
   $('#createForm').style.display = 'none';
   $('#showCreateForm').style.display = 'inline-flex';
-  $('#campaignForm').reset();
+  resetCampaignForm();
 });
 
-$('#campaignForm').addEventListener('submit', (e) => {
-  e.preventDefault();
+function resetCampaignForm() {
+  $('#campaignForm').reset();
+  $('#formStep1').style.display = 'block';
+  $('#formStep2').style.display = 'none';
+  $('#tenantList').innerHTML = '';
+  tenantRowIndex = 0;
+  updateTenantCount();
+}
+
+function tenantRowHtml(index) {
+  const lettres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const lettre = lettres[index % 26];
+  const num = index + 1;
+  return `
+    <div class="tenant-row" data-index="${index}" style="border:1px solid #eef2f7;border-radius:8px;padding:12px;margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <strong style="color:#2c3e50">Locataire ${lettre}${num}</strong>
+        <button type="button" class="btn btn--sm btn--outline remove-tenant" style="color:#e74c3c;font-size:.75rem">✕ Supprimer</button>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Nom complet *</label>
+          <input class="form-input" name="tenant_nom_${index}" value="Locataire ${lettre}${num}" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email *</label>
+          <input class="form-input" type="email" name="tenant_email_${index}" placeholder="locataire@email.fr" required>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Téléphone</label>
+          <input class="form-input" name="tenant_tel_${index}" placeholder="06 XX XX XX XX">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Appartement *</label>
+          <input class="form-input" name="tenant_appart_${index}" value="${lettre}${num}" required>
+        </div>
+        <div class="form-group" style="flex:0 0 80px">
+          <label class="form-label">Étage *</label>
+          <input class="form-input" type="number" name="tenant_etage_${index}" value="0" min="-2" max="50" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Digicode</label>
+          <input class="form-input" name="tenant_digicode_${index}" placeholder="Code d'accès">
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function addTenantRows(count) {
+  const container = $('#tenantList');
+  for (let i = 0; i < count; i++) {
+    container.insertAdjacentHTML('beforeend', tenantRowHtml(tenantRowIndex));
+    tenantRowIndex++;
+  }
+  updateTenantCount();
+  attachRemoveHandlers();
+}
+
+function updateTenantCount() {
+  const rows = $$('.tenant-row');
+  $('#tenantCount').textContent = `(${rows.length})`;
+}
+
+function attachRemoveHandlers() {
+  $$('.remove-tenant').forEach(btn => {
+    btn.addEventListener('click', () => {
+      btn.closest('.tenant-row').remove();
+      updateTenantCount();
+    });
+  });
+}
+
+$('#toStep2').addEventListener('click', () => {
   const adresse = $('#campAdresse').value.trim();
   const dateDebut = $('#campDebut').value;
   const dateFin = $('#campFin').value;
   const nbLogements = parseInt($('#campNbLogements').value);
 
-  if (!adresse || !dateDebut || !dateFin) { toast('Veuillez remplir tous les champs', 'warning'); return; }
+  if (!adresse || !dateDebut || !dateFin || !nbLogements) {
+    toast('Veuillez remplir tous les champs de l\'étape 1', 'warning'); return;
+  }
   if (dateDebut > dateFin) { toast('La date de fin doit être après la date de début', 'warning'); return; }
 
-  const etagesDispos = [0, 0, 1, 1, 2, 2, 3, 3, 4];
-  const locataires = Array.from({ length: nbLogements }, (_, i) => {
-    const etage = etagesDispos[i % etagesDispos.length];
+  $('#formStep1').style.display = 'none';
+  $('#formStep2').style.display = 'block';
+  addTenantRows(nbLogements);
+});
+
+$('#backToStep1').addEventListener('click', () => {
+  $('#formStep2').style.display = 'none';
+  $('#formStep1').style.display = 'block';
+});
+
+$('#addTenantBtn').addEventListener('click', () => {
+  addTenantRows(1);
+});
+
+$('#importCsvBtn').addEventListener('click', () => {
+  toast('Import CSV — fonctionnalité à venir', 'info');
+});
+
+$('#campaignForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+
+  const adresse = $('#campAdresse').value.trim();
+  const dateDebut = $('#campDebut').value;
+  const dateFin = $('#campFin').value;
+
+  const tenantRows = $$('.tenant-row');
+  if (tenantRows.length === 0) { toast('Ajoutez au moins un locataire', 'warning'); return; }
+
+  const locataires = [];
+  let valid = true;
+
+  tenantRows.forEach((row) => {
+    const index = row.dataset.index;
+    const nom = row.querySelector(`[name="tenant_nom_${index}"]`).value.trim();
+    const email = row.querySelector(`[name="tenant_email_${index}"]`).value.trim();
+    const tel = row.querySelector(`[name="tenant_tel_${index}"]`).value.trim();
+    const logement = row.querySelector(`[name="tenant_appart_${index}"]`).value.trim();
+    const etage = parseInt(row.querySelector(`[name="tenant_etage_${index}"]`).value);
+    const digicode = row.querySelector(`[name="tenant_digicode_${index}"]`).value.trim();
+
+    if (!nom || !email || !logement || isNaN(etage)) {
+      valid = false;
+      row.style.borderColor = '#e74c3c';
+      return;
+    }
+    row.style.borderColor = '#eef2f7';
+
     const etageLabel = etage === 0 ? 'RDC' : etage === -1 ? 'Sous-sol' : etage + 'e';
-    return {
-      id: 'l_' + Date.now() + '_' + i,
-      logement: String.fromCharCode(65 + (i % 26)) + (i + 1),
+    locataires.push({
+      id: 'l_' + Date.now() + '_' + index,
+      nom,
+      email,
+      tel,
+      logement,
       etage,
       etageLabel,
-      statut: Math.random() > 0.6 ? 'repondu' : 'attente',
+      digicode,
+      statut: 'attente',
       creneau: null,
-    };
+    });
   });
+
+  if (!valid) { toast('Certains champs obligatoires sont manquants (en rouge)', 'warning'); return; }
 
   const campaign = {
     id: 'c_' + Date.now(),
     adresse,
     dateDebut,
     dateFin,
-    nbLogements,
+    nbLogements: locataires.length,
     statut: 'active',
     locataires,
   };
 
   APP.campaigns.unshift(campaign);
-  toast(`Campagne créée : ${adresse}`, 'success');
-  $('#campaignForm').reset();
+  toast(`Campagne créée : ${adresse} (${locataires.length} locataires)`, 'success');
+  resetCampaignForm();
   $('#createForm').style.display = 'none';
   $('#showCreateForm').style.display = 'inline-flex';
   renderCampaignList();
@@ -346,6 +476,7 @@ function renderReponses(camp) {
 
     return `<tr>
       <td><strong>${l.logement}</strong></td>
+      <td>${l.nom || '—'}</td>
       <td>${l.etageLabel}</td>
       <td><span class="status status--${statutClass}">${statutLabel}</span></td>
       <td>${creneauStr}</td>
@@ -385,6 +516,7 @@ function renderPlanningTab(camp) {
       <td>${p.fin}</td>
       <td>${p.etageLabel}</td>
       <td><strong>${p.logement}</strong></td>
+      <td>${p.nom || '—'}</td>
       <td style="text-align:center">
         <a class="btn btn--sm btn--outline" href="#planning/${camp.id}">Voir</a>
       </td>
@@ -476,7 +608,7 @@ function renderTimeline(plan) {
           <span class="timeline__item-time">${p.dateLabel} · ${p.debut}–${p.fin}</span>
           <span class="timeline__item-badge">${p.etageLabel} · ${p.logement}</span>
         </div>
-        <div class="timeline__item-label">Audit ${p.logement} (${p.etageLabel}) — ${p.duree}</div>
+        <div class="timeline__item-label">${p.nom} — Audit ${p.logement} (${p.etageLabel}) — ${p.duree}</div>
       </div>
       ${!isLast ? `<div class="timeline__item timeline__item--pause">
         <div class="timeline__item-header">
@@ -493,7 +625,7 @@ function renderPlanningDetail(plan, camp) {
   const tbody = $('#planningDetailList');
 
   if (plan.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><p>Aucune visite planifiée.</p></td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" class="empty-state"><p>Aucune visite planifiée.</p></td></tr>';
     return;
   }
 
@@ -504,6 +636,7 @@ function renderPlanningDetail(plan, camp) {
       <td><strong>${p.debut}–${p.fin}</strong></td>
       <td>${p.etageLabel}</td>
       <td>${p.logement}</td>
+      <td>${p.nom || '—'}</td>
       <td>${p.duree}</td>
       <td style="text-align:center">
         <button class="btn btn--sm btn--outline" data-plan-modify="${p.locataireId}" style="color:#3498db">✎</button>
@@ -531,7 +664,7 @@ function renderPlanningDetail(plan, camp) {
 function renderModifForm(camp, plan) {
   const select = $('#modifLogement');
   select.innerHTML = camp.locataires.filter(l => l.statut === 'repondu').map(l =>
-    `<option value="${l.id}">${l.logement} (${l.etageLabel})</option>`
+    `<option value="${l.id}">${l.logement} — ${l.nom || '?'} (${l.etageLabel})</option>`
   ).join('');
 }
 
