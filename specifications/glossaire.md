@@ -1,7 +1,7 @@
 # Glossaire
 
 **Projet :** Planif'Audit — Application de planification d'audits énergétiques
-**Version :** 1.0
+**Version :** 2.0
 
 ---
 
@@ -23,23 +23,45 @@
 | **Relance** | Notification adressée à un locataire n'ayant pas encore saisi ses disponibilités, déclenchée par l'entrepreneur |
 | **Timeline** | Représentation visuelle chronologique des visites sur le planning |
 | **Visite** | Passage physique de l'entrepreneur dans un logement pour réaliser l'audit énergétique |
+| **[AJOUT] Typologie** | Catégorie d'un logement selon le nombre de pièces principales (T1, T2, T3, T4, T5, T6) ; critère d'échantillonnage obligatoire |
+| **[AJOUT] Plancher bas** | Structure séparant le logement du sol ou d'un local inférieur ; types : terre-plein, vide-sanitaire, sur local commercial, garage, autre |
+| **[AJOUT] Plancher haut** | Structure séparant le logement du toit ou des combles ; types : combles perdus, combles aménagés, toiture terrasse, extérieur |
+| **[AJOUT] Étage intermédiaire** | Étage qui n'est ni le rez-de-chaussée (RDC) ni le dernier étage de l'immeuble ; un logement à cet étage doit obligatoirement être visité |
+| **[AJOUT] Échantillonnage complet** | Statut atteint lorsque l'algorithme a couvert tous les critères obligatoires (typologies, planchers, étage intermédiaire) dans le respect du seuil minimal |
+| **[AJOUT] Échantillonnage incomplet** | Statut affiché quand au moins un critère obligatoire n'est pas couvert par les logements sélectionnés ; le diagnostiqueur peut ajuster manuellement |
+| **[AJOUT] Algorithme de sélection** | Algorithme qui calcule la meilleure combinaison de logements à visiter pour couvrir tous les critères d'échantillonnage avec le moins de visites possible |
+| **[AJOUT] Jour disponible (diagnostiqueur)** | Jour choisi par le diagnostiqueur dans l'intervalle de la campagne ; les occupants ne peuvent proposer des créneaux que sur ces jours |
+| **[AJOUT] Créneau horaire (occupant)** | Plage horaire proposée par un occupant uniquement parmi les jours disponibles du diagnostiqueur |
+| **[AJOUT] Seuil minimal de visites** | Nombre minimum de logements à visiter calculé selon la taille de l'immeuble : 10 % (30–99 lots) ou 10 + 5 % (100 lots ou plus) |
 
 ---
 
 ## Relations entre les termes
 
 ```
-Campagne (période globale)
+Immeuble
     │
-    ├── Logement 1 (appartement)
-    │       ├── Disponibilités (créneaux libres saisis par le locataire)
-    │       └── Créneau attribué (intervalle planifié après ordonnancement)
+    ├── Typologies présentes (T1, T2, T3, T4, T5, T6)
+    ├── Types de plancher bas (terre-plein, vide-sanitaire, ...)
+    ├── Types de plancher haut (combles perdus, toiture terrasse, ...)
     │
-    ├── Logement 2
-    │       └── ...
+    ├── Logement 1
+    │       ├── Typologie
+    │       ├── Type plancher bas
+    │       ├── Type plancher haut
+    │       ├── Étage (RDC / intermédiaire / dernier)
+    │       ├── Disponibilités (créneaux horaires saisis par l'occupant)
+    │       └── Créneau attribué (après croisement)
     │
-    └── Planning optimisé = ensemble des créneaux attribués, triés par étage
+    └── Logement 2 → ...
 
-    ├── Relance → envoyée si pas de réponse
-    └── Rappel → envoyé avant la visite
+    Algorithme de sélection → liste des logements à visiter (RG11–RG15)
+        ├── Échantillonnage complet (tous critères couverts)
+        └── Échantillonnage incomplet (critères manquants listés)
+
+    Jours disponibles (diagnostiqueur) → filtre les créneaux proposables par les occupants
+
+    Communication post-sélection :
+        ├── Email visite (créneau + coordonnées)
+        └── Email information (simple avis)
 ```

@@ -1,7 +1,7 @@
 # User Stories
 
 **Projet :** Planif'Audit — Application de planification d'audits énergétiques
-**Version :** 1.0
+**Version :** 2.0
 
 ---
 
@@ -18,6 +18,12 @@
 | US12 | Entrepreneur | générer des liens uniques pour chaque locataire | leur permettre de saisir leurs disponibilités sans création de compte | Haute |
 | US13 | Entrepreneur | relancer en masse les locataires n'ayant pas répondu | accélérer les réponses sans action manuelle par logement | Moyenne |
 | US14 | Entrepreneur | visualiser la progression des réponses par campagne (statistiques) | savoir où j'en suis dans l'organisation | Haute |
+| **US15** | **[AJOUT]** Diagnostiqueur | sélectionner mes jours disponibles avant d'inviter les occupants | que les occupants ne proposent que des créneaux compatibles avec mon agenda | Haute |
+| **US16** | **[AJOUT]** Diagnostiqueur | déclarer les typologies présentes (T1–T6) et les types de plancher bas/haut de l'immeuble | que l'algorithme calcule l'échantillonnage obligatoire | Haute |
+| **US17** | **[AJOUT]** Diagnostiqueur | lancer l'algorithme de sélection des logements à visiter | obtenir la meilleure combinaison possible couvrant tous les critères avec le moins de visites | Haute |
+| **US18** | **[AJOUT]** Diagnostiqueur | voir si l'échantillonnage est complet ou incomplet (avec le détail des critères manquants) | savoir s'il faut ajuster manuellement la sélection | Haute |
+| **US19** | **[AJOUT]** Diagnostiqueur | envoyer des emails différenciés (visité / non visité) aux occupants | communiquer le bon message à chaque occupant | Moyenne |
+| **US20** | **[AJOUT]** Diagnostiqueur | prévisualiser les emails avant envoi | vérifier le contenu avant d'envoyer | Moyenne |
 
 ## Stories des locataires
 
@@ -28,3 +34,5 @@
 | US7 | Locataire | recevoir un rappel de mon créneau 48h puis 24h avant | ne pas oublier le rendez-vous | Moyenne |
 | US8 | Locataire | signaler un changement de disponibilité après avoir déjà répondu | mettre à jour ma plage horaire en cas d'imprévu | Basse |
 | US10 | Locataire | accéder au formulaire sans créer de compte | ne pas avoir à m'inscrire pour une simple visite | Haute |
+| **US21** | **[AJOUT]** Occupant | recevoir un email adapté à mon statut (visité ou non visité) | savoir si je dois préparer ma visite ou simplement être informé | Haute |
+| **US22** | **[AJOUT]** Occupant | donner mes disponibilités uniquement sur les jours choisis par le diagnostiqueur | ne pas proposer des créneaux où il n'est pas disponible | Haute |

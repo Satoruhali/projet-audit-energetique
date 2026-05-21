@@ -1,6 +1,6 @@
 # 2. Dossier de Conception – Application de Planification d’Audits Énergétiques
 
-**Version :** 1.0 — 18/05/2026
+**Version :** 2.0 — 21/05/2026
 
 ---
 
@@ -12,8 +12,12 @@
 | F2 | Saisie des disponibilités | Chaque locataire peut renseigner ses créneaux libres sur la période choisie | À définir |
 | F3 | Ordonnancement par étage | L'application trie les visites par étage croissant (RDC → dernier étage) pour un enchaînement optimal | À définir |
 | F4 | Consultation du planning | L'entrepreneur visualise le planning final généré | À définir |
-
-*D'autres fonctionnalités seront ajoutées au fil des décisions.*
+| **F5** | **[AJOUT]** Configuration des critères de l'immeuble | Le diagnostiqueur saisit les typologies présentes (T1–T6) et les types de plancher bas/haut de l'immeuble | Haute |
+| **F6** | **[AJOUT]** Algorithme de sélection des logements | L'application calcule la meilleure combinaison de logements couvrant tous les critères d'échantillonnage (RG11–RG15) avec le moins de visites possible | Haute |
+| **F7** | **[AJOUT]** Affichage du statut d'échantillonnage | L'application affiche "Échantillonnage complet" ou "Incomplet" avec le détail des critères manquants | Haute |
+| **F8** | **[AJOUT]** Sélection des jours disponibles (diagnostiqueur) | Le diagnostiqueur choisit ses jours disponibles avant l'invitation des occupants | Haute |
+| **F9** | **[AJOUT]** Croisement disponibilités | Le planning final croise les logements sélectionnés avec les créneaux des occupants (filtrés par jours disponibles du diagnostiqueur) | Haute |
+| **F10** | **[AJOUT]** Envoi d'emails différenciés | Envoi automatique d'email d'information (non visité) ou email avec créneau + coordonnées (visité) | Moyenne |
 
 ## 2.2 Spécifications Techniques
 
@@ -77,6 +81,30 @@
 | **Compétences tech** | Utilise principalement un ordinateur fixe, navigation simple (mail, lecture d'articles) |
 | **Équipement** | Ordinateur fixe sous Windows |
 
+### [AJOUT] Persona 4 — Sarah, la diagnostiqueuse réglementaire
+
+| Champ | Valeur |
+|---|---|
+| **Âge** | 29 ans |
+| **Profession** | Diagnostiqueuse DPE certifiée, salariée dans un bureau d'études |
+| **Situation** | Réalise des audits collectifs dans des immeubles de 30 à 200+ logements ; doit respecter la réglementation d'échantillonnage |
+| **Objectif principal** | Couvrir tous les critères réglementaires (typologies, planchers) avec un minimum de visites pour optimiser son temps |
+| **Frustrations** | Doit vérifier manuellement qu'elle a bien visité chaque type de logement ; craint les contrôles si l'échantillon est incomplet |
+| **Compétences tech** | Bonne maîtrise des outils métier (tableurs, logiciels DPE) mais pas développeuse |
+| **Équipement** | Ordinateur portable + tablette pour les visites terrain |
+
+### [AJOUT] Persona 5 — M. Camara, occupant en immeuble complexe
+
+| Champ | Valeur |
+|---|---|
+| **Âge** | 38 ans |
+| **Profession** | Commerçant, tient une boutique au RDC de son immeuble |
+| **Situation** | Vit dans un T4 au 3e étage ; son logement est au-dessus d'un local commercial (plancher bas : sur local commercial) et sous des combles perdus (plancher haut : combles perdus) |
+| **Objectif principal** | Être informé si son logement est sélectionné pour la visite, et pouvoir donner ses disponibilités simplement |
+| **Frustrations** | A déjà eu des diagnostics où le diagnostiqueur ne pouvait pas accéder à son logement faute de créneau compatible ; ne savait pas si son logement serait visité ou non |
+| **Compétences tech** | À l'aise avec le mail et les formulaires en ligne, utilise son smartphone au quotidien |
+| **Équipement** | Smartphone Android + ordinateur au magasin |
+
 ---
 
 ## 2.4 User Stories
@@ -93,6 +121,14 @@
 | US8 | Locataire | signaler un changement de disponibilité après avoir déjà répondu | mettre à jour ma plage horaire en cas d'imprévu | Basse |
 | US9 | Entrepreneur | exporter le planning au format PDF ou iCal | l'imprimer ou l'intégrer à mon calendrier personnel | Basse |
 | US10 | Locataire | accéder au formulaire sans créer de compte | ne pas avoir à m'inscrire pour une simple visite | Haute |
+| **US11** | **[AJOUT]** Diagnostiqueur | sélectionner mes jours disponibles avant d'inviter les occupants | que les occupants ne proposent que des créneaux compatibles avec mon agenda | Haute |
+| **US12** | **[AJOUT]** Diagnostiqueur | déclarer les typologies présentes (T1–T6) et les types de plancher bas/haut de l'immeuble | que l'algorithme calcule l'échantillonnage obligatoire | Haute |
+| **US13** | **[AJOUT]** Diagnostiqueur | lancer l'algorithme de sélection des logements à visiter | obtenir la meilleure combinaison possible couvrant tous les critères avec le moins de visites | Haute |
+| **US14** | **[AJOUT]** Diagnostiqueur | voir si l'échantillonnage est complet ou incomplet (avec le détail des critères manquants) | savoir s'il faut ajuster manuellement la sélection | Haute |
+| **US15** | **[AJOUT]** Diagnostiqueur | envoyer des emails différenciés (visité / non visité) aux occupants | communiquer le bon message à chaque occupant | Moyenne |
+| **US16** | **[AJOUT]** Diagnostiqueur | prévisualiser les emails avant envoi | vérifier le contenu avant d'envoyer | Moyenne |
+| **US17** | **[AJOUT]** Occupant | donner mes disponibilités uniquement sur les jours choisis par le diagnostiqueur | ne pas proposer des créneaux où il n'est pas disponible | Haute |
+| **US18** | **[AJOUT]** Occupant | recevoir un email adapté à mon statut (visité ou non visité) | savoir si je dois préparer ma visite ou simplement être informé | Haute |
 
 ---
 
@@ -173,6 +209,70 @@
  │                                            │
  │  [Exporter PDF] [Exporter iCal]            │
  │                                            │
+ └────────────────────────────────────────────┘
+```
+
+### [AJOUT] Écran 4 – Configuration de l'immeuble (diagnostiqueur)
+
+Saisie des critères pour l'algorithme d'échantillonnage.
+
+```
+ ┌────────────────────────────────────────────┐
+ │  Configuration de l'immeuble               │
+ │  Adresse : 12 Rue des Lilas, Paris 75011   │
+ │                                            │
+ │  Typologies présentes :                    │
+ │  ☑ T1  ☑ T2  ☑ T3  ☑ T4  ☐ T5  ☐ T6     │
+ │                                            │
+ │  Types de plancher bas :                   │
+ │  ☑ Terre-plein  ☑ Vide-sanitaire           │
+ │  ☐ Sur local    ☐ Garage    ☑ Autre       │
+ │                                            │
+ │  Types de plancher haut :                  │
+ │  ☑ Combles perdus  ☐ Combles aménagés      │
+ │  ☑ Toiture terrasse  ☐ Extérieur           │
+ │                                            │
+ │  [Enregistrer]    [Lancer la sélection]    │
+ └────────────────────────────────────────────┘
+```
+
+### [AJOUT] Écran 5 – Résultat de l'algorithme de sélection
+
+```
+ ┌────────────────────────────────────────────┐
+ │  Résultat de la sélection                  │
+ │  12 Rue des Lilas — 45 logements           │
+ │                                            │
+ │  🔴 ÉCHANTILLONNAGE INCOMPLET              │
+ │  Manque : T5, plancher bas: garage         │
+ │                                            │
+ │  Sélectionnés : 7 / 10 minimum requis      │
+ │  ┌──────┬──────┬───────────┬──────────┐   │
+ │  │ Logt │ Typo │ Pl. bas   │ Pl. haut │   │
+ │  ├──────┼──────┼───────────┼──────────┤   │
+ │  │ A1   │ T2   │Terre-plein│Combles   │   │
+ │  │ B3   │ T3   │ VS        │ Toiture  │   │
+ │  │ D6   │ T1   │ VS        │ Toiture  │   │
+ │  └──────┴──────┴───────────┴──────────┘   │
+ │                                            │
+ │  [Ajuster manuellement]  [Valider]         │
+ └────────────────────────────────────────────┘
+```
+
+### [AJOUT] Écran 6 – Sélection des jours disponibles (diagnostiqueur)
+
+```
+ ┌────────────────────────────────────────────┐
+ │  Mes jours disponibles                     │
+ │  10/03 au 20/03/2026                       │
+ │                                            │
+ │  Lun 10 ☐  Mar 11 ☑  Mer 12 ☑            │
+ │  Jeu 13 ☑  Ven 14 ☐  Sam 15 ☐            │
+ │  Dim 16 ☐  Lun 17 ☑  Mar 18 ☑  Mer 19 ☑  │
+ │                                            │
+ │  Jours sélectionnés : 6                    │
+ │                                            │
+ │  [Valider et envoyer les liens]            │
  └────────────────────────────────────────────┘
 ```
 
@@ -257,6 +357,29 @@
  └──────────┘        │                                 │
                       │                                 │
  ┌──────────┐        │  ┌─────────────────────┐       │
+ │          │        │  │ UC5 : Exporter le    │       │
+ │          │────────│─→│ planning             │       │
+ │          │        │  └─────────────────────┘       │
+ │          │        │  ┌─────────────────────┐       │
+ │          │────────│─→│ UC10 : Saisir les   │       │
+ │          │        │  │ critères immeuble   │       │
+ │          │        │  └─────────────────────┘       │
+ │          │        │  ┌─────────────────────┐       │
+ │          │────────│─→│ UC11 : Exécuter     │       │
+ │          │        │  │ l'algorithme de     │       │
+ │          │        │  │ sélection           │       │
+ │          │        │  └─────────────────────┘       │
+ │          │        │  ┌─────────────────────┐       │
+ │          │────────│─→│ UC12 : Choisir ses  │       │
+ │          │        │  │ jours disponibles   │       │
+ │          │        │  └─────────────────────┘       │
+ │          │        │  ┌─────────────────────┐       │
+ │          │────────│─→│ UC13 : Envoyer      │       │
+ │          │        │  │ emails différenciés │       │
+ │          │        │  └─────────────────────┘       │
+ └──────────┘        │                                 │
+                      │                                 │
+ ┌──────────┐        │  ┌─────────────────────┐       │
  │          │────────│─→│ UC6 : Saisir ses     │       │
  │ Locataire│        │  │ disponibilités       │       │
  │          │        │  └─────────────────────┘       │
@@ -302,8 +425,40 @@
 |---|---|
 | **Acteur** | Locataire |
 | **Précondition** | Le locataire a reçu un lien valide |
-| **Scénario nominal** | 1. Le locataire clique sur le lien ; 2. Il coche les créneaux qui lui conviennent ; 3. Il valide |
+| **Scénario nominal** | 1. Le locataire clique sur le lien ; 2. Il coche les créneaux qui lui conviennent (filtrés par jours disponibles du diagnostiqueur) ; 3. Il valide |
 | **Postcondition** | Les disponibilités sont enregistrées sans création de compte |
+
+**[AJOUT] UC10 — Saisir les critères de l'immeuble**
+| Champ | Valeur |
+|---|---|
+| **Acteur** | Diagnostiqueur |
+| **Précondition** | La campagne vient d'être créée |
+| **Scénario nominal** | 1. Accéder au formulaire "Configuration de l'immeuble" ; 2. Cocher les typologies présentes (T1–T6) ; 3. Sélectionner les types de plancher bas présents ; 4. Sélectionner les types de plancher haut présents ; 5. Associer chaque logement à sa typologie, son étage et ses types de plancher ; 6. Valider |
+| **Postcondition** | Les critères sont enregistrés, l'algorithme peut être exécuté |
+
+**[AJOUT] UC11 — Exécuter l'algorithme de sélection**
+| Champ | Valeur |
+|---|---|
+| **Acteur** | Diagnostiqueur |
+| **Précondition** | Les critères de l'immeuble sont saisis |
+| **Scénario nominal** | 1. Cliquer "Lancer la sélection" ; 2. L'algorithme applique RG11–RG15 ; 3. Il cherche la meilleure combinaison couvrant tous les critères avec le moins de visites ; 4. Le résultat affiche la liste sélectionnée et le statut complet/incomplet ; 5. Le diagnostiqueur peut ajuster manuellement |
+| **Postcondition** | La liste des logements à visiter est déterminée |
+
+**[AJOUT] UC12 — Choisir ses jours disponibles**
+| Champ | Valeur |
+|---|---|
+| **Acteur** | Diagnostiqueur |
+| **Précondition** | La sélection des logements est validée |
+| **Scénario nominal** | 1. Accéder à l'écran "Mes disponibilités" ; 2. Cochez les jours dans l'intervalle de la campagne ; 3. Valider ; 4. Les liens sont générés et envoyés ; 5. Les occupants ne voient que ces jours |
+| **Postcondition** | Les jours disponibles sont enregistrés |
+
+**[AJOUT] UC13 — Envoyer les emails différenciés**
+| Champ | Valeur |
+|---|---|
+| **Acteur** | Diagnostiqueur |
+| **Précondition** | Les créneaux de visite ont été attribués |
+| **Scénario nominal** | 1. Accéder à l'écran "Communication" ; 2. Visualiser la liste (visité / non visité) ; 3. Prévisualiser les deux types d'emails ; 4. Envoyer |
+| **Postcondition** | Chaque occupant reçoit le message adapté à son statut |
 
 ---
 
@@ -321,6 +476,13 @@
 | RG8 | Rappel automatique | Les locataires reçoivent un rappel 48h et 24h avant leur créneau attribué |
 | RG9 | Pause entre visites | Un intervalle minimum de 15 minutes est réservé entre deux visites consécutives pour le déplacement |
 | RG10 | Non-réponse = absence | Tout locataire n'ayant pas répondu dans les délais est marqué "Non disponible" et n'apparaît pas dans le planning |
+| **RG11** | **[AJOUT]** Échantillonnage par typologie | Au moins 1 logement par typologie présente (T1–T6) doit être visité |
+| **RG12** | **[AJOUT]** Échantillonnage par type plancher bas | Au moins 1 logement par type de plancher bas présent : terre-plein, vide-sanitaire, sur local commercial, garage, autre |
+| **RG13** | **[AJOUT]** Échantillonnage par type plancher haut | Au moins 1 logement par type de plancher haut présent : combles perdus, combles aménagés, toiture terrasse, extérieur |
+| **RG14** | **[AJOUT]** Étage intermédiaire | Au moins 1 logement en étage intermédiaire (ni RDC, ni dernier étage) doit être visité |
+| **RG15** | **[AJOUT]** Seuil minimal de visites | 30–99 lots → 10 % ; 100 lots ou plus → 10 + 5 % |
+| **RG16** | **[AJOUT]** Jours disponibles du diagnostiqueur d'abord | Le diagnostiqueur choisit ses jours avant les occupants ; les occupants ne voient que ces jours |
+| **RG17** | **[AJOUT]** Deux types d'emails | Logement non visité → email info ; Logement visité → créneau + coordonnées |
 
 ---
 
@@ -338,6 +500,75 @@
 | **Relance** | Notification adressée à un locataire n'ayant pas encore saisi ses disponibilités |
 | **Audit énergétique** | Diagnostic de performance énergétique (DPE) d'un logement |
 | **Visite** | Passage physique de l'entrepreneur dans un appartement pour réaliser l'audit |
+| **[AJOUT] Typologie** | Catégorie d'un logement selon le nombre de pièces principales (T1–T6) |
+| **[AJOUT] Plancher bas** | Structure séparant le logement du sol ou d'un local inférieur |
+| **[AJOUT] Plancher haut** | Structure séparant le logement du toit ou des combles |
+| **[AJOUT] Étage intermédiaire** | Étage qui n'est ni le RDC ni le dernier étage |
+| **[AJOUT] Échantillonnage complet** | Tous les critères obligatoires sont couverts par les logements sélectionnés |
+| **[AJOUT] Algorithme de sélection** | Algorithme calculant la meilleure combinaison de logements couvrant tous les critères avec le moins de visites |
+| **[AJOUT] Jour disponible** | Jour choisi par le diagnostiqueur ; les occupants ne peuvent proposer des créneaux que sur ces jours |
+| **[AJOUT] Seuil minimal** | Nombre minimum de visites calculé selon la taille de l'immeuble (10% ou 10+5%) |
 
 ---
+
+## [AJOUT] 2.10 Algorithme de sélection des logements
+
+### Principes
+L'algorithme de sélection détermine quels logements doivent être visités pour respecter la réglementation d'échantillonnage des DPE collectifs.
+
+### Critères d'échantillonnage (RG11–RG14)
+1. **Typologies** : au moins 1 logement par typologie présente (T1, T2, T3, T4, T5, T6)
+2. **Plancher bas** : au moins 1 logement par type présent (terre-plein, vide-sanitaire, sur local commercial, garage, autre)
+3. **Plancher haut** : au moins 1 logement par type présent (combles perdus, combles aménagés, toiture terrasse, extérieur)
+4. **Étage intermédiaire** : au moins 1 logement ni au RDC ni au dernier étage
+
+### Seuil minimal (RG15)
+- **30 à 99 logements** → 10 % du total (arrondi supérieur)
+- **100 logements ou plus** → 10 + 5 % du total (arrondi supérieur)
+- Si l'échantillonnage (RG11–RG14) donne moins de logements que le seuil, des logements supplémentaires sont ajoutés
+
+### Logique de combinaison
+- Un même logement peut couvrir **plusieurs critères** (ex: T3 + plancher bas vide-sanitaire + étage intermédiaire)
+- L'algorithme cherche la **meilleure combinaison** pour couvrir tous les critères avec le **minimum de visites**
+- Si plusieurs types de plancher bas existent → un logement **par type différent**, même au même étage
+- Idem pour les planchers hauts
+
+### Étapes
+1. Collecter tous les logements avec leurs attributs (typologie, plancher bas, plancher haut, étage)
+2. Identifier les critères obligatoires (RG11–RG14)
+3. Rechercher la combinaison optimale (set cover problem)
+4. Comparer avec le seuil minimal (RG15)
+5. Ajouter des logements supplémentaires si nécessaire
+6. Afficher le statut "Complet" ou "Incomplet" avec le détail des critères manquants
+
+---
+
+## [AJOUT] 2.11 Gestion des disponibilités croisées
+
+### Flux
+1. Le diagnostiqueur choisit ses **jours disponibles** parmi l'intervalle de la campagne
+2. Les occupants reçoivent un lien et **ne voient que ces jours** dans le calendrier
+3. Les occupants sélectionnent leurs **créneaux horaires** (ex: 9h-12h, 14h-17h)
+4. Le planning final **croise** : logements sélectionnés + créneaux compatibles des occupants
+5. L'ordonnancement applique RG3 (tri étage), RG4 (pas chevauchement), RG9 (pause 15 min)
+
+### Contraintes
+- Un occupant ne peut proposer des créneaux que sur les jours disponibles du diagnostiqueur
+- Le diagnostiqueur peut ajuster manuellement le planning après croisement
+
+---
+
+## [AJOUT] 2.12 Communication post-sélection
+
+### Deux types d'emails (RG17)
+
+| Type | Destinataire | Contenu |
+|------|-------------|---------|
+| **Option 1 — Information** | Occupant dont le logement n'est PAS visité | Information de la campagne + mention que son logement n'est pas retenu + coordonnées du syndic/diagnostiqueur pour questions |
+| **Option 2 — Visite** | Occupant dont le logement EST visité | Créneau attribué (date + heure) + coordonnées complètes du diagnostiqueur (nom, téléphone, email) + instruction pour la visite |
+
+### Prévisualisation
+- Le diagnostiqueur peut prévisualiser les deux modèles d'emails avant envoi
+- Les champs dynamiques ([Nom], [Date], [Créneau], etc.) sont affichés avec des exemples
+- Possibilité de modifier le contenu des emails avant envoi
 

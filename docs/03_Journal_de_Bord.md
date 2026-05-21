@@ -116,3 +116,30 @@ Création du schéma complet avec **5 tables** :
 4. [ ] Ajouter les scripts de seed pour la base de développement
 
 ### Fin de la séance : 17h00 — Durée : 3h
+
+---
+
+## 21/05/2026 — Séance n°11 - Enrichissement des spécifications (v2.0)
+
+### Objectif :
+Intégrer les nouvelles règles métier issues de la réglementation des diagnostics énergétiques collectifs : échantillonnage, algorithme de sélection, disponibilités croisées, communication différenciée.
+
+### Travail réalisé :
+- **Ajout des règles RG11 à RG17** (échantillonnage par typologie, plancher bas, plancher haut, étage intermédiaire, seuil minimal, jours disponibles diagnostiqueur, deux types d'emails) dans `specifications/regles-gestion.md`
+- **Ajout de 12 nouvelles user stories** (US11–US22) dans `specifications/user-stories.md`
+- **Ajout de 4 nouveaux cas d'utilisation** (UC10–UC13) dans `specifications/cas-utilisation.md`
+- **Ajout de 10 nouveaux termes** dans `specifications/glossaire.md`
+- **Ajout de 2 nouveaux personas** (Sarah la diagnostiqueuse, M. Camara l'occupant) dans `specifications/personas.md`
+- **Ajout de 4 nouveaux wireframes** (configuration immeuble, résultat sélection, jours disponibles, aperçu emails) dans `specifications/wireframes.md`
+- **Mise à jour complète** de `docs/02_Specifications.md` avec 3 nouvelles sections (algorithme, disponibilités, communication)
+- **Mise à jour** de `docs/01_Plan_Organisation_Projet.md` avec une nouvelle phase E (Échantillonnage réglementaire)
+- **Mise à jour** de `docs/05_Documentation_Technique.md` avec les sections préparatoires
+- **Mise à jour** de `docs/TODO_LIST.md` avec le nouveau planning
+- **Mise à jour** de `specifications/brief-projet.md` et `docs/04_Suivi_Modifications.md`
+
+### Difficultés :
+- Aucune. La documentation existante était bien structurée, facilitant l'insertion des nouvelles sections.
+
+### Prochaines étapes :
+1. Phase A — Initialisation du backend Node.js
+2. Phase E — Implémentation de l'algorithme de sélection et des nouvelles règles métier

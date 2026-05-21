@@ -1,7 +1,7 @@
 # 1. Plan d'Organisation de Projet
 
 **Projet :** Planif'Audit — Application de planification de visites pour audit énergétique  
-**Version :** 1.0 — 21/05/2026  
+**Version :** 1.1 — 21/05/2026  
 **Auteur :** Wassi
 
 ---
@@ -159,15 +159,30 @@ C:\Users\wassi\projet-audit-energetique\
 | D3 | Remplir le `TODO_LIST.md` avec les objectifs quotidiens | Basse | 15 min |
 | D4 | Rédiger un README.md à la racine du projet (présentation, installation, usage) | Moyenne | 1h |
 
-### Phase E — Fonctionnalités avancées
+### Phase E — Échantillonnage réglementaire (NOUVEAU)
 
 | # | Tâche | Priorité | Durée estimée |
 |---|-------|----------|---------------|
-| E1 | Portail locataire (page publique pour choisir un créneau) | Moyenne | 3h |
-| E2 | Envoi d'emails d'invitation (nodemailer) | Basse | 2h |
-| E3 | Import CSV des locataires | Basse | 2h |
-| E4 | Export du planning en PDF | Basse | 2h |
-| E5 | Dashboard avec statistiques réelles (au lieu des mock data) | Moyenne | 1h30 |
+| E1 | **[AJOUT]** Mettre à jour le schéma BDD : ajouter tables `typologies`, `types_plancher_bas`, `types_plancher_haut`, colonnes associées aux logements | Haute | 1h |
+| E2 | **[AJOUT]** Implémenter l'algorithme de sélection des logements (set cover / combinaison optimale) côté backend | Haute | 3h |
+| E3 | **[AJOUT]** Créer l'interface de saisie des critères de l'immeuble (typologies, planchers) | Haute | 2h |
+| E4 | **[AJOUT]** Créer l'interface d'affichage du résultat avec statut complet/incomplet | Haute | 1h30 |
+| E5 | **[AJOUT]** Implémenter la sélection des jours disponibles du diagnostiqueur | Haute | 1h |
+| E6 | **[AJOUT]** Filtrer le calendrier des occupants selon les jours disponibles | Haute | 1h30 |
+| E7 | **[AJOUT]** Implémenter le croisement disponibilités → planning final | Haute | 2h |
+| E8 | **[AJOUT]** Créer le module d'envoi d'emails différenciés (visité / non visité) | Moyenne | 2h |
+| E9 | **[AJOUT]** Ajouter la prévisualisation des emails avant envoi | Moyenne | 1h |
+| E10 | **[AJOUT]** Tester les contraintes d'échantillonnage (RG11–RG17) | Haute | 2h |
+
+### Phase F — Fonctionnalités avancées
+
+| # | Tâche | Priorité | Durée estimée |
+|---|-------|----------|---------------|
+| F1 | Portail locataire (page publique pour choisir un créneau) | Moyenne | 3h |
+| F2 | Envoi d'emails d'invitation (nodemailer) | Basse | 2h |
+| F3 | Import CSV des locataires | Basse | 2h |
+| F4 | Export du planning en PDF | Basse | 2h |
+| F5 | Dashboard avec statistiques réelles (au lieu des mock data) | Moyenne | 1h30 |
 
 ### Phase F — Déploiement
 
@@ -230,9 +245,13 @@ Estimation basée sur une disponibilité de **2 à 3 créneaux par jour**.
 | Frontend v2 (API réelle) | HTML/CSS/JS | J5 (24/05) | ⬜ À faire |
 | Rapport de tests | Markdown | J5 (25/05) | ⬜ À faire |
 | Documentation technique | `05_Documentation_Technique.md` | J6 (26/05) | ⬜ À faire |
+| **[AJOUT]** Algorithme de sélection des logements | Backend (Node.js) | J5 (24/05) | ⬜ À faire |
+| **[AJOUT]** Interface configuration immeuble + échantillonnage | Frontend (HTML/CSS/JS) | J6 (25/05) | ⬜ À faire |
+| **[AJOUT]** Module disponibilités croisées (diagnostiqueur → occupant) | Backend + Frontend | J7 (26/05) | ⬜ À faire |
+| **[AJOUT]** Module d'envoi d'emails différenciés | Backend (nodemailer) | J8 (27/05) | ⬜ À faire |
 | Portail locataire | HTML/JS (page publique) | J7 (27/05) | ⬜ À faire |
-| Application déployée | URL accessible | J9 (29/05) | ⬜ À faire |
-| **Livrable final complet** | Dossier structuré + code + docs | **J10 (30/05)** | ⬜ À faire |
+| Application déployée | URL accessible | J10 (30/05) | ⬜ À faire |
+| **Livrable final complet** | Dossier structuré + code + docs | **J11 (31/05)** | ⬜ À faire |
 
 ---
 

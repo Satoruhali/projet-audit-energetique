@@ -1,7 +1,7 @@
 # 1. Brief Initial
 
 **Projet :** Site web pour auto-entrepreneur en audits énergétiques  
-**Version :** 1.0 — 18/05/2026
+**Version :** 2.0 — 21/05/2026
 
 ---
 
@@ -15,12 +15,18 @@ Difficulté à planifier et ordonnancer les visites dans un immeuble, notamment 
 - Permettre à l'entrepreneur de fixer une amplitude de dates pour ses interventions (ex : 10 au 20 mars).
 - Permettre aux locataires de saisir leurs créneaux de disponibilité.
 - Trier et organiser les visites par étage (1er étage ensemble, puis 2e, etc.) afin d'optimiser les déplacements et enchaîner les visites sans perte de temps.
+- **[AJOUT]** Sélectionner automatiquement les logements à visiter selon les règles d'échantillonnage réglementaire (typologies, planchers, seuil minimal).
+- **[AJOUT]** Croiser les disponibilités du diagnostiqueur et des occupants pour générer un planning optimisé.
+- **[AJOUT]** Communiquer de façon différenciée avec les occupants (visité / non visité).
 
 ## 1.4 Acteurs
 | Acteur | Rôle |
 |---|---|
-| **Auto-entrepreneur** | Définit les plages de dates, consulte le planning optimisé |
-| **Locataire** | Saisit ses disponibilités pour la visite de son logement |
+| **Auto-entrepreneur / Diagnostiqueur** | Définit les plages de dates, configure les critères de l'immeuble, exécute l'algorithme de sélection, choisit ses jours disponibles, consulte le planning optimisé, envoie les emails différenciés |
+| **Occupant / Locataire** | Saisit ses disponibilités pour la visite de son logement (filtrées par jours disponibles du diagnostiqueur), reçoit un email adapté à son statut |
 
 ## 1.5 Contraintes identifiées (à valider)
-- Aucune pour l'instant.
+- Respect de la réglementation DPE collectif : échantillonnage par typologie (T1–T6), par type de plancher bas/haut, étage intermédiaire.
+- Seuil minimal de visites selon la taille de l'immeuble (10% ou 10+5%).
+- Le diagnostiqueur choisit ses jours disponibles avant les occupants.
+- Deux types d'emails selon que le logement est visité ou non.

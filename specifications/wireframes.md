@@ -1,7 +1,7 @@
 # Wireframes
 
 **Projet :** Planif'Audit — Application de planification d'audits énergétiques
-**Version :** 1.0
+**Version :** 2.0
 
 ---
 
@@ -142,3 +142,170 @@ Vue du planning généré avec tri par étage et timeline.
 - **RG3** — Tri par étage croissant (RDC → dernier étage)
 - **RG4** — Pas de chevauchement des créneaux
 - **RG9** — Pause minimale de 15 min entre deux visites consécutives
+
+---
+
+## [AJOUT] Écran 5 — Configuration de l'immeuble (diagnostiqueur)
+
+Saisie des critères pour l'algorithme d'échantillonnage.
+
+```
+ ┌────────────────────────────────────────────────────────────┐
+ │  Configuration de l'immeuble                               │
+ │                                                            │
+ │  Adresse : 12 Rue des Lilas, Paris 75011                   │
+ │                                                            │
+ │  ┌────────────────────────────────────────────────────┐    │
+ │  │  Typologies présentes                              │    │
+ │  │  ☑ T1  ☑ T2  ☑ T3  ☑ T4  ☐ T5  ☐ T6              │    │
+ │  └────────────────────────────────────────────────────┘    │
+ │                                                            │
+ │  ┌────────────────────────────────────────────────────┐    │
+ │  │  Types de plancher bas                             │    │
+ │  │  ☑ Terre-plein  ☑ Vide-sanitaire  ☐ Sur local     │    │
+ │  │  ☐ Garage        ☑ Autre                          │    │
+ │  └────────────────────────────────────────────────────┘    │
+ │                                                            │
+ │  ┌────────────────────────────────────────────────────┐    │
+ │  │  Types de plancher haut                            │    │
+ │  │  ☑ Combles perdus  ☐ Combles aménagés             │    │
+ │  │  ☑ Toiture terrasse  ☐ Extérieur                  │    │
+ │  └────────────────────────────────────────────────────┘    │
+ │                                                            │
+ │  ┌────────────────────────────────────────────────────┐    │
+ │  │  Liste des logements                               │    │
+ │  │  ┌──────┬──────┬───────────┬──────────┬─────────┐  │    │
+ │  │  │ Logt │ Typo │ Pl. bas   │ Pl. haut │ Étage   │  │    │
+ │  │  ├──────┼──────┼───────────┼──────────┼─────────┤  │    │
+ │  │  │ A1   │ T2   │ Terre-plein│Combles  │ RDC     │  │    │
+ │  │  │ A2   │ T2   │ Terre-plein│Combles  │ RDC     │  │    │
+ │  │  │ B3   │ T3   │ VS         │ Toiture  │ 1er    │  │    │
+ │  │  │ B4   │ T4   │ VS         │ Toiture  │ 1er    │  │    │
+ │  │  │ C5   │ T3   │ VS         │ Toiture  │ 2e     │  │    │
+ │  │  │ D6   │ T1   │ VS         │ Toiture  │ 3e     │  │    │
+ │  │  └──────┴──────┴───────────┴──────────┴─────────┘  │    │
+ │  └────────────────────────────────────────────────────┘    │
+ │                                                            │
+ │              [Enregistrer]    [Lancer la sélection]        │
+ └────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## [AJOUT] Écran 6 — Résultat de l'algorithme de sélection
+
+Affichage des logements sélectionnés avec statut complet/incomplet.
+
+```
+ ┌────────────────────────────────────────────────────────────┐
+ │  Résultat de la sélection                                  │
+ │  12 Rue des Lilas — 45 logements                           │
+ │                                                            │
+ │  ┌────────────────────────────────────────────────────┐    │
+ │  │  Statut : 🔴 ÉCHANTILLONNAGE INCOMPLET             │    │
+ │  │  Critères manquants :                               │    │
+ │  │  • Typologie T5 (aucun logement T5 dans l'immeuble)│    │
+ │  │  • Plancher bas : garage (aucun logement avec       │    │
+ │  │    ce type de plancher)                             │    │
+ │  └────────────────────────────────────────────────────┘    │
+ │                                                            │
+ │  Logements sélectionnés (7 / 10 minimum requis)             │
+ │  ┌──────┬──────┬───────────┬──────────┬─────────┬────────┐ │
+ │  │ Logt │ Typo │ Pl. bas   │ Pl. haut │ Étage   │ Couvre │ │
+ │  ├──────┼──────┼───────────┼──────────┼─────────┼────────┤ │
+ │  │ A1   │ T2   │Terre-plein│Combles   │ RDC     │ T2+PB  │ │
+ │  │ B3   │ T3   │ VS        │ Toiture  │ 1er     │ T3+PH  │ │
+ │  │ B4   │ T4   │ VS        │ Toiture  │ 1er     │ T4     │ │
+ │  │ D6   │ T1   │ VS        │ Toiture  │ 3e      │ T1+Etg │ │
+ │  │ F10  │ T5   │ VS        │ Combles  │ 5e      │ T5     │ │
+ │  │ G12  │ T6   │Ter-plein  │ Toiture  │ 8e      │ T6     │ │
+ │  │ H15  │ T4   │ Garage    │ Combles  │ RDC     │ PB     │ │
+ │  └──────┴──────┴───────────┴──────────┴──────────┴────────┘ │
+ │                                                            │
+ │  Seuil minimal : 10 logements (10% de 100) → 3 manquants   │
+ │                                                            │
+ │              [Ajuster manuellement]    [Valider]           │
+ └────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## [AJOUT] Écran 7 — Sélection des jours disponibles (diagnostiqueur)
+
+Choix des jours avant invitation des occupants.
+
+```
+ ┌────────────────────────────────────────────────────────────┐
+ │  Mes jours disponibles                                     │
+ │  12 Rue des Lilas — Campagne du 10/03 au 20/03/2026       │
+ │                                                            │
+ │  Sélectionnez les jours où vous serez disponible :         │
+ │                                                            │
+ │  ┌─────────┬─────────┬─────────┬─────────┬─────────┐      │
+ │  │  Lun 10 │  Mar 11 │  Mer 12 │  Jeu 13 │  Ven 14 │      │
+ │  │  ☐      │  ☑      │  ☑      │  ☑      │  ☐      │      │
+ │  ├─────────┼─────────┼─────────┼─────────┼─────────┤      │
+ │  │  Sam 15 │  Dim 16 │  Lun 17 │  Mar 18 │  Mer 19 │      │
+ │  │  ☐      │  ☐      │  ☑      │  ☑      │  ☑      │      │
+ │  └─────────┴─────────┴─────────┴─────────┴─────────┘      │
+ │                                                            │
+ │  Jours sélectionnés : 6 jours                              │
+ │                                                            │
+ │              [Valider et envoyer les liens]                │
+ └────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## [AJOUT] Écran 8 — Aperçu des emails avant envoi
+
+Prévisualisation des deux types d'emails.
+
+```
+ ┌────────────────────────────────────────────────────────────┐
+ │  Communication — Aperçu des emails                         │
+ │  12 Rue des Lilas                                          │
+ │                                                            │
+ │  ┌────────────────────────────────────────────────────┐    │
+ │  │  Occupants visités (7) : email avec créneau        │    │
+ │  │  ┌──────────────────────────────────────────────┐  │    │
+ │  │  │  Objet : Votre rendez-vous DPE collectif     │  │    │
+ │  │  │                                                │  │    │
+ │  │  │  Bonjour [Nom],                              │  │    │
+ │  │  │                                                │  │    │
+ │  │  │  Votre logement a été sélectionné pour        │  │    │
+ │  │  │  l'audit énergétique. Rendez-vous le :        │  │    │
+ │  │  │  📅 12/03/2026 à 09h00                        │  │    │
+ │  │  │                                                │  │    │
+ │  │  │  Diagnostiqueur : Sarah Dupont                │  │    │
+ │  │  │  📞 06 12 34 56 78                            │  │    │
+ │  │  │  ✉ sarah.d@exemple.fr                        │  │    │
+ │  │  └──────────────────────────────────────────────┘  │    │
+ │  └────────────────────────────────────────────────────┘    │
+ │                                                            │
+ │  ┌────────────────────────────────────────────────────┐    │
+ │  │  Occupants non visités (38) : email d'information  │    │
+ │  │  ┌──────────────────────────────────────────────┐  │    │
+ │  │  │  Objet : Information audit DPE collectif     │  │    │
+ │  │  │                                                │  │    │
+ │  │  │  Bonjour [Nom],                              │  │    │
+ │  │  │                                                │  │    │
+ │  │  │  Une campagne d'audit énergétique a lieu      │  │    │
+ │  │  │  dans votre immeuble du 10 au 20/03/2026.    │  │    │
+ │  │  │  Votre logement n'a pas été retenu pour       │  │    │
+ │  │  │  une visite cette année.                      │  │    │
+ │  │  │                                                │  │    │
+ │  │  │  Pour toute question, contactez votre         │  │    │
+ │  │  │  syndic ou le diagnostiqueur.                 │  │    │
+ │  │  └──────────────────────────────────────────────┘  │    │
+ │  └────────────────────────────────────────────────────┘    │
+ │                                                            │
+ │              [Modifier les emails]    [Envoyer tout]       │
+ └────────────────────────────────────────────────────────────┘
+ ```
+
+ **Éléments :**
+ - Séparateur "Occupants visités / Occupants non visités"
+ - Prévisualisation des emails avec champs dynamiques ([Nom], dates)
+ - Bouton "Modifier les emails" pour ajuster le contenu
+ - Bouton "Envoyer tout" qui déclenche l'envoi différencié

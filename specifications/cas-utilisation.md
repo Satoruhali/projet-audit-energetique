@@ -1,7 +1,7 @@
 # Cas d'Utilisation
 
 **Projet :** Planif'Audit — Application de planification d'audits énergétiques
-**Version :** 1.0
+**Version :** 2.0
 
 ---
 
@@ -33,6 +33,22 @@
  │          │        │  ┌─────────────────────────────────────┐           │
  │          │────────│─→│ UC9 : Relancer les locataires       │           │
  │          │        │  │ (individuel ou en masse)            │           │
+ │          │        │  └─────────────────────────────────────┘           │
+ │          │        │  ┌─────────────────────────────────────┐           │
+ │          │────────│─→│ UC10 : Saisir les critères de       │           │
+ │          │        │  │ l'immeuble (typologies, planchers)  │           │
+ │          │        │  └─────────────────────────────────────┘           │
+ │          │        │  ┌─────────────────────────────────────┐           │
+ │          │────────│─→│ UC11 : Exécuter l'algorithme de     │           │
+ │          │        │  │ sélection des logements à visiter   │           │
+ │          │        │  └─────────────────────────────────────┘           │
+ │          │        │  ┌─────────────────────────────────────┐           │
+ │          │────────│─→│ UC12 : Choisir ses jours            │           │
+ │          │        │  │ disponibles (diagnostiqueur)        │           │
+ │          │        │  └─────────────────────────────────────┘           │
+ │          │        │  ┌─────────────────────────────────────┐           │
+ │          │────────│─→│ UC13 : Envoyer les emails           │           │
+ │          │        │  │ différenciés (visité/non visité)    │           │
  │          │        │  └─────────────────────────────────────┘           │
  └──────────┘        │                                                      │
                       │                                                      │
@@ -136,3 +152,41 @@
 | **Précondition** | Des locataires n'ont pas répondu |
 | **Scénario nominal** | 1. L'entrepreneur consulte la liste des réponses ; 2. Il clique "Relancer" sur un locataire ou "Relancer tous" ; 3. Un rappel est envoyé |
 | **Postcondition** | Les locataires relancés reçoivent une notification |
+
+---
+
+### [AJOUT] UC10 — Saisir les critères de l'immeuble (typologies, planchers)
+
+| Champ | Valeur |
+|---|---|
+| **Acteur** | Diagnostiqueur |
+| **Précondition** | Une campagne vient d'être créée |
+| **Scénario nominal** | 1. Le diagnostiqueur accède au formulaire "Configuration de l'immeuble" ; 2. Il coche les typologies présentes (T1, T2, T3, T4, T5, T6) ; 3. Il sélectionne les types de plancher bas présents (terre-plein, vide-sanitaire, sur local commercial, garage, autre) ; 4. Il sélectionne les types de plancher haut présents (combles perdus, combles aménagés, toiture terrasse, extérieur) ; 5. Il associe chaque logement à sa typologie, son étage, son type de plancher bas et son type de plancher haut ; 6. Il valide la configuration |
+| **Postcondition** | Les critères de l'immeuble sont enregistrés, l'algorithme peut être exécuté |
+
+### [AJOUT] UC11 — Exécuter l'algorithme de sélection des logements à visiter
+
+| Champ | Valeur |
+|---|---|
+| **Acteur** | Diagnostiqueur |
+| **Précondition** | Les critères de l'immeuble sont saisis (UC10) |
+| **Scénario nominal** | 1. Le diagnostiqueur clique "Lancer la sélection" ; 2. L'algorithme applique RG11–RG15 (typologies, plancher bas, plancher haut, étage intermédiaire, seuil minimal) ; 3. L'algorithme cherche la meilleure combinaison pour couvrir tous les critères avec le moins de visites possible ; 4. Le résultat affiche la liste des logements sélectionnés et le statut "Échantillonnage complet" ou "Incomplet" avec les critères manquants ; 5. Le diagnostiqueur peut ajuster manuellement la sélection |
+| **Postcondition** | La liste des logements à visiter est déterminée |
+
+### [AJOUT] UC12 — Choisir ses jours disponibles (diagnostiqueur)
+
+| Champ | Valeur |
+|---|---|
+| **Acteur** | Diagnostiqueur |
+| **Précondition** | La sélection des logements est validée (UC11) |
+| **Scénario nominal** | 1. Le diagnostiqueur accède à l'écran "Mes disponibilités" ; 2. Il coche un ou plusieurs jours dans l'intervalle de la campagne ; 3. Il valide ses jours disponibles ; 4. Les liens sont générés et envoyés aux occupants ; 5. Les occupants ne peuvent saisir des créneaux que sur ces jours |
+| **Postcondition** | Les jours disponibles sont enregistrés et transmis aux occupants |
+
+### [AJOUT] UC13 — Envoyer les emails différenciés (visité / non visité)
+
+| Champ | Valeur |
+|---|---|
+| **Acteur** | Diagnostiqueur |
+| **Précondition** | Les créneaux de visite ont été attribués |
+| **Scénario nominal** | 1. Le diagnostiqueur accède à l'écran "Communication" ; 2. Il visualise la liste des occupants avec leur statut (visité / non visité) ; 3. Il prévisualise les deux types d'emails ; 4. Il clique "Envoyer les emails" ; 5. Les occupants reçus reçoivent : (a) email d'information simple si non visité, (b) créneau proposé + coordonnées du diagnostiqueur si visité |
+| **Postcondition** | Les emails sont envoyés, chaque occupant reçoit le message adapté |
