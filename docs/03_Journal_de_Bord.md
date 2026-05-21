@@ -15,6 +15,7 @@
 | 19/05/2026 | 7 | Rédaction du fichier `script.js` : données mockées (3 campagnes, 15 locataires), hash routing SPA, interactions CRUD (création/suppression campagne), onglets détail, génération planning avec RG3/RG4/RG9, fonctions toast, timeline visuelle, relance individuelle/masse, export simulé, modification créneaux avec formulaire. | Aucun | — |
 | 20/05/2026 | 8 | Restructuration complète de l'arborescence du projet Planif'Audit. Création dossiers Agent.ia/, skills/, prompts/, specifications/, docs/, backup/. Déplacement des .md racine vers docs/. Création de 6 fichiers specs modulaires (user-stories, personas, wireframes, regles-gestion, cas-utilisation, glossaire). Création config.json agent IA. Déplacement brief-projet.md vers specifications/. Mise à jour du journal de bord. | Aucun | — |
 | 20/05/2026 | 9 | Refonte du formulaire de création de campagne : passage en 2 étapes (immeuble → locataires), ajout champs nom/email/téléphone/digicode, colonne Nom dans tous les tableaux, mise à jour mock data avec noms et emails. | Aucun | — |
+| 20/05/2026 | 10 | Organisation de la base de données MariaDB : création du schéma avec 5 tables (entrepreneurs, immeubles, campagnes, locataires, creneaux), définition des relations et contraintes. Tests d'intégrité et de cohérence. | Aucun | — |
 
 ---
 
@@ -61,3 +62,57 @@ Le formulaire de création de campagne actuel est trop limité. Il ne permet pas
 ### Notes complémentaires :
 - L'import CSV sera une fonctionnalité secondaire (plus tard)
 - Les emails d'invitation seront gérés après la refonte du formulaire
+
+---
+
+## 20/05/2026 — Séance n°10 - Organisation de la base de données
+
+### Objectif :
+Mettre en place le schéma relationnel de la base de données MariaDB pour structurer les données de l'application Planif'Audit.
+
+### Travail réalisé :
+Création du schéma complet avec **5 tables** :
+
+| Table | Clé primaire | Clé étrangère | Description |
+|-------|-------------|---------------|-------------|
+| `entrepreneurs` | `id_entrepreneur INT PK` | — | Comptes administrateurs (nom, email, mot_de_passe) |
+| `immeubles` | `id_immeuble INT PK` | `id_entrepreneur FK → entrepreneurs(id_entrepreneur)` | Bâtiments rattachés à un entrepreneur |
+| `campagnes` | `id_campagne INT PK` | `id_immeuble FK → immeubles(id_immeuble)` | Campagnes de visite liées à un immeuble |
+| `locataires` | `id_locataire INT PK` | `id_campagne FK → campagnes(id_campagne)` | Locataires inscrits à une campagne (nom, email, téléphone, appartement, étage, digicode) |
+| `creneaux` | `id_creneau INT PK` | `id_campagne FK → campagnes(id_campagne)`, `id_locataire FK → locataires(id_locataire)` | Créneaux de visite (date, heure_debut, heure_fin, statut) |
+
+**Relations principales :**
+- Un entrepreneur possède **1 à N** immeubles
+- Un immeuble peut avoir **0 à N** campagnes
+- Une campagne contient **1 à N** locataires
+- Un locataire peut avoir **1 à N** créneaux (réservation + modification)
+
+**Contraintes appliquées :**
+- `NOT NULL` sur tous les champs obligatoires (nom, email, étage, dates)
+- `UNIQUE` sur email des entrepreneurs et locataires
+- `CHECK (étage >= 0)` sur locataires
+- `CHECK (statut IN ('libre', 'réservé', 'confirmé', 'annulé'))` sur creneaux
+- `ON DELETE CASCADE` pour suppression en cascade campagne → locataires → créneaux
+- Index sur `(id_campagne, étage)` pour optimiser le tri par étage (RG3)
+
+### Tests effectués :
+- **Création** : exécution du script SQL complet sans erreur
+- **Insertion** : insertion de 3 jeux de données de test (1 entrepreneur, 2 immeubles, 3 campagnes, 15 locataires, 30 créneaux)
+- **Contraintes** : vérification des `NOT NULL` et `UNIQUE` (doublon email rejeté)
+- **Relations** : test `ON DELETE CASCADE` (suppression campagne → suppression automatique des locataires et créneaux liés)
+- **Requêtes fonctionnelles** :
+  - Récupération des locataires triés par étage pour une campagne (`SELECT ... ORDER BY étage`)
+  - Vérification des créneaux sans chevauchement pour un même locataire (auto-jointure)
+  - Agrégation du nombre de créneaux par statut par campagne
+- **Contrainte RG4** : validation qu'aucun créneau ne se chevauche pour un même locataire via requête de détection
+
+### Difficultés :
+- Aucune difficulté majeure. Le passage de MySQL à MariaDB n'a pas posé de problème de compatibilité (MariaDB 10.11+).
+
+### Prochaines étapes :
+1. [ ] Mettre à jour le script SQL avec l'architecture finale
+2. [ ] Implémenter la couche backend Node.js + Express avec connexion MariaDB
+3. [ ] Adapter le frontend pour consommer les données réelles via API
+4. [ ] Ajouter les scripts de seed pour la base de développement
+
+### Fin de la séance : 17h00 — Durée : 3h
