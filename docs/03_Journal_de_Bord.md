@@ -143,3 +143,48 @@ Intégrer les nouvelles règles métier issues de la réglementation des diagnos
 ### Prochaines étapes :
 1. Phase A — Initialisation du backend Node.js
 2. Phase E — Implémentation de l'algorithme de sélection et des nouvelles règles métier
+
+---
+
+## 21/05/2026 — Étape 0.1 — Initialisation du projet Node.js + structure backend
+
+**Durée effective :** 1h
+**Statut :** ✅ COMPLÉTÉ
+
+### Tâches réalisées :
+1. ✅ Création du `package.json` avec les dépendances :
+   - express, mysql2, dotenv, cors, helmet
+   - jsonwebtoken, joi (ou zod), nodemailer, bcrypt
+
+2. ✅ Configuration des variables d'environnement (`.env`) :
+   - PORT=3000
+   - DB_HOST, DB_USER, DB_PASS, DB_NAME
+   - JWT_SECRET
+
+3. ✅ Création du `.gitignore` avec :
+   - node_modules/
+   - .env
+   - backup/
+
+4. ✅ Structure backend mise en place :
+```
+backend/
+├── config/
+│   └── db.js (pool MariaDB configuré)
+├── app.js (middlewares montés : express.json, cors, helmet)
+└── server.js (point d'entrée avec écoute sur PORT)
+```
+
+5. ✅ Test du serveur : démarrage réussi sur http://localhost:3000
+
+### Livrable obtenu :
+✅ Projet Node.js initialisé et prêt à coder
+✅ Serveur backend fonctionnel
+✅ Connexion base de données configurée (MariaDB via pool)
+
+### Prochaine étape :
+Étape 0.2 — Modélisation BDD + création des tables
+
+### Blocages / Notes :
+- Aucun blocage rencontré
+- Pense à créer la base de données MariaDB avant l'étape suivante
