@@ -1,0 +1,240 @@
+PLAN D'ATTAQUE – RESTRUCTURATION PLANIF'AUDIT
+Préambule : Constats clés
+1. Backend = vierge (6 dossiers vides, aucun code)
+2. Frontend = complet mais mocké (3 vues SPA fonctionnelles)
+3. Schéma DB = dépassé (6 tables, naming batiments/appartements, pas de support RG11-RG17)
+4. Aucune dépendance installée (pas de package.json, pas de .env)
+5. Aucune authentification
+6. Aucun test
+7. Algorithme de sélection = pas codé du tout
+Phase 0 : Fondations du projet (1 étape)
+Étape 0.1 — Initialiser le projet Node.js + structure backend
+Durée : ~1h  
+Livrable : Projet prêt à coder
+- Créer package.json (npm init) avec Express, mysql2, dotenv, cors, helmet, jsonwebtoken, joi/zod, nodemailer, bcrypt
+- Créer .env (PORT, DB_HOST, DB_USER, DB_PASS, DB_NAME, JWT_SECRET)
+- Créer .gitignore (node_modules, .env, backup/)
+- Structure backend opérationnelle : backend/config/db.js (pool MariaDB), backend/app.js (middlewares montés), backend/server.js (entry point)
+- Vérifier que le serveur démarre sur http://localhost:3000
+Blocant pour : Toute la Phase 1, 2, 3, 4, 5, 6
+Phase 1 : Base de données (2 étapes)
+Étape 1.1 — Nouveau schéma complet (migration from scratch)
+Durée : ~2h  
+Livrable : Fichier SQL database/schema.sql + script database/seed.sql
+Décision : Nouveau schéma, pas de modification de l'existant. Raisons :
+- Le schéma actuel (testdb.sql) a un naming incompatible (batiments/appartements/campagnes_audit/disponibilites_locataires/plannings_optimises)
+- Les données de test mockées dans script.js n'ont pas de correspondance SQL propre
+- Le nouveau schéma doit intégrer RG11-RG17 dès la conception
+Tables à créer (unified naming = docs v2) :
+Table	Rôle	Nouveauté
+entrepreneurs	Comptes diagnostiqueurs	NOUVELLE (auth)
+immeubles	Bâtiments rattachés à un entrepreneur	id_entrepreneur FK
+typologies	T1, T2, T3, T4, T5, T6	NOUVELLE (RG11)
+types_plancher_bas	terre-plein, vide-sanitaire, local com., garage, autre	NOUVELLE (RG12)
+types_plancher_haut	combles perdus, combles aménagés, toiture terrasse, extérieur	NOUVELLE (RG13)
+campagnes	Campagne d'audit	renommée, ajout nb_min_visites, pct_min_visites
+logements	Unité de logement (ex-"appartements")	RENOMMÉE, ajout id_typologie, id_type_plancher_bas, id_type_plancher_haut, position ENUM('bas','intermediaire','haut'), selectionne_visite BOOL
+locataires	Occupant du logement	ajout token_acces UUID pour lien unique
+jours_disponibles	Jours choisis par le diagnostiqueur	NOUVELLE (RG16)
+creneaux	Créneaux proposés/réservés par occupants	renommée, ajout statut ENUM + FK id_jour_disponible
+emails_envoyes	Historique des envois	NOUVELLE (RG17), colonnes : type ENUM('visite','non_visite','relance'), date_envoi, statut
+Fichier database/schema.sql : toutes les CREATE TABLE + contraintes + indexes
+Fichier database/seed.sql : jeu de test réaliste (2 entrepreneurs, 2 immeubles, 6 typologies, 5 types plancher bas, 4 types plancher haut, 15 logements, 15 locataires, 2 campagnes)
+Blocant pour : Étape 1.2, Phases 2-6
+Étape 1.2 — Migrer les données de test existantes
+Durée : ~1h  
+Livrable : Données de test adaptées au nouveau schéma
+- Analyser les mock data script.js (3 campagnes, 15 locataires)
+- Les transcrire en seed SQL compatible nouveau schéma
+- Ajouter les colonnes manquantes (typologie aléatoire, plancher bas/haut aléatoire, position aléatoire)
+- Ajouter des locataires avec token_acces pour tester les liens uniques
+Dépend de : Étape 1.1  
+Blocant pour : Phases 2-6
+Phase 2 : Backend — Routes fondamentales (4 étapes)
+Étape 2.1 — Authentification entrepreneur
+Durée : ~2h  
+Livrable : Routes POST /api/auth/register, POST /api/auth/login, middleware JWT
+- Modèle entrepreneur (bcrypt pour mot de passe)
+- JWT token avec id_entrepreneur en payload
+- Middleware auth.js : vérifie token, attache req.entrepreneur
+- Route protégée GET /api/auth/me (vérification token)
+Blocant pour : Toutes les routes suivantes (toute l'API est protégée)
+Étape 2.2 — CRUD immeubles + données de référence
+Durée : ~2h  
+Livrable : Routes /api/entrepreneur/immeubles, /api/referentiel/typologies, /api/referentiel/planchers
+- GET/POST /api/entrepreneur/immeubles (liste, création)
+- GET /api/referentiel/typologies (liste T1-T6)
+- GET /api/referentiel/plancher-bas (liste types)
+- GET /api/referentiel/plancher-haut (liste types)
+- Validation Joi des payloads
+Blocant pour : Étape 2.3, Phase 4
+Étape 2.3 — CRUD campagnes + logements + locataires
+Durée : ~3h  
+Livrable : Routes complètes pour la gestion des campagnes
+- POST /api/entrepreneur/campagnes (avec immeuble_id)
+- GET /api/entrepreneur/campagnes (liste)
+- GET /api/entrepreneur/campagnes/:id (détail avec logements)
+- POST /api/entrepreneur/campagnes/:id/logements (ajout par lot)
+- PUT /api/entrepreneur/campagnes/:id/logements/:id (édition typo/plancher/position)
+- Suppression logique ou physique
+Blocant pour : Phase 3, Phase 4, Phase 5
+Étape 2.4 — Routes jours disponibles (diagnostiqueur)
+Durée : ~1h  
+Livrable : Routes pour la sélection des jours de visite
+- PUT /api/entrepreneur/campagnes/:id/jours-disponibles (remplace les jours)
+- GET /api/entrepreneur/campagnes/:id/jours-disponibles
+- Validation : jours dans l'intervalle de la campagne, pas de doublons
+Blocant pour : Phase 5
+Phase 3 : Algorithme de sélection (2 étapes)
+Étape 3.1 — Version isolée avec tests unitaires
+Durée : ~2h  
+Livrable : Module backend/services/algorithme-selection.js + tests
+À coder AVANT toute intégration API. Pourquoi :
+- L'algo est complexe (meilleure combinaison couvrant typologies + plancher bas + plancher haut + position)
+- Il doit être testé exhaustivement sans dépendance réseau
+- Il peut être développé en parallèle de la Phase 2
+Fonctions minimales :
+class AlgorithmeSelection {
+  // Entrée : liste de logements avec leurs caractéristiques
+  // Sortie : liste des logements sélectionnés + métriques
+  
+  calculerSeuil(nbLogements)     // RG15 : 10% ou 10+5%
+  grouperParCriteres(logements)  // Regroupe par (typo, plancher_bas, plancher_haut, position)
+  trouverMeilleureCombinaison(groupes, seuil) // Set cover pondéré
+  selectionner(logements)        // Point d'entrée unique
+}
+Tests unitaires (mocha/jest) :
+- 10 logements → seuil = 1 (10%)
+- 50 logements → seuil = 5 (10%)
+- 100 logements → seuil = 10+5 = 15 (10% + 5%)
+- Couverture exhaustive de toutes les typologies
+- Cas où tous les logements sont identiques (même typo, même plancher)
+- Cas avec logements intermédiaires uniques
+Indépendant de : Peut être fait en parallèle des Phases 1-2
+Étape 3.2 — Intégration API
+Durée : ~1h  
+Livrable : Route POST /api/entrepreneur/campagnes/:id/lancer-selection
+- Appelle l'algorithme avec les logements de la campagne
+- Met à jour selectionne_visite dans la table logements
+- Retourne la liste sélectionnée + métriques (nb sélectionnés, couverture)
+- Validation : la campagne doit avoir des jours_disponibles définis
+Dépend de : Étape 3.1 + Étape 2.3
+Phase 4 : Frontend — Saisie des données immeuble/logements (2 étapes)
+Étape 4.1 — Ajout des champs typologie, plancher, position dans le formulaire
+Durée : ~2h  
+Livrable : Formulaire campagne modifié dans index.html + script.js
+- Étape 1 du formulaire : ajouter sélecteurs "Typologie", "Plancher bas", "Plancher haut", "Position" par logement
+- Étape 2 (créneau) : inchangée pour l'instant
+- Appel API GET /api/referentiel/typologies et .../plancher-* pour les listes déroulantes
+- Validation : ces champs deviennent obligatoires
+Dépend de : Étape 1.1, 2.2  
+Blocant pour : Étape 4.2
+Étape 4.2 — Connexion campagne → API réelle
+Durée : ~2h  
+Livrable : Plus de mock data pour la création
+- Remplacer creerCampagne() qui push dans APP.campaigns par un POST /api/entrepreneur/campagnes
+- Remplacer ajouterLogement() (mock) par un POST /api/.../logements
+- Ajouter un champ id_campagne dans le store local
+- Remplacer GET /api/entrepreneur/campagnes pour le dashboard
+- Conserver les mock data comme fallback temporaire si API indisponible
+Dépend de : Étape 4.1, Étape 2.3
+Phase 5 : Frontend — Gestion des disponibilités (2 étapes)
+Étape 5.1 — Sélection des jours par le diagnostiqueur
+Durée : ~2h  
+Livrable : Nouvel écran/étape "Choix des jours de visite"
+- Après création campagne, rediriger vers un calendrier de sélection
+- Le diagnostiqueur coche les jours où il peut venir (dans l'intervalle)
+- PUT /api/entrepreneur/campagnes/:id/jours-disponibles
+- UX : calendrier simple avec cases à cocher par jour
+Dépend de : Étape 2.4
+Étape 5.2 — Saisie des créneaux occupants (lien unique)
+Durée : ~3h  
+Livrable : Page publique de saisie des créneaux
+- Créer une vue séparée (ou page dédiée) pour le lien unique : /rendez-vous/:token
+- Affiche les jours disponibles (filtrés par jours diagnostiqueur)
+- L'occupant choisit date + heure début/fin
+- POST /api/liens/:token/creneaux
+- Validation : créneau dans les jours disponibles, pas de chevauchement
+- Confirmation visuelle + email de confirmation simulé
+Dépend de : Étape 5.1  
+Nécessite : Une route backend GET/POST /api/liens/:token/creneaux (non listée dans Phase 2 — à ajouter)
+Phase 6 : Frontend — Affichage résultat + emails (2 étapes)
+Étape 6.1 — Affichage de la sélection
+Durée : ~2h  
+Livrable : Vue "Résultat de l'échantillonnage"
+- Nouvel onglet dans la vue détail campagne : "Échantillonnage"
+- Affiche :
+- Seuil calculé (nb logements + justification)
+- Tableau des logements avec colonne "Sélectionné" (oui/non)
+- Couverture des typologies (qu'est-ce qui est représenté)
+- Bouton "Lancer l'algorithme" (POST /.../lancer-selection)
+- Si déjà lancé, afficher les résultats + possibilité de relancer
+Dépend de : Étape 3.2, Étape 4.2
+Étape 6.2 — Emails différenciés + historique
+Durée : ~2h  
+Livrable : Envoi d'emails différenciés + historique
+- Bouton "Envoyer les emails" dans l'onglet Échantillonnage
+- POST /api/entrepreneur/campagnes/:id/envoyer-emails
+- Backend : génère 2 templates (visité / non visité), envoie via nodemailer
+- Frontend : affiche l'historique dans un tableau
+- Type d'email dans emails_envoyes.type : 'visite' ou 'non_visite'
+- Log des statuts d'envoi
+Dépend de : Étape 6.1, Étape 2.1 (pour récupérer l'email entrepreneur)
+Phase 7 : Tests et validation (2 étapes)
+Étape 7.1 — Tests API (intégration)
+Durée : ~2h  
+Livrable : Tests supertest sur les routes principales
+- POST /api/auth/register + login
+- CRUD immeubles
+- CRUD campagnes + logements
+- POST /lancer-selection
+- POST /liens/:token/creneaux
+Étape 7.2 — Tests bout en bout
+Durée : ~2h  
+Livrable : Scénario complet validé
+- Parcours complet : création campagne → ajout logements → choix jours → occupants saisissent créneaux → lancer sélection → envoyer emails
+- Vérification des données en base
+- Vérification que les contraintes RG11-RG17 sont respectées
+Récapitulatif : Ordre recommandé + dépendances
+Semaine 1 (21-22 mai) :
+  Phase 0 ────┐
+               ├──> Phase 1.1 ──> Phase 1.2 ──> Phase 2.1
+               │                                    │
+               └──> Phase 3.1 (parallèle)           │
+                                                     │
+Semaine 1-2 (23-26 mai) :                            │
+  Phase 2.1 ──> Phase 2.2 ──> Phase 2.3 ──> Phase 2.4
+                                                     │
+  Phase 3.1 ──> Phase 3.2 (après 2.3)               │
+                                                     │
+Semaine 2 (27-30 mai) :                              │
+  Phase 2.2 ──> Phase 4.1 ──> Phase 4.2             │
+                                    │                │
+  Phase 2.4 ──> Phase 5.1          │                │
+                  │                │                │
+  Phase 5.2 ──────┘                │                │
+                                   │                │
+  Phase 4.2 ──> Phase 6.1 ──> Phase 6.2            │
+                                                     │
+Semaine 3 (2-3 juin) :                               │
+  Phase 7.1 ──> Phase 7.2 (après toutes les phases)  │
+Dépendances critiques (ordre strict)
+Étape	Bloquée par	Peut être parallélisée avec
+2.1 (Auth)	1.1 (schema)	Rien d'autre (base common)
+3.1 (Algo isolé)	Rien	Tout sauf 3.2
+2.3 (Campagnes CRUD)	2.1 + 2.2	3.1
+2.4 (Jours dispo)	2.3	3.1
+3.2 (Algo intégré)	3.1 + 2.3	4.1
+4.1 (Front forms)	2.2	3.1, 2.4
+4.2 (Connexion API)	4.1 + 2.3	5.1
+5.1 (Front jours)	2.4	4.2
+5.2 (Créneaux occ.)	5.1	6.1
+6.1 (Affichage sélection)	4.2 + 3.2	5.2
+6.2 (Emails)	6.1	—
+7.1-7.2 (Tests)	Tout	Rien
+Recommandations clés
+1. Commence par la Phase 0 + Phase 1.1 (fondations + schéma DB) — c'est le seul vrai prérequis
+2. Lance Phase 3.1 en parallèle de Phase 2.1-2.2 (l'algo n'a besoin de rien d'autre que Node.js et jest)
+3. Ne touche au frontend qu'après avoir un backend fonctionnel (Phase 2.1-2.3 terminée)
+4. Garde les mock data actuelles comme fallback dans le frontend jusqu'à la Phase 4.2 — ça évite de casser l'application pendant la transition
+5. Ne conserve PAS les données testdb.sql (trop décalées du nouveau schéma) — réécris un seed propre en 1.2
