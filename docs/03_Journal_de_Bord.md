@@ -241,3 +241,33 @@ Mettre à jour le schéma relationnel pour intégrer les nouvelles règles méti
 - [ ] Adapter la couche backend (requêtes, routes) à la nouvelle structure
 - [ ] Mettre à jour `docs/05_Documentation_Technique.md` avec le nouveau schéma
 - [ ] Créer un script de migration pour les données existantes le cas échéant
+
+---
+
+## 26/05/2026 — Étape 2.1 et 2.2 terminées
+
+### Durée totale : ~4h
+
+### Étape 2.1 — Authentification entrepreneur ✅
+- Modèle `entrepreneur` avec bcrypt pour mot de passe
+- Routes `POST /api/auth/register` et `POST /api/auth/login`
+- JWT token avec payload `id_entrepreneur`
+- Middleware `auth.js` (vérification token + attache req.entrepreneur)
+- Route protégée `GET /api/auth/me`
+- ✅ Validation : tests register, login, route protégée OK
+
+### Étape 2.2 — CRUD immeubles + référentiels ✅
+- Routes `GET/POST /api/entrepreneur/immeubles` (liste, création)
+- Routes référentiels :
+  - `GET /api/referentiel/typologies` → [T1, T2, T3, T4, T5, T6]
+  - `GET /api/referentiel/plancher-bas` → liste types
+  - `GET /api/referentiel/plancher-haut` → liste types
+- Validation Joi des payloads (typologies, champs obligatoires)
+- ✅ Validation : tests API et Joi OK
+
+### Points bloquants résolus
+- Correction des noms de champs (motDePasse, annee_construction, etc.)
+- Ajustement longueur mot de passe (minimum 8 caractères)
+
+### Prochaine étape
+Étape 2.3 — CRUD lots + consommations

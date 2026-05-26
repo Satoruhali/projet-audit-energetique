@@ -1,0 +1,52 @@
+ERREUR: ValidationError: Entrepreneur validation failed: motDePasse: Path `motDePasse` is required.
+    at model.validate (C:\Users\wassi\projet-audit-energetique\node_modules\mongoose\lib\document.js:2864:36)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async model.$__save (C:\Users\wassi\projet-audit-energetique\node_modules\mongoose\lib\model.js:393:7)
+    at async model.save (C:\Users\wassi\projet-audit-energetique\node_modules\mongoose\lib\model.js:667:5)
+    at async model.create (C:\Users\wassi\projet-audit-energetique\node_modules\mongoose\lib\model.js:2747:5)
+    at async exports.register (C:\Users\wassi\projet-audit-energetique\backend\controllers\authController.js:11:26) {
+  errors: {
+    motDePasse: ValidatorError: Path `motDePasse` is required.
+        at SchemaString.doValidate (C:\Users\wassi\projet-audit-energetique\node_modules\mongoose\lib\schemaType.js:1517:13)
+        at model.validate (C:\Users\wassi\projet-audit-energetique\node_modules\mongoose\lib\document.js:2842:20)
+        at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at async model.$__save (C:\Users\wassi\projet-audit-energetique\node_modules\mongoose\lib\model.js:393:7)
+        at async model.save (C:\Users\wassi\projet-audit-energetique\node_modules\mongoose\lib\model.js:667:5)
+        at async model.create (C:\Users\wassi\projet-audit-energetique\node_modules\mongoose\lib\model.js:2747:5)
+        at async exports.register (C:\Users\wassi\projet-audit-energetique\backend\controllers\authController.js:11:26) {
+      properties: [Object],
+      kind: 'required',
+      path: 'motDePasse',
+      value: undefined,
+      reason: undefined,
+      Symbol(mongoose#validatorError): true
+    }
+  },
+  _message: 'Entrepreneur validation failed'
+}
+ERREUR: ValidationError: Entrepreneur validation failed: motDePasse: Path `motDePasse` (`123456`, length 6) is shorter than the minimum allowed length (8).
+    at model.validate (C:\Users\wassi\projet-audit-energetique\node_modules\mongoose\lib\document.js:2864:36)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async model.$__save (C:\Users\wassi\projet-audit-energetique\node_modules\mongoose\lib\model.js:393:7)
+    at async model.save (C:\Users\wassi\projet-audit-energetique\node_modules\mongoose\lib\model.js:667:5)
+    at async model.create (C:\Users\wassi\projet-audit-energetique\node_modules\mongoose\lib\model.js:2747:5)
+    at async exports.register (C:\Users\wassi\projet-audit-energetique\backend\controllers\authController.js:11:26) {
+  errors: {
+    motDePasse: ValidatorError: Path `motDePasse` (`123456`, length 6) is shorter than the minimum allowed length (8).
+        at SchemaString.doValidate (C:\Users\wassi\projet-audit-energetique\node_modules\mongoose\lib\schemaType.js:1517:13)
+        at model.validate (C:\Users\wassi\projet-audit-energetique\node_modules\mongoose\lib\document.js:2842:20)
+        at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at async model.$__save (C:\Users\wassi\projet-audit-energetique\node_modules\mongoose\lib\model.js:393:7)
+        at async model.save (C:\Users\wassi\projet-audit-energetique\node_modules\mongoose\lib\model.js:667:5)
+        at async model.create (C:\Users\wassi\projet-audit-energetique\node_modules\mongoose\lib\model.js:2747:5)
+        at async exports.register (C:\Users\wassi\projet-audit-energetique\backend\controllers\authController.js:11:26) {
+      properties: [Object],
+      kind: 'minlength',
+      path: 'motDePasse',
+      value: '123456',
+      reason: undefined,
+      Symbol(mongoose#validatorError): true
+    }
+  },
+  _message: 'Entrepreneur validation failed'
+}
