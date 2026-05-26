@@ -1,17 +1,26 @@
 const express = require('express');
 const cors = require('cors');
-const helmet = require('helmet');
-require('dotenv').config();
+
+const authRoutes = require('./routes/authRoutes');
+const immeubleRoutes = require('./routes/immeubleRoutes');
+const referentielRoutes = require('./routes/referentielRoutes');
 
 const app = express();
 
-app.use(helmet());
 app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'Serveur opérationnel' });
 });
+
+// app.use('/api/auth', authRoutes);
+app.use('/api/auth', (req, res, next) => {
+  console.log('Route atteinte:', req.method, req.url);
+  next();
+}, authRoutes);
+
+app.use('/api/entrepreneur/immeubles', immeubleRoutes);
+app.use('/api/referentiel', referentielRoutes);
 
 module.exports = app;
