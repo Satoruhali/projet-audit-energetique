@@ -16,6 +16,7 @@
 | 20/05/2026 | 8 | Restructuration complète de l'arborescence du projet Planif'Audit. Création dossiers Agent.ia/, skills/, prompts/, specifications/, docs/, backup/. Déplacement des .md racine vers docs/. Création de 6 fichiers specs modulaires (user-stories, personas, wireframes, regles-gestion, cas-utilisation, glossaire). Création config.json agent IA. Déplacement brief-projet.md vers specifications/. Mise à jour du journal de bord. | Aucun | — |
 | 20/05/2026 | 9 | Refonte du formulaire de création de campagne : passage en 2 étapes (immeuble → locataires), ajout champs nom/email/téléphone/digicode, colonne Nom dans tous les tableaux, mise à jour mock data avec noms et emails. | Aucun | — |
 | 20/05/2026 | 10 | Organisation de la base de données MariaDB : création du schéma avec 5 tables (entrepreneurs, immeubles, campagnes, locataires, creneaux), définition des relations et contraintes. Tests d'intégrité et de cohérence. | Aucun | — |
+| 22/05/2026 | 12 | Restructuration complète de la BDD : passage de 5 à 10 tables. Renommage batiments→immeubles, appartements→logements, campagnes_audit→campagnes. Ajout typologies, types_plancher, jours_disponibles, emails_envoyes. Fusion disponibilites_locataires et plannings_optimises dans creneaux. Nouveaux index et contraintes. | Aucun | — |
 
 ---
 
@@ -188,3 +189,55 @@ backend/
 ### Blocages / Notes :
 - Aucun blocage rencontré
 - Pense à créer la base de données MariaDB avant l'étape suivante
+
+---
+
+## 22/05/2026 — Restructuration de la base de données
+
+### Objectif :
+Mettre à jour le schéma relationnel pour intégrer les nouvelles règles métier (échantillonnage par typologie, planchers, disponibilités entrepreneur, suivi des emails) et aligner la nomenclature avec les spécifications v2.0.
+
+### Changements effectués :
+
+**Renommages :**
+- `batiments` → `immeubles`
+- `appartements` → `logements`
+- `campagnes_audit` → `campagnes`
+
+**Nouvelles tables (4) :**
+- `typologies` — catalogue des typologies de logement (T1, T2, …) avec contrainte `CHECK (1–6 pièces)`
+- `types_plancher` — référentiel des types de plancher (bas/haut) avec `UNIQUE` sur `nom`
+- `jours_disponibles` — disponibilités des entrepreneurs (lié à `entrepreneurs`, `UNIQUE(entrepreneur, date)`)
+- `emails_envoyes` — historique des envois d'emails aux locataires avec suivi de statut (envoyé, échoué, ouvert, cliqué)
+
+**Tables supprimées (fusionnées) :**
+- `disponibilites_locataires` — intégré dans `creneaux`
+- `plannings_optimises` — intégré dans `creneaux`
+
+**Modifications structurelles :**
+- `locataires` : n'est plus liée à une campagne ; ajout de `token_acces` (UNIQUE, NULL) et `date_inscription` ; lien désormais via `logements`
+- `entrepreneurs` : `id_entrepreneur` → `id` ; ajout de `mot_de_passe_hash`, `telephone`, `date_creation`
+- `immeubles` : `id_immeuble` → `id` ; ajout de `nb_etages`, `adresse`
+- `campagnes` : `id_campagne` → `id` ; ajout de `statut` ENUM, `nb_min_visites`, `pct_min_visites` ; n'est plus reliée directement aux locataires
+- `logements` (ex `appartements`) : ajout de `id_typologie` FK, `id_type_plancher_bas` FK, `id_type_plancher_haut` FK, `position` ENUM, `selectionne_visite` BOOLEAN ; `UNIQUE(batiment_id, numero)`
+- `creneaux` : `id_creneau` → `id` ; lie désormais `logements`, `campagnes` et `jours_disponibles` ; ajout de `date_visite`, `ordre_visite`, `statut` ENUM('propose','confirme','effectue','annule') ; deux contraintes UNIQUE composites
+
+**Nouveaux index :**
+- `idx_logements_id_immeuble`, `idx_logements_id_typologie`
+- `idx_creneaux_id_logement`, `idx_creneaux_id_campagne`, `idx_creneaux_id_jour_disponible`
+- `idx_emails_envoyes_locataire`, `idx_emails_envoyes_campagne`
+- `idx_locataires_token_acces`
+
+### Impact sur le projet :
+- **Schéma passe de 5 à 10 tables** — couvre désormais l'échantillonnage réglementaire, les disponibilités entrepreneur et la communication
+- **Modèle de données repensé** : les locataires deviennent des entités indépendantes (plus liées à une campagne) ; la relation passe par immeuble → logements → locataire
+- **Backend à adapter** : les requêtes SQL existantes (jointures, insertions) doivent être mises à jour pour refléter les nouveaux noms de colonnes et les nouvelles relations
+- **Frontend sans impact immédiat** mais les appels API futurs devront utiliser la nouvelle nomenclature
+- **Scripts de seed obsolètes** — à réécrire pour les 10 tables
+
+### Prochaines actions :
+- [ ] Mettre à jour le script SQL de création (migration complète)
+- [ ] Réécrire les scripts de seed pour les 10 tables
+- [ ] Adapter la couche backend (requêtes, routes) à la nouvelle structure
+- [ ] Mettre à jour `docs/05_Documentation_Technique.md` avec le nouveau schéma
+- [ ] Créer un script de migration pour les données existantes le cas échéant
