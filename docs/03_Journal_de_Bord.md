@@ -4,6 +4,15 @@
 
 ---
 
+## 📅 2026-05-28 — 15:30
+- **Tâche** : Routes PUT/GET jours-disponibles pour sélection des jours de visite
+- **Durée estimée** : 1h
+- **Durée réelle** : ⏳ à compléter
+- **Statut** : ✅ terminée
+- **Fichiers modifiés** : `backend/controllers/campagneJoursController.js`, `backend/routes/campagneJoursRoutes.js`, `backend/validations/campagneJours.js`, `backend/app.js`, `backend/models/Campagne.js`
+- **Notes** : PUT remplace les jours (validation intervalle + doublons). GET retourne la liste. Tests validés (10/10), fichiers de test supprimés.
+---
+
 | Date | Séance | Actions menées | Problèmes | Solutions |
 |---|---|---|---|---|
 | 18/05/2026 | 1 | Création du dossier professionnel v1.0 — rédaction du brief initial, des spécifications préliminaires et de la structure du dossier | Aucun | — |

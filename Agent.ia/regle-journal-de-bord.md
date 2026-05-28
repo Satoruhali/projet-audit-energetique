@@ -1,38 +1,27 @@
 # Règle : Journal de bord automatique
 
-📁 **Emplacement absolu du journal** :  
-`C:\Users\wassi\projet-audit-energetique\docs\03_Journal_de_Bord.md`  
-*(si le fichier n'existe pas, le créer à cet endroit)*
+## 📁 Emplacement absolu du journal
+`C:\Users\wassi\projet-audit-energetique\docs\03_Journal_de_Bord.md`
 
-Déclenchement :
-- Après chaque action que l'utilisateur décrit comme "je viens de faire X", "tâche exécutée : Y"
-- Après chaque implémentation demandée par l'utilisateur
+*(Si le fichier n'existe pas, le créer à cet emplacement exact)*
 
-Comportement de l'IA :
-1. Ouvre ou crée le fichier au chemin exact ci-dessus
-2. Ajoute une nouvelle entrée au **début du fichier** (ordre antéchronologique)
-3. Format de chaque entrée :
-   ```markdown
-   ## 📅 [DATE] — [HEURE]
-   - **Tâche** : [description]
-   - **Durée estimée** : [durée]
-   - **Durée réelle** : [à demander ou "à compléter"]
-   - **Statut** : 🔄 en cours / ✅ terminée / ⚠️ bloquée
-   - **Fichiers modifiés** : [chemins relatifs depuis la racine]
-   - **Notes** : [optionnel]
-   ---
-   ```
-4. Ne supprime jamais d'entrées existantes
-5. Si la durée réelle n'est pas connue, ajouter `⏳ à compléter` et demander à l'utilisateur
+## 🔄 Déclencheurs (quand l'IA doit écrire dans le journal)
 
-Exemple d'entrée :
+L'IA DOIT ajouter une entrée dans le journal quand :
+1. L'utilisateur dit : *"je viens de faire X"*, *"tâche exécutée : Y"*, *"j'ai terminé Z"*
+2. L'utilisateur demande explicitement de *"actualiser/mettre à jour le journal"*
+3. Une implémentation est terminée (série de routes, correction de bug, tests passants)
+4. Un blocage est identifié (ex: erreur 500, test qui échoue)
+5. Une étape du projet est validée (ex: tous les tests ✅)
+
+## 📝 Format OBLIGATOIRE de chaque entrée
+
 ```markdown
-## 📅 2026-05-28 — 14:30
-- **Tâche** : Implémentation CRUD campagnes (routes POST/GET/PUT/DELETE)
-- **Durée estimée** : 3h
-- **Durée réelle** : ⏳ à compléter
-- **Statut** : ✅ terminée
-- **Fichiers modifiés** : `routes/api.php`, `app/Models/Campagne.php`, `app/Http/Controllers/CampagneController.php`
-- **Notes** : Suppression logique implémentée avec SoftDeletes
+## 📅 [AAAA-MM-JJ] — [HH:MM]
+- **Tâche** : [description précise de l'action réalisée]
+- **Durée estimée** : [durée en heures/minutes]
+- **Durée réelle** : [durée ou "⏳ à compléter"]
+- **Statut** : 🔄 en cours / ✅ terminée / ⚠️ bloquée
+- **Fichiers modifiés** : `[chemins relatifs depuis la racine]`
+- **Notes** : [optionnel, ex: erreur rencontrée, solution trouvée]
 ---
-```
