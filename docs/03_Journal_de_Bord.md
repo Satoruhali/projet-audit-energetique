@@ -271,3 +271,16 @@ Mettre à jour le schéma relationnel pour intégrer les nouvelles règles méti
 
 ### Prochaine étape
 Étape 2.3 — CRUD lots + consommations
+
+---
+
+## 📅 2026-05-28 — 11:50
+
+- **Tâche** : Réalisation et tests des 6 routes API campagnes — POST `/api/entrepreneur/campagnes` (avec immeuble_id), GET `/api/entrepreneur/campagnes` (liste), GET `/api/entrepreneur/campagnes/:id` (détail avec logements), POST `/api/entrepreneur/campagnes/:id/logements` (ajout par lot), PUT `/api/entrepreneur/campagnes/:id/logements/:id` (édition typo/plancher/position), suppression logique ou physique
+- **Durée estimée** : 1h
+- **Durée réelle** : ⏳ à compléter
+- **Statut** : ✅ terminée
+- **Fichiers modifiés** : `routes/api.php`, `app/Http/Controllers/CampagneController.php`, `app/Models/Campagne.php`, `app/Models/Logement.php`
+- **Notes** : Tous les tests sont OK. GET /campagnes/:id corrigé (erreur 500 résolue). Serveur redémarré et validé.
+
+---

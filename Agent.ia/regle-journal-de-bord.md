@@ -1,55 +1,38 @@
-# Règle : Mise à jour automatique du journal de bord
+# Règle : Journal de bord automatique
 
-## Objectif
+📁 **Emplacement absolu du journal** :  
+`C:\Users\wassi\projet-audit-energetique\docs\03_Journal_de_Bord.md`  
+*(si le fichier n'existe pas, le créer à cet endroit)*
 
-Chaque fois que l'IA exécute une tâche pour le compte de l'utilisateur, elle doit enregistrer une entrée dans `journal-de-bord.md` à la racine du projet. L’historique des entrées est conservé — jamais supprimé.
+Déclenchement :
+- Après chaque action que l'utilisateur décrit comme "je viens de faire X", "tâche exécutée : Y"
+- Après chaque implémentation demandée par l'utilisateur
 
-## Format d'une entrée
+Comportement de l'IA :
+1. Ouvre ou crée le fichier au chemin exact ci-dessus
+2. Ajoute une nouvelle entrée au **début du fichier** (ordre antéchronologique)
+3. Format de chaque entrée :
+   ```markdown
+   ## 📅 [DATE] — [HEURE]
+   - **Tâche** : [description]
+   - **Durée estimée** : [durée]
+   - **Durée réelle** : [à demander ou "à compléter"]
+   - **Statut** : 🔄 en cours / ✅ terminée / ⚠️ bloquée
+   - **Fichiers modifiés** : [chemins relatifs depuis la racine]
+   - **Notes** : [optionnel]
+   ---
+   ```
+4. Ne supprime jamais d'entrées existantes
+5. Si la durée réelle n'est pas connue, ajouter `⏳ à compléter` et demander à l'utilisateur
 
+Exemple d'entrée :
 ```markdown
-## [YYYY-MM-DD HH:mm]
-
-- **Tâche** : brève description impérative (ex. "Ajout de la fonction de connexion")
-- **Contexte** : pourquoi cette tâche est nécessaire (1 phrase max)
-- **Durée estimée** : X min
-- **Durée réelle** : X min
-- **État** : `✅ Terminée` | `🔄 En cours` | `❌ Bloquée`
-- **Fichiers modifiés** :
-  - `chemin/vers/fichier1.ext`
-  - `chemin/vers/fichier2.ext`
-- **Notes** : (optionnel) décision, difficulté, ou prochaine étape
-```
-
-## Déclencheurs
-
-1. **Fin de tâche** → l'IA ajoute automatiquement l'entrée avec l'état `✅ Terminée`.
-2. **Début de tâche longue** → l'IA ajoute une entrée avec l'état `🔄 En cours` avant de commencer.
-3. **Blocage** → l'IA ajoute une entrée avec l'état `❌ Bloquée` et décrit le blocage dans les notes.
-
-## Règles impératives
-
-- Toujours **ajouter** une nouvelle ligne — ne jamais écraser ni réécrire les entrées passées.
-- La durée réelle est mesurée depuis le début de la tâche (ou depuis la dernière entrée `🔄 En cours`).
-- Si l'utilisateur donne une tâche, l'IA peut estimer la durée et l'enregistrer en `🔄 En cours` immédiatement.
-- Si le fichier `journal-de-bord.md` n'existe pas, l'IA le crée avec un en-tête `# Journal de bord` avant la première entrée.
-
-## Exemple concret
-
-**Tâche reçue :** « Ajouter une validation email sur le formulaire d'inscription. »
-
-1. L'IA estime 15 min, crée une entrée `🔄 En cours`, et travaille.
-2. Une fois terminé, l'IA met à jour l'entrée existante et ajoute un bloc final `✅ Terminée` :
-
-```markdown
-## [2026-05-28 14:30]
-
-- **Tâche** : Validation email sur le formulaire d'inscription
-- **Contexte** : Empêcher les inscriptions avec des emails invalides
-- **Durée estimée** : 15 min
-- **Durée réelle** : 12 min
-- **État** : `✅ Terminée`
-- **Fichiers modifiés** :
-  - `src/validators/email.ts`
-  - `src/components/InscriptionForm.tsx`
-- **Notes** : Utilisation d'une regex RFC 5322 simplifiée
+## 📅 2026-05-28 — 14:30
+- **Tâche** : Implémentation CRUD campagnes (routes POST/GET/PUT/DELETE)
+- **Durée estimée** : 3h
+- **Durée réelle** : ⏳ à compléter
+- **Statut** : ✅ terminée
+- **Fichiers modifiés** : `routes/api.php`, `app/Models/Campagne.php`, `app/Http/Controllers/CampagneController.php`
+- **Notes** : Suppression logique implémentée avec SoftDeletes
+---
 ```

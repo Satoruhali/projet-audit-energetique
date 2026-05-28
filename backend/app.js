@@ -4,6 +4,7 @@ const cors = require('cors');
 const authRoutes = require('./routes/authRoutes');
 const immeubleRoutes = require('./routes/immeubleRoutes');
 const referentielRoutes = require('./routes/referentielRoutes');
+const campagneRoutes = require('./routes/campagneRoutes');
 
 const app = express();
 
@@ -21,6 +22,7 @@ app.use('/api/auth', (req, res, next) => {
 }, authRoutes);
 
 app.use('/api/entrepreneur/immeubles', immeubleRoutes);
+app.use('/api/entrepreneur/campagnes', campagneRoutes);
 app.use('/api/referentiel', referentielRoutes);
 
 module.exports = app;
