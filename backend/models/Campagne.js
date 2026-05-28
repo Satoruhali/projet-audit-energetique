@@ -14,7 +14,8 @@ const campagneSchema = new mongoose.Schema({
     enum: ['brouillon', 'en_cours', 'termine'],
     default: 'brouillon'
   },
-  deletedAt: { type: Date, default: null }
+  deletedAt: { type: Date, default: null },
+  jours_disponibles: [{ type: Date }]
 }, { timestamps: true });
 
 campagneSchema.virtual('logements', {

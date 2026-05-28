@@ -22,7 +22,10 @@ app.use('/api/auth', (req, res, next) => {
 }, authRoutes);
 
 app.use('/api/entrepreneur/immeubles', immeubleRoutes);
+const campagneJoursRoutes = require('./routes/campagneJoursRoutes');
+
 app.use('/api/entrepreneur/campagnes', campagneRoutes);
+app.use('/api/entrepreneur/campagnes/:id', campagneJoursRoutes);
 app.use('/api/referentiel', referentielRoutes);
 
 module.exports = app;
