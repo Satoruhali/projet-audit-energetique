@@ -27,6 +27,6 @@ Difficulté à planifier et ordonnancer les visites dans un immeuble, notamment 
 
 ## 1.5 Contraintes identifiées (à valider)
 - Respect de la réglementation DPE collectif : échantillonnage par typologie (T1–T6), par type de plancher bas/haut, étage intermédiaire.
-- Seuil minimal de visites selon la taille de l'immeuble (10% ou 10+5%).
+- Seuil minimal de visites selon la taille de l'immeuble (< 30 lots → pas de seuil ; 31–100 lots → 10% ; > 100 lots → 5%, min. 10).
 - Le diagnostiqueur choisit ses jours disponibles avant les occupants.
 - Deux types d'emails selon que le logement est visité ou non.

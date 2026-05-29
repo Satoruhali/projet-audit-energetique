@@ -98,15 +98,16 @@ class AlgorithmeSelection {
   // Entrée : liste de logements avec leurs caractéristiques
   // Sortie : liste des logements sélectionnés + métriques
   
-  calculerSeuil(nbLogements)     // RG15 : 10% ou 10+5%
+  calculerSeuil(nbLogements)     // RG15 : <31 → aucun seuil ; 31-100 → 10% ; >100 → 5% min 10
   grouperParCriteres(logements)  // Regroupe par (typo, plancher_bas, plancher_haut, position)
   trouverMeilleureCombinaison(groupes, seuil) // Set cover pondéré
   selectionner(logements)        // Point d'entrée unique
 }
 Tests unitaires (mocha/jest) :
-- 10 logements → seuil = 1 (10%)
+- 10 logements → seuil = 0 (pas de seuil quantitatif en dessous de 31)
 - 50 logements → seuil = 5 (10%)
-- 100 logements → seuil = 10+5 = 15 (10% + 5%)
+- 100 logements → seuil = 10 (10%)
+- 200 logements → seuil = 10 (5% de 200 = 10, plancher 10)
 - Couverture exhaustive de toutes les typologies
 - Cas où tous les logements sont identiques (même typo, même plancher)
 - Cas avec logements intermédiaires uniques

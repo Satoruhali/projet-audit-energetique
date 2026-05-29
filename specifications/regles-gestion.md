@@ -21,7 +21,7 @@
 | **RG12** | [AJOUT] Échantillonnage par type de plancher bas | Au moins 1 logement par type de plancher bas présent : terre-plein, vide-sanitaire, sur local commercial, garage, autre | Badge "Échantillonnage complet/incomplet" |
 | **RG13** | [AJOUT] Échantillonnage par type de plancher haut | Au moins 1 logement par type de plancher haut présent : combles perdus, combles aménagés, toiture terrasse, extérieur | Badge "Échantillonnage complet/incomplet" |
 | **RG14** | [AJOUT] Étage intermédiaire | Au moins 1 logement en étage intermédiaire (ni RDC, ni dernier étage) doit être visité | Badge "Échantillonnage complet/incomplet" |
-| **RG15** | [AJOUT] Seuil minimal de visites | Si 30 à 99 lots → 10 % minimum ; si 100 lots ou plus → 10 + 5 % minimum | Calcul automatique du seuil |
+| **RG15** | [AJOUT] Seuil minimal de visites | Si < 30 lots → pas de seuil quantitatif ; si 31 à 100 lots → 10 % minimum ; si > 100 lots → 5 % minimum, plancher de 10 visites | Calcul automatique du seuil |
 | **RG16** | [AJOUT] Jours disponibles du diagnostiqueur d'abord | Le diagnostiqueur choisit ses jours disponibles avant que les occupants ne donnent leurs créneaux ; les occupants ne voient que ces jours-là | Calendrier diagnostiqueur → Calendrier occupant filtré |
 | **RG17** | [AJOUT] Deux types d'emails | Logement non visité → email d'information simple ; Logement visité → créneau proposé + coordonnées diagnostiqueur | Aperçu emails avant envoi |
 
@@ -72,9 +72,10 @@ L'algorithme doit sélectionner au moins 1 logement par type de plancher haut pr
 L'algorithme doit sélectionner au moins 1 logement situé à un étage qui n'est ni le RDC ni le dernier étage. Si l'immeuble n'a que 2 niveaux (RDC + 1er), cette règle est sans objet.
 
 ### [AJOUT] RG15 — Seuil minimal de visites
-Deux seuils s'appliquent :
-1. **Immeuble de 30 à 99 logements** → visiter **10 % des lots** minimum (arrondi à l'entier supérieur)
-2. **Immeuble de 100 logements ou plus** → visiter **10 logements + 5 % du total** minimum (arrondi à l'entier supérieur)
+Les seuils réglementaires (arrêté du 31 mars 2021 modifié) :
+1. **Immeuble de moins de 30 logements** → pas de seuil quantitatif, seuls les critères qualitatifs (RG11–RG14) s'appliquent
+2. **Immeuble de 31 à 100 logements** → visiter **10 % des lots** minimum (arrondi à l'entier supérieur)
+3. **Immeuble de plus de 100 logements** → visiter **5 % du total** minimum, avec un **plancher de 10 visites** (arrondi à l'entier supérieur)
 
 Si le nombre de logements requis par l'échantillonnage (RG11–RG14) est inférieur au seuil, l'algorithme complète avec des logements supplémentaires choisis aléatoirement ou selon les disponibilités.
 
