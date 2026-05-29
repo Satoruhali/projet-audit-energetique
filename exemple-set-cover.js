@@ -63,7 +63,7 @@ function criteresCouvertPar(logement, nbEtages) {
   couverts.add(`pb:${logement.plancher_bas}`);
   couverts.add(`ph:${logement.plancher_haut}`);
   const estRdc = logement.etage === 0;
-  const estDernier = logement.etage === nbEtages;
+  const estDernier = logement.etage === nbEtages - 1;
   if (!estRdc && !estDernier) couverts.add('etage:intermediaire');
   return couverts;
 }
@@ -221,3 +221,5 @@ console.log(JSON.stringify({
   seuil: { requis: seuil, obtenu: selectionComplete.length },
   criteresManquants: resultat.ilRestait
 }, null, 2));
+
+module.exports = { construireCriteres, criteresCouvertPar, selectionSetCover, calculerSeuilMinimal, completerJusquaSeuil, logements, nbEtages };
