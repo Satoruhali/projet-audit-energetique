@@ -6,10 +6,48 @@
    ============================================= */
 
 /* ---------- MOCK DATA ---------- */
+/* ---------- API HELPERS ---------- */
+const API_BASE = (location.protocol === 'file:') ? '' : location.origin + '/api/entrepreneur';
+
+async function apiFetch(method, path, body = null) {
+  try {
+    if (!API_BASE) return null;
+    const opts = {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+    };
+    if (body) opts.body = JSON.stringify(body);
+    const res = await fetch(`${API_BASE}${path}`, opts);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
+async function apiCampagneCreate(data) {
+  const result = await apiFetch('POST', '/campagnes', data);
+  if (result && result._id) return result;
+  return null;
+}
+
+async function apiCampagneLogementsStore(campagneId, logements) {
+  const result = await apiFetch('POST', `/campagnes/${campagneId}/logements`, logements);
+  if (result && Array.isArray(result)) return result;
+  return null;
+}
+
+async function apiCampagnesList() {
+  const result = await apiFetch('GET', '/campagnes');
+  if (result && Array.isArray(result)) return result;
+  return null;
+}
+
 const APP = {
   campaigns: [
     {
       id: 'c1',
+      id_campagne: null,
       adresse: '12 Rue des Lilas, Paris 75011',
       dateDebut: '2026-06-01',
       dateFin: '2026-06-10',
@@ -26,6 +64,7 @@ const APP = {
     },
     {
       id: 'c2',
+      id_campagne: null,
       adresse: '8 Avenue Victor Hugo, Lyon 69002',
       dateDebut: '2026-07-15',
       dateFin: '2026-07-25',
@@ -40,6 +79,7 @@ const APP = {
     },
     {
       id: 'c3',
+      id_campagne: null,
       adresse: '3 Rue de la Paix, Marseille 13001',
       dateDebut: '2026-05-01',
       dateFin: '2026-05-08',
@@ -55,6 +95,33 @@ const APP = {
     },
   ],
   currentCampaignId: null,
+  typologies: [
+    { id: 'T1', label: 'T1' },
+    { id: 'T2', label: 'T2' },
+    { id: 'T3', label: 'T3' },
+    { id: 'T4', label: 'T4' },
+    { id: 'T5', label: 'T5' },
+  ],
+  plancherBas: [
+    { id: 'pb-dalle', label: 'Dalle béton sur terre-plein' },
+    { id: 'pb-cave', label: 'Plancher bas sur cave' },
+    { id: 'pb-vide-sanitaire', label: 'Plancher bas sur vide sanitaire' },
+    { id: 'pb-bois', label: 'Plancher bois surélevé' },
+  ],
+  plancherHaut: [
+    { id: 'ph-combles-perdus', label: 'Plafond sous combles perdus' },
+    { id: 'ph-toiture-terrasse', label: 'Toiture-terrasse' },
+    { id: 'ph-combles-amenages', label: 'Combles aménagés' },
+    { id: 'ph-dalle-etage', label: 'Dalle béton entre étages' },
+  ],
+  positions: [
+    { id: 'nord', label: 'Nord' },
+    { id: 'sud', label: 'Sud' },
+    { id: 'est', label: 'Est' },
+    { id: 'ouest', label: 'Ouest' },
+    { id: 'centre', label: 'Centre' },
+    { id: 'angle', label: 'Angle' },
+  ],
 };
 
 /* ---------- DOM REFS ---------- */
@@ -103,6 +170,18 @@ function campaignStats(camp) {
   const repondu = camp.locataires.filter(l => l.statut === 'repondu').length;
   const attente = camp.locataires.filter(l => l.statut === 'attente' || l.statut === 'relance').length;
   return { total, repondu, attente };
+}
+
+function optionsHtml(options, selected = '') {
+  const items = options || [];
+  let html = '<option value="">— Sélectionner —</option>';
+  items.forEach(o => {
+    const val = o.id || o.value || o;
+    const label = o.label || o;
+    const sel = val === selected ? ' selected' : '';
+    html += `<option value="${val}"${sel}>${label}</option>`;
+  });
+  return html;
 }
 
 /* ---------- RG3 : TRI PAR ÉTAGE CROISSANT ---------- */
@@ -169,11 +248,33 @@ function addMinutes(t, mins) {
 }
 
 /* ---------- DASHBOARD ---------- */
-function showDashboard() {
+async function showDashboard() {
   const view = $('#view-dashboard');
   view.classList.add('active');
 
-  // Stats
+  // Tentative API : GET /api/entrepreneur/campagnes
+  const apiCampagnes = await apiCampagnesList();
+
+  if (apiCampagnes) {
+    // API disponible : merger avec les campagnes locales
+    const localIds = new Set(APP.campaigns.map(c => c.id));
+    const merged = apiCampagnes.map(c => ({
+      id: c._id,
+      id_campagne: c._id,
+      adresse: c.nom || c.adresse || 'Sans nom',
+      dateDebut: c.date_debut ? c.date_debut.slice(0, 10) : '',
+      dateFin: c.date_fin ? c.date_fin.slice(0, 10) : '',
+      nbLogements: c.logements?.length || c.nbLogements || 0,
+      statut: c.statut === 'en_cours' ? 'active' : c.statut || 'active',
+      locataires: [],
+    }));
+    // Ajouter les campagnes API qui ne sont pas déjà en local
+    merged.forEach(c => {
+      if (!localIds.has(c.id)) APP.campaigns.unshift(c);
+    });
+  }
+
+  // Stats (toujours sur APP.campaigns, qu'il vienne de l'API ou du fallback)
   const actives = APP.campaigns.filter(c => c.statut === 'active').length;
   const attentes = APP.campaigns.filter(c => c.statut === 'attente').length;
   const terminees = APP.campaigns.filter(c => c.statut === 'termine').length;
@@ -245,6 +346,27 @@ function updateStats() {
   $('#statDone').textContent = terminees;
 }
 
+/* ---------- REFERENTIEL ---------- */
+async function loadReferentiel() {
+  if (location.protocol === 'file:') return;
+  const apiBase = location.origin + '/api/referentiel';
+  async function fetchJson(url) {
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      return await res.json();
+    } catch { return null; }
+  }
+  const [typologies, plancherBas, plancherHaut] = await Promise.all([
+    fetchJson(apiBase + '/typologies'),
+    fetchJson(apiBase + '/plancher-bas'),
+    fetchJson(apiBase + '/plancher-haut'),
+  ]);
+  if (typologies) APP.typologies = typologies;
+  if (plancherBas) APP.plancherBas = plancherBas;
+  if (plancherHaut) APP.plancherHaut = plancherHaut;
+}
+
 /* ---------- CRÉATION CAMPAGNE (2 ÉTAPES) ---------- */
 let tenantRowIndex = 0;
 
@@ -252,6 +374,7 @@ $('#showCreateForm').addEventListener('click', () => {
   $('#createForm').style.display = 'block';
   $('#showCreateForm').style.display = 'none';
   resetCampaignForm();
+  loadReferentiel();
 });
 
 $('#cancelForm').addEventListener('click', () => {
@@ -305,6 +428,32 @@ function tenantRowHtml(index) {
         <div class="form-group">
           <label class="form-label">Digicode</label>
           <input class="form-input" name="tenant_digicode_${index}" placeholder="Code d'accès">
+        </div>
+      </div>
+      <div class="form-row" style="margin-top:8px">
+        <div class="form-group">
+          <label class="form-label">Typologie</label>
+          <select class="form-input" name="tenant_typologie_${index}">
+            ${optionsHtml(APP.typologies)}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Plancher bas</label>
+          <select class="form-input" name="tenant_plancher_bas_${index}">
+            ${optionsHtml(APP.plancherBas)}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Plancher haut</label>
+          <select class="form-input" name="tenant_plancher_haut_${index}">
+            ${optionsHtml(APP.plancherHaut)}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Position</label>
+          <select class="form-input" name="tenant_position_${index}">
+            ${optionsHtml(APP.positions)}
+          </select>
         </div>
       </div>
     </div>
@@ -385,8 +534,12 @@ $('#campaignForm').addEventListener('submit', (e) => {
     const logement = row.querySelector(`[name="tenant_appart_${index}"]`).value.trim();
     const etage = parseInt(row.querySelector(`[name="tenant_etage_${index}"]`).value);
     const digicode = row.querySelector(`[name="tenant_digicode_${index}"]`).value.trim();
+    const typologie = row.querySelector(`[name="tenant_typologie_${index}"]`).value;
+    const plancherBas = row.querySelector(`[name="tenant_plancher_bas_${index}"]`).value;
+    const plancherHaut = row.querySelector(`[name="tenant_plancher_haut_${index}"]`).value;
+    const position = row.querySelector(`[name="tenant_position_${index}"]`).value;
 
-    if (!nom || !email || !logement || isNaN(etage)) {
+    if (!nom || !email || !logement || isNaN(etage) || !typologie || !plancherBas || !plancherHaut || !position) {
       valid = false;
       row.style.borderColor = '#e74c3c';
       return;
@@ -403,6 +556,10 @@ $('#campaignForm').addEventListener('submit', (e) => {
       etage,
       etageLabel,
       digicode,
+      typologie,
+      plancherBas,
+      plancherHaut,
+      position,
       statut: 'attente',
       creneau: null,
     });
@@ -410,23 +567,74 @@ $('#campaignForm').addEventListener('submit', (e) => {
 
   if (!valid) { toast('Certains champs obligatoires sont manquants (en rouge)', 'warning'); return; }
 
-  const campaign = {
-    id: 'c_' + Date.now(),
-    adresse,
-    dateDebut,
-    dateFin,
-    nbLogements: locataires.length,
-    statut: 'active',
-    locataires,
-  };
+  async function submitCampagne() {
+    // Tentative API : POST /api/entrepreneur/campagnes
+    const apiResult = await apiCampagneCreate({
+      nom: adresse,
+      date_debut: dateDebut,
+      date_fin: dateFin,
+      statut: 'active',
+    });
 
-  APP.campaigns.unshift(campaign);
-  toast(`Campagne créée : ${adresse} (${locataires.length} locataires)`, 'success');
-  resetCampaignForm();
-  $('#createForm').style.display = 'none';
-  $('#showCreateForm').style.display = 'inline-flex';
-  renderCampaignList();
-  updateStats();
+    let id_campagne = null;
+    let logementsCreated = [];
+
+    if (apiResult) {
+      id_campagne = apiResult._id;
+      // Tentative API : POST /api/entrepreneur/campagnes/:id/logements
+      const logementsPayload = locataires.map(l => ({
+        numero: l.logement,
+        etage: l.etage,
+        surface: 50,
+        typologie: l.typologie || 'T1',
+        plancher_bas: l.plancherBas || 'dalle',
+        plancher_haut: l.plancherHaut || 'combles',
+      }));
+      logementsCreated = await apiCampagneLogementsStore(id_campagne, logementsPayload);
+    }
+
+    if (apiResult && logementsCreated) {
+      // Succès API : stocker avec id_campagne
+      const campaign = {
+        id: id_campagne,
+        id_campagne,
+        adresse,
+        dateDebut,
+        dateFin,
+        nbLogements: locataires.length,
+        statut: 'active',
+        locataires: locataires.map((l, i) => ({
+          ...l,
+          id: logementsCreated[i]?._id || l.id,
+          id_logement: logementsCreated[i]?._id || null,
+        })),
+      };
+      APP.campaigns.unshift(campaign);
+      toast(`Campagne créée via API : ${adresse}`, 'success');
+    } else {
+      // Fallback mock : création locale
+      toast('API indisponible — mode dégradé (mock)', 'info');
+      const campaign = {
+        id: 'c_' + Date.now(),
+        id_campagne: null,
+        adresse,
+        dateDebut,
+        dateFin,
+        nbLogements: locataires.length,
+        statut: 'active',
+        locataires,
+      };
+      APP.campaigns.unshift(campaign);
+    }
+
+    resetCampaignForm();
+    $('#createForm').style.display = 'none';
+    $('#showCreateForm').style.display = 'inline-flex';
+    renderCampaignList();
+    updateStats();
+  }
+
+  submitCampagne();
 });
 
 /* ---------- MENU MOBILE ---------- */
