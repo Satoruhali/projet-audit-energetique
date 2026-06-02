@@ -173,12 +173,9 @@ const APP = {
     { id: 'ph-dalle-etage', label: 'Dalle béton entre étages' },
   ],
   positions: [
-    { id: 'nord', label: 'Nord' },
-    { id: 'sud', label: 'Sud' },
-    { id: 'est', label: 'Est' },
-    { id: 'ouest', label: 'Ouest' },
-    { id: 'centre', label: 'Centre' },
-    { id: 'angle', label: 'Angle' },
+    { id: 'bas', label: 'Bas (RDC/rez-de-chaussée)' },
+    { id: 'intermediaire', label: 'Intermédiaire (étages courants)' },
+    { id: 'haut', label: 'Haut (dernier étage/combles)' },
   ],
 };
 
@@ -280,17 +277,18 @@ $('#loginForm').addEventListener('submit', async (e) => {
   btn.disabled = false; btn.textContent = 'Se connecter';
 
   if (result.error) { errorEl.textContent = result.error; return; }
-  if (result.token && result.user) {
+  if (result.token) {
     setToken(result.token);
-    setUser(result.user);
-    updateTopbarUser(result.user);
-    toast('Connecté en tant que ' + result.user.nom, 'success');
-    navigate('#dashboard');
-  } else if (result.token) {
-    setToken(result.token);
-    const me = await apiAuthMe();
-    if (me && me.nom) { setUser(me); updateTopbarUser(me); }
-    toast('Connecté', 'success');
+    const userData = result.entrepreneur || result.user;
+    if (userData) {
+      setUser(userData);
+      updateTopbarUser(userData);
+      toast('Connecté en tant que ' + (userData.nom || userData.email), 'success');
+    } else {
+      const me = await apiAuthMe();
+      if (me && me.entrepreneur) { setUser(me.entrepreneur); updateTopbarUser(me.entrepreneur); }
+      toast('Connecté', 'success');
+    }
     navigate('#dashboard');
   }
 });
@@ -314,17 +312,18 @@ $('#registerForm').addEventListener('submit', async (e) => {
   btn.disabled = false; btn.textContent = 'Créer un compte';
 
   if (result.error) { errorEl.textContent = result.error; return; }
-  if (result.token && result.user) {
+  if (result.token) {
     setToken(result.token);
-    setUser(result.user);
-    updateTopbarUser(result.user);
-    toast('Compte créé : ' + result.user.nom, 'success');
-    navigate('#dashboard');
-  } else if (result.token) {
-    setToken(result.token);
-    const me = await apiAuthMe();
-    if (me && me.nom) { setUser(me); updateTopbarUser(me); }
-    toast('Compte créé', 'success');
+    const userData = result.entrepreneur || result.user;
+    if (userData) {
+      setUser(userData);
+      updateTopbarUser(userData);
+      toast('Compte créé : ' + (userData.nom || userData.email), 'success');
+    } else {
+      const me = await apiAuthMe();
+      if (me && me.entrepreneur) { setUser(me.entrepreneur); updateTopbarUser(me.entrepreneur); }
+      toast('Compte créé', 'success');
+    }
     navigate('#dashboard');
   } else {
     errorEl.textContent = 'Inscription réussie, mais connexion automatique impossible. Veuillez vous connecter.';
@@ -773,6 +772,7 @@ $('#campaignForm').addEventListener('submit', (e) => {
         typologie: l.typologie || 'T1',
         plancher_bas: l.plancherBas || 'dalle',
         plancher_haut: l.plancherHaut || 'combles',
+        position: l.position || 'intermediaire',
       }));
       logementsCreated = await apiCampagneLogementsStore(id_campagne, logementsPayload);
     }

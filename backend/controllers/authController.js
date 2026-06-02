@@ -18,6 +18,10 @@ exports.register = async (req, res) => {
       entrepreneur: {
         id: entrepreneur._id, nom: entrepreneur.nom,
         email: entrepreneur.email, role: entrepreneur.role
+      },
+      user: {
+        id: entrepreneur._id, nom: entrepreneur.nom,
+        email: entrepreneur.email, role: entrepreneur.role
       }
     });
   }   catch (err) {
@@ -50,6 +54,10 @@ exports.login = async (req, res) => {
       message: 'Connexion réussie',
       token,
       entrepreneur: {
+        id: entrepreneur._id, nom: entrepreneur.nom,
+        email: entrepreneur.email, role: entrepreneur.role
+      },
+      user: {
         id: entrepreneur._id, nom: entrepreneur.nom,
         email: entrepreneur.email, role: entrepreneur.role
       }

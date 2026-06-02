@@ -7,7 +7,8 @@ const logementItem = Joi.object({
   loyer_estime: Joi.number().positive().optional(),
   typologie: Joi.string().valid('T1', 'T2', 'T3', 'T4', 'T5', 'T6').required(),
   plancher_bas: Joi.string().trim().required(),
-  plancher_haut: Joi.string().trim().required()
+  plancher_haut: Joi.string().trim().required(),
+  position: Joi.string().valid('bas', 'intermediaire', 'haut').required()
 });
 
 const creerLogements = Joi.array().items(logementItem).min(1).required();
@@ -20,6 +21,7 @@ const updateLogement = Joi.object({
   typologie: Joi.string().valid('T1', 'T2', 'T3', 'T4', 'T5', 'T6').optional(),
   plancher_bas: Joi.string().trim().optional(),
   plancher_haut: Joi.string().trim().optional(),
+  position: Joi.string().valid('bas', 'intermediaire', 'haut').optional(),
   statut: Joi.string().valid('libre', 'occupe', 'reserve').optional()
 }).min(1);
 

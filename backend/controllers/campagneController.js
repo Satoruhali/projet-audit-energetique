@@ -83,9 +83,6 @@ exports.lancerSelection = async (req, res) => {
       return res.status(400).json({ message: 'La campagne doit avoir des jours_disponibles définis avant de lancer la sélection' });
     }
 
-    const immeuble = await Immeuble.findById(campagne.immeuble_id);
-    const nbEtages = immeuble.nombre_etages || 1;
-
     const logements = await Logement.find({
       campagne_id: campagne._id,
       deletedAt: null
@@ -100,7 +97,7 @@ exports.lancerSelection = async (req, res) => {
       { $set: { selectionne_visite: false } }
     );
 
-    const resultat = lancerSelection(logements, nbEtages);
+    const resultat = lancerSelection(logements);
 
     await Logement.updateMany(
       { _id: { $in: resultat.selectionnes }, deletedAt: null },

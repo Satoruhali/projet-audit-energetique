@@ -1,4 +1,4 @@
-function construireCriteres(logements, nbEtages) {
+function construireCriteres(logements) {
   const criteres = new Set();
 
   const typologies = new Set(logements.map(l => l.typologie));
@@ -10,24 +10,23 @@ function construireCriteres(logements, nbEtages) {
   const planchersHaut = new Set(logements.map(l => l.plancher_haut));
   for (const p of planchersHaut) criteres.add(`ph:${p}`);
 
-  if (nbEtages > 2) criteres.add('etage:intermediaire');
+  const positions = new Set(logements.map(l => l.position));
+  for (const p of positions) criteres.add(`pos:${p}`);
 
   return criteres;
 }
 
-function criteresCouvertPar(logement, nbEtages) {
+function criteresCouvertPar(logement) {
   const couverts = new Set();
   couverts.add(`typo:${logement.typologie}`);
   couverts.add(`pb:${logement.plancher_bas}`);
   couverts.add(`ph:${logement.plancher_haut}`);
-  const estRdc = logement.etage === 0;
-  const estDernier = logement.etage === nbEtages - 1;
-  if (!estRdc && !estDernier) couverts.add('etage:intermediaire');
+  couverts.add(`pos:${logement.position}`);
   return couverts;
 }
 
-function selectionSetCover(logements, nbEtages) {
-  const criteresRestants = construireCriteres(logements, nbEtages);
+function selectionSetCover(logements) {
+  const criteresRestants = construireCriteres(logements);
   const selection = [];
 
   const avecCriteres = logements.map(l => ({
@@ -36,7 +35,8 @@ function selectionSetCover(logements, nbEtages) {
     typologie: l.typologie,
     plancher_bas: l.plancher_bas,
     plancher_haut: l.plancher_haut,
-    couverts: criteresCouvertPar(l, nbEtages)
+    position: l.position,
+    couverts: criteresCouvertPar(l)
   }));
 
   while (criteresRestants.size > 0) {
@@ -90,10 +90,10 @@ function completerJusquaSeuil(selection, logements, seuil) {
   return result;
 }
 
-function lancerSelection(logements, nbEtages) {
+function lancerSelection(logements) {
   const logementsData = logements.map(l => l.toObject ? l.toObject() : l);
 
-  const resultat = selectionSetCover(logementsData, nbEtages);
+  const resultat = selectionSetCover(logementsData);
 
   const selectionComplete = completerJusquaSeuil(
     resultat.selectionnes,
@@ -108,11 +108,7 @@ function lancerSelection(logements, nbEtages) {
       typologies: [...new Set(selectionComplete.map(l => l.typologie))],
       planchersBas: [...new Set(selectionComplete.map(l => l.plancher_bas))],
       planchersHaut: [...new Set(selectionComplete.map(l => l.plancher_haut))],
-      intermediaire: selectionComplete.some(l => {
-        const estRdc = l.etage === 0;
-        const estDernier = l.etage === nbEtages - 1;
-        return !estRdc && !estDernier;
-      })
+      positions: [...new Set(selectionComplete.map(l => l.position))]
     },
     seuil: { requis: calculerSeuilMinimal(logementsData.length), obtenu: selectionComplete.length },
     criteresManquants: resultat.ilRestait

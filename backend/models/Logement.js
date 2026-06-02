@@ -19,6 +19,11 @@ const logementSchema = new mongoose.Schema({
   },
   plancher_bas: { type: String, required: true, trim: true },
   plancher_haut: { type: String, required: true, trim: true },
+  position: {
+    type: String,
+    enum: ['bas', 'intermediaire', 'haut'],
+    required: true
+  },
   statut: {
     type: String,
     enum: ['libre', 'occupe', 'reserve'],

@@ -2,16 +2,7 @@
 
 **Version :** 1.0 — 18/05/2026
 
----
 
-## 📅 2026-05-28 — 15:30
-- **Tâche** : Routes PUT/GET jours-disponibles pour sélection des jours de visite
-- **Durée estimée** : 1h
-- **Durée réelle** : ⏳ à compléter
-- **Statut** : ✅ terminée
-- **Fichiers modifiés** : `backend/controllers/campagneJoursController.js`, `backend/routes/campagneJoursRoutes.js`, `backend/validations/campagneJours.js`, `backend/app.js`, `backend/models/Campagne.js`
-- **Notes** : PUT remplace les jours (validation intervalle + doublons). GET retourne la liste. Tests validés (10/10), fichiers de test supprimés.
----
 
 | Date | Séance | Actions menées | Problèmes | Solutions |
 |---|---|---|---|---|
@@ -316,3 +307,84 @@ Mettre à jour le schéma relationnel pour intégrer les nouvelles règles méti
 - Dépendances respectées : Étape 1.1, 2.2 (pour 4.1) et Étape 4.1, 2.3 (pour 4.2)
 
 ---
+
+## 📅 2026-06-02 — 11:35
+- **Tâche** : Algorithme de sélection set cover (RG15) — route POST lancer-selection + service + typologie/planchers sur logement
+- **Durée estimée** : 2h
+- **Durée réelle** : ⏳ à compléter
+- **Statut** : ✅ terminée
+- **Fichiers modifiés** : `backend/services/setCoverService.js`, `backend/controllers/campagneController.js`, `backend/models/Logement.js`, `backend/routes/campagneRoutes.js`, `backend/validations/logement.js`, `backend/validations/campagne.js`, `exemple-set-cover.js`, `exemple-set-cover.test.js`, `docs/02_Specifications.md`, `specifications/regles-gestion.md`, `specifications/glossaire.md`, `specifications/brief-projet.md`
+- **Notes** : Correction seuils RG15 conformes à l'arrêté du 31 mars 2021. Exemple set cover + tests fournis.
+---
+
+## 📅 2026-06-02 — 11:38
+- **Tâche** : Refactor date_debut/date_fin → joursDisponibles + vue choix des jours (#view-jours)
+- **Durée estimée** : 1h
+- **Durée réelle** : ⏳ à compléter
+- **Statut** : ✅ terminée
+- **Fichiers modifiés** : `index.html`, `script.js`, `styles.css`, `backend/models/Campagne.js`, `backend/controllers/campagneJoursController.js`
+- **Notes** : Remplacement des dates fixes par un calendrier 30 jours. Intégration composant jours-disponibles dans le détail campagne. Suppression anciennes routes PUT/GET jours-disponibles.
+---
+
+## 📅 2026-06-02 — 13:39
+- **Tâche** : Authentification complète frontend (inscription, connexion, JWT, déconnexion)
+- **Durée estimée** : 1h
+- **Durée réelle** : ⏳ à compléter
+- **Statut** : ✅ terminée
+- **Fichiers modifiés** : `index.html`, `script.js`, `styles.css`, `backend/controllers/authController.js`, `backend/server.js`
+- **Notes** : Formulaire login/register avec onglets. Auth guard : redirection vers #auth si non connecté. Correction champ motDePasse côté backend.
+---
+
+## 📅 2026-06-02 — 14:25
+- **Tâche** : Page publique RDV + API créneaux + tests (livrable étape 5.2)
+- **Durée estimée** : 2h
+- **Durée réelle** : ⏳ à compléter
+- **Statut** : ✅ terminée
+- **Fichiers modifiés** : `backend/controllers/lienController.js`, `backend/models/Creneau.js`, `backend/models/Locataire.js`, `backend/routes/lienRoutes.js`, `backend/validations/lien.js`, `backend/tests/lien.test.js`, `backend/app.js`, `index.html`, `script.js`, `styles.css`, `package.json`
+- **Notes** : Page dédiée /rendez-vous/:token avec sélection jour/heure par l'occupant. GET /api/liens/:token retourne infos locataire + jours dispo. POST /api/liens/:token/creneaux avec validation Joi, vérification disponibilité et chevauchement. Confirmation visuelle + email simulé. 22 tests unitaires et intégration (timeToMinutes, chevauchement, routes).
+---
+
+## 📅 2026-06-02 — Audit de sécurité et correction des failles critiques
+
+### Contexte :
+Audit du plan d'attaque et du code existant pour identifier les failles pouvant compromettre le bon fonctionnement de l'application à court et moyen terme.
+
+### Failles critiques corrigées :
+
+1. **Rate limiting** — Routes publiques `/api/liens/:token` sans aucune protection (risque brute-force/DDoS)
+   - Installation de `express-rate-limit`
+   - Limiteur global : 100 req/15 min
+   - Limiteur renforcé : 10 req/min sur les routes publiques
+
+2. **Error handler global** — Absence de middleware d'erreur centralisé (erreurs non capturées → crash ou HTML brut)
+   - Création de `backend/middlewares/errorHandler.js` avec classe `AppError`
+   - Gestion des erreurs Mongoose (ValidationError, doublons code 11000)
+   - Connecté dans `app.js` via `app.use(errorHandler)`
+
+3. **Configuration SMTP** — nodemailer inutilisable sans configuration
+   - Ajout de `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM` dans `.env`
+
+4. **Concept "position" incohérent** — Le plan spécifiait `ENUM('bas','intermediaire','haut')` mais le frontend utilisait des directions cardinales (nord/sud/est/ouest) et le modèle Logement n'avait pas de champ position
+   - Ajout du champ `position` dans le modèle `Logement` (enum validé)
+   - Validation Joi alignée
+   - Frontend : valeurs remplacées par 'bas', 'intermediaire', 'haut'
+   - Algorithme set cover : suppression du paramètre `nbEtages`, ajout du critère `position`
+
+5. **Auth frontend/backend désaligné** — Frontend attendait `result.user`, backend renvoyait `result.entrepreneur` → login impossible en conditions réelles
+   - Backend : ajout du champ `user` en miroir de `entrepreneur`
+   - Frontend : priorité à `result.entrepreneur`, fallback `result.user`, fallback `apiAuthMe()`
+
+### Fichiers modifiés (12) :
+- `backend/middlewares/errorHandler.js` — **NOUVEAU**
+- `backend/app.js`, `backend/routes/lienRoutes.js` — rate limiting + error handler
+- `backend/models/Logement.js`, `backend/validations/logement.js` — champ position
+- `backend/controllers/authController.js` — champ user miroir
+- `backend/controllers/campagneController.js` — signature lancerSelection
+- `backend/services/setCoverService.js` — position dans set cover
+- `script.js` — positions + auth + payload logements
+- `package.json`, `package-lock.json` — express-rate-limit + NODE_ENV=testing
+- `PLAN D'ATTAQUE – RESTRUCTURATION PL.txt` — amendement complet
+- `.env` — SMTP + rate limiting config
+
+### Tests : 22/22 ✅
+### Statut : ✅ Terminé

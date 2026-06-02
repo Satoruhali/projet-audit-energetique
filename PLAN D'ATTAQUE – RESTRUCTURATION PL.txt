@@ -239,3 +239,127 @@ Recommandations clés
 3. Ne touche au frontend qu'après avoir un backend fonctionnel (Phase 2.1-2.3 terminée)
 4. Garde les mock data actuelles comme fallback dans le frontend jusqu'à la Phase 4.2 — ça évite de casser l'application pendant la transition
 5. Ne conserve PAS les données testdb.sql (trop décalées du nouveau schéma) — réécris un seed propre en 1.2
+
+═══════════════════════════════════════════════════════════
+AMENDEMENT — CORRECTIONS URGENTES APPLIQUÉES LE 02/06/2026
+═══════════════════════════════════════════════════════════
+
+Suite à l'audit du plan d'attaque, les failles suivantes ont été
+identifiées et corrigées.
+
+┌─────────────────────────────────────────────────────────────┐
+│ FAILLE 1 : Aucune protection des routes publiques          │
+│ CRITIQUE : ⚠ Risque de déni de service / brute-force       │
+├─────────────────────────────────────────────────────────────┘
+└► CORRECTION 1 : Rate limiting ajouté
+   • Middleware express-rate-limit installé (v7)
+   • Limiteur global : 100 req/15 min sur /api/*
+   • Limiteur renforcé : 10 req/min sur /api/liens/:token
+   • Config via .env : RATE_LIMIT_* variables
+
+┌─────────────────────────────────────────────────────────────┐
+│ FAILLE 2 : Pas de middleware d'erreur global               │
+│ CRITIQUE : ⚠ Erreurs non capturées → crash ou HTML brut    │
+├─────────────────────────────────────────────────────────────┘
+└► CORRECTION 2 : Error handler centralisé
+   • Nouveau fichier : backend/middlewares/errorHandler.js
+   • Classe AppError pour les erreurs métier (isOperational)
+   • Gestion des ValidationError (Mongoose) et doublons (code 11000)
+   • Connecté dans app.js via app.use(errorHandler)
+   • Toutes les réponses d'erreur sont désormais en JSON cohérent
+
+┌─────────────────────────────────────────────────────────────┐
+│ FAILLE 3 : Configuration SMTP absente                      │
+│ CRITIQUE : ⚠ nodemailer inutilisable sans config           │
+├─────────────────────────────────────────────────────────────┘
+└► CORRECTION 3 : .env enrichi
+   • Ajout SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM
+   • Valeurs par défaut non bloquantes (vides → simulation console)
+
+┌─────────────────────────────────────────────────────────────┐
+│ FAILLE 4 : Concept "position" incohérent                   │
+│ CRITIQUE : ⚠ Algorithme ignorait la position               │
+│ Le plan dit position = ENUM('bas','intermediaire','haut')   │
+│ mais le frontend utilisait des directions cardinales         │
+│ (nord/sud/est/ouest/centre/angle) et le modèle Logement     │
+│ n'avait pas de champ position du tout.                      │
+├─────────────────────────────────────────────────────────────┘
+└► CORRECTION 4 : Position harmonisée
+   • Modèle Logement : ajout champ position (enum 'bas','intermediaire','haut')
+   • Validation Joi : position requise en création, optionnelle en update
+   • Frontend (APP.positions) : remplacé les cardinales par
+     'bas', 'intermediaire', 'haut' avec labels explicites
+   • Envoi API : position inclus dans le payload logements
+   • Algorithme setCoverService.js : suppression de nbEtages (inutilisé),
+     ajout du critère de position dans le set cover
+   • Controllers : mise à jour des appels lancerSelection()
+
+┌─────────────────────────────────────────────────────────────┐
+│ FAILLE 5 : Incohérence auth frontend/backend               │
+│ CRITIQUE : ⚠ Login impossible — frontend attendait          │
+│ result.user mais backend renvoyait result.entrepreneur      │
+├─────────────────────────────────────────────────────────────┘
+└► CORRECTION 5 : Alignement auth
+   • Backend authController : ajout du champ 'user' en miroir
+     de 'entrepreneur' pour compatibilité ascendante
+   • Frontend script.js : priorité à result.entrepreneur,
+     fallback result.user, fallback apiAuthMe().entrepreneur
+
+┌─────────────────────────────────────────────────────────────┐
+│ FAILLE 6 : Route GET /api/liens/:token manquante dans le   │
+│ plan (identifié par le plan lui-même ligne 161)             │
+│ À VÉRIFIER : Cette route existait DÉJÀ dans le code         │
+│ (lienRoutes.js + lienController.js) — le plan était        │
+│ simplement en retard sur l'implémentation.                  │
+├─────────────────────────────────────────────────────────────┘
+└► CONSTAT : Déjà implémenté, aucun changement nécessaire.
+
+┌─────────────────────────────────────────────────────────────┐
+│ FAILLE 7 : Propriété des ressources non vérifiée            │
+│ IMPORTANT : Un entrepreneur pourrait accéder aux données    │
+│ d'un autre si les routes ne filtrent pas par propriétaire   │
+├─────────────────────────────────────────────────────────────┘
+└► VÉRIFICATION : Tous les contrôleurs vérifient déjà
+   l'appartenance (req.entrepreneur.id → requête filtrée):
+   • immeubleController : find({ id_entrepreneur }) ✓
+   • campagneController : Immeuble.find({ id_entrepreneur }) + $in ✓
+   • logementController : vérification campagne → immeuble ✓
+   • campagneJoursController : idem ✓
+   → Aucun changement nécessaire.
+
+═══════════════════════════════════════════════════════════
+MODIFICATIONS TECHNIQUES NE NÉCESSITANT PAS D'ACTION IMMÉDIATE
+═══════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────┐
+│ PAGINATION À PRÉVOIR (Phase 2.2+)                          │
+│ Les routes GET listes (immeubles, campagnes, logements)     │
+│ n'ont pas de pagination. Pour >1000 logements, ajouter      │
+│ ?page=1&limit=50 avec skip/limit Mongoose.                  │
+├─────────────────────────────────────────────────────────────┘
+└► PLANIFIÉ POUR : Phase 2.2 (CRUD immeubles) — ajouter
+   la pagination lors de l'optimisation des routes.
+
+┌─────────────────────────────────────────────────────────────┐
+│ RELANCE EMAIL NON IMPLÉMENTÉE                              │
+│ emails_envoyes.type inclut 'relance' mais aucune route      │
+│ ni UI ne gère l'envoi de relances automatisées.             │
+├─────────────────────────────────────────────────────────────┘
+└► PLANIFIÉ POUR : Phase 6.2 (Emails) — ajouter un bouton
+   "Relancer les non-répondants" + route POST .../relancer.
+
+┌─────────────────────────────────────────────────────────────┐
+│ RG14 NON DÉFINI                                             │
+│ Le plan mentionne RG11-RG17 mais RG14 n'apparaît nulle      │
+│ part. Si c'est une contrainte métier, elle est oubliée.     │
+├─────────────────────────────────────────────────────────────┘
+└► ACTION REQUISE : Définir RG14 et l'intégrer au besoin.
+
+┌─────────────────────────────────────────────────────────────┐
+│ REFRESH TOKEN MANQUANT                                      │
+│ JWT expire après 7 jours sans mécanisme de refresh.         │
+│ L'utilisateur est déconnecté sans prévenir.                 │
+├─────────────────────────────────────────────────────────────┘
+└► PLANIFIÉ POUR : Version 2.0 (post-MVP). Solution simple :
+   route POST /api/auth/refresh-token avec un second token
+   stocké en httpOnly cookie.
