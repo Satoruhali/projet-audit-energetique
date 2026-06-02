@@ -387,6 +387,78 @@
         </form>
       </div>
     </section>
+    <!-- =============================== -->
+    <!-- VUE 5 : PAGE PUBLIQUE RENDEZ-VOUS -->
+    <!-- =============================== -->
+    <section id="view-rdv" class="view">
+      <div class="rdv-container">
+        <div class="rdv-card">
+          <div class="rdv-card__header">
+            <h1 class="rdv-card__title">Planif'<span>Audit</span></h1>
+            <p class="rdv-card__subtitle">Planification de votre visite énergétique</p>
+          </div>
+
+          <!-- ÉTAPE 1 : Infos occupant -->
+          <div id="rdv-info" class="rdv-section">
+            <div class="rdv-info-card">
+              <p class="rdv-info__label">Occupant</p>
+              <p class="rdv-info__value" id="rdvNom"></p>
+              <p class="rdv-info__label">Logement</p>
+              <p class="rdv-info__value" id="rdvLogement"></p>
+            </div>
+          </div>
+
+          <!-- CHARGEMENT -->
+          <div id="rdv-loading" class="rdv-section rdv-section--center">
+            <p>Chargement de vos disponibilités…</p>
+          </div>
+
+          <!-- ÉTAPE 2 : Choix du jour -->
+          <div id="rdv-jours" class="rdv-section" style="display:none">
+            <h2 class="rdv-section__title">Choisissez un jour pour la visite</h2>
+            <p class="rdv-section__desc">Sélectionnez une date parmi les jours disponibles ci-dessous.</p>
+            <div id="rdvJoursList" class="rdv-jours-grid"></div>
+          </div>
+
+          <!-- ÉTAPE 3 : Choix de l'heure -->
+          <div id="rdv-heure" class="rdv-section" style="display:none">
+            <h2 class="rdv-section__title">Choisissez un créneau horaire</h2>
+            <p class="rdv-section__desc" id="rdvDateSelected"></p>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="rdvHeureDebut">Heure de début</label>
+                <input class="form-input" type="time" id="rdvHeureDebut" value="09:00">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="rdvHeureFin">Heure de fin</label>
+                <input class="form-input" type="time" id="rdvHeureFin" value="09:30">
+              </div>
+            </div>
+            <button class="btn btn--primary btn--block" id="rdvSubmitBtn">Confirmer mon rendez-vous</button>
+          </div>
+
+          <!-- CONFIRMATION -->
+          <div id="rdv-confirmation" class="rdv-section" style="display:none">
+            <div class="rdv-confirmation">
+              <div class="rdv-confirmation__icon">✓</div>
+              <h2 class="rdv-confirmation__title">Rendez-vous confirmé !</h2>
+              <p class="rdv-confirmation__desc">Votre visite énergétique a été planifiée.</p>
+              <div class="rdv-confirmation__details" id="rdvConfirmDetails"></div>
+              <p class="rdv-confirmation__note">Un email de confirmation vous a été envoyé.</p>
+            </div>
+          </div>
+
+          <!-- ERREUR -->
+          <div id="rdv-erreur" class="rdv-section" style="display:none">
+            <div class="rdv-confirmation rdv-confirmation--error">
+              <div class="rdv-confirmation__icon">✕</div>
+              <h2 class="rdv-confirmation__title">Lien invalide</h2>
+              <p class="rdv-confirmation__desc" id="rdvErreurMsg">Ce lien n'est pas valide ou a expiré.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
   </main>
 
   <!-- TOAST -->

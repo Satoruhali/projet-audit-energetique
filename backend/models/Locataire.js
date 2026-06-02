@@ -15,7 +15,8 @@ const locataireSchema = new mongoose.Schema({
   prenom: { type: String, required: true, trim: true },
   email: { type: String, trim: true, lowercase: true },
   telephone: { type: String, trim: true },
-  date_entree: { type: Date }
+  date_entree: { type: Date },
+  token: { type: String, unique: true, sparse: true, index: true }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Locataire', locataireSchema);

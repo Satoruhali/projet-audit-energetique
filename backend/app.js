@@ -5,6 +5,7 @@ const authRoutes = require('./routes/authRoutes');
 const immeubleRoutes = require('./routes/immeubleRoutes');
 const referentielRoutes = require('./routes/referentielRoutes');
 const campagneRoutes = require('./routes/campagneRoutes');
+const lienRoutes = require('./routes/lienRoutes');
 
 const app = express();
 
@@ -26,6 +27,7 @@ const campagneJoursRoutes = require('./routes/campagneJoursRoutes');
 
 app.use('/api/entrepreneur/campagnes', campagneRoutes);
 app.use('/api/entrepreneur/campagnes/:id', campagneJoursRoutes);
+app.use('/api/liens', lienRoutes);
 app.use('/api/referentiel', referentielRoutes);
 
 module.exports = app;
