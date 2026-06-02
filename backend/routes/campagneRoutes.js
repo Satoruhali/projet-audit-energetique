@@ -12,4 +12,6 @@ router.post('/:id/logements', auth, logementController.storeBatch);
 router.put('/:campagne_id/logements/:logement_id', auth, logementController.update);
 router.delete('/:campagne_id/logements/:logement_id', auth, logementController.delete);
 
+router.post('/:id/lancer-selection', auth, campagneController.lancerSelection);
+
 module.exports = router;

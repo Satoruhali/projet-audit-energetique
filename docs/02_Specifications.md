@@ -480,7 +480,7 @@ Saisie des critères pour l'algorithme d'échantillonnage.
 | **RG12** | **[AJOUT]** Échantillonnage par type plancher bas | Au moins 1 logement par type de plancher bas présent : terre-plein, vide-sanitaire, sur local commercial, garage, autre |
 | **RG13** | **[AJOUT]** Échantillonnage par type plancher haut | Au moins 1 logement par type de plancher haut présent : combles perdus, combles aménagés, toiture terrasse, extérieur |
 | **RG14** | **[AJOUT]** Étage intermédiaire | Au moins 1 logement en étage intermédiaire (ni RDC, ni dernier étage) doit être visité |
-| **RG15** | **[AJOUT]** Seuil minimal de visites | 30–99 lots → 10 % ; 100 lots ou plus → 10 + 5 % |
+| **RG15** | **[AJOUT]** Seuil minimal de visites | < 30 lots → pas de seuil ; 31–100 lots → 10 % ; > 100 lots → 5 % (min. 10) |
 | **RG16** | **[AJOUT]** Jours disponibles du diagnostiqueur d'abord | Le diagnostiqueur choisit ses jours avant les occupants ; les occupants ne voient que ces jours |
 | **RG17** | **[AJOUT]** Deux types d'emails | Logement non visité → email info ; Logement visité → créneau + coordonnées |
 
@@ -523,8 +523,9 @@ L'algorithme de sélection détermine quels logements doivent être visités pou
 4. **Étage intermédiaire** : au moins 1 logement ni au RDC ni au dernier étage
 
 ### Seuil minimal (RG15)
-- **30 à 99 logements** → 10 % du total (arrondi supérieur)
-- **100 logements ou plus** → 10 + 5 % du total (arrondi supérieur)
+- **Moins de 30 logements** → pas de seuil quantitatif, seuls les critères qualitatifs (RG11–RG14) s'appliquent
+- **31 à 100 logements** → 10 % du total (arrondi supérieur)
+- **Plus de 100 logements** → 5 % du total, minimum 10 visites (arrondi supérieur)
 - Si l'échantillonnage (RG11–RG14) donne moins de logements que le seuil, des logements supplémentaires sont ajoutés
 
 ### Logique de combinaison

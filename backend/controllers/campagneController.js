@@ -3,6 +3,7 @@ const Immeuble = require('../models/Immeuble');
 const Logement = require('../models/Logement');
 const Locataire = require('../models/Locataire');
 const { creerCampagne } = require('../validations/campagne');
+const { lancerSelection } = require('../services/setCoverService');
 
 exports.store = async (req, res) => {
   try {
@@ -60,5 +61,64 @@ exports.show = async (req, res) => {
     res.json(campagne);
   } catch (err) {
     res.status(500).json({ message: 'Erreur lors de la récupération de la campagne' });
+  }
+};
+
+exports.lancerSelection = async (req, res) => {
+  try {
+    const immeubles = await Immeuble.find({ id_entrepreneur: req.entrepreneur.id });
+    const immeubleIds = immeubles.map(i => i._id);
+
+    const campagne = await Campagne.findOne({
+      _id: req.params.id,
+      immeuble_id: { $in: immeubleIds },
+      deletedAt: null
+    });
+
+    if (!campagne) {
+      return res.status(404).json({ message: 'Campagne introuvable ou non autorisée' });
+    }
+
+    if (!campagne.jours_disponibles || campagne.jours_disponibles.length === 0) {
+      return res.status(400).json({ message: 'La campagne doit avoir des jours_disponibles définis avant de lancer la sélection' });
+    }
+
+    const immeuble = await Immeuble.findById(campagne.immeuble_id);
+    const nbEtages = immeuble.nombre_etages || 1;
+
+    const logements = await Logement.find({
+      campagne_id: campagne._id,
+      deletedAt: null
+    });
+
+    if (logements.length === 0) {
+      return res.status(400).json({ message: 'Aucun logement trouvé dans cette campagne' });
+    }
+
+    await Logement.updateMany(
+      { campagne_id: campagne._id, deletedAt: null },
+      { $set: { selectionne_visite: false } }
+    );
+
+    const resultat = lancerSelection(logements, nbEtages);
+
+    await Logement.updateMany(
+      { _id: { $in: resultat.selectionnes }, deletedAt: null },
+      { $set: { selectionne_visite: true } }
+    );
+
+    const selectionnesIds = resultat.selectionnes;
+
+    res.json({
+      message: `Sélection terminée : ${selectionnesIds.length} logements sélectionnés`,
+      nbSelectionnes: selectionnesIds.length,
+      selectionnes: selectionnesIds,
+      couverture: resultat.couverture,
+      seuil: resultat.seuil,
+      couvertureComplete: resultat.success,
+      criteresManquants: resultat.criteresManquants
+    });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur lors du lancement de la sélection' });
   }
 };

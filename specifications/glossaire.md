@@ -32,7 +32,7 @@
 | **[AJOUT] Algorithme de sélection** | Algorithme qui calcule la meilleure combinaison de logements à visiter pour couvrir tous les critères d'échantillonnage avec le moins de visites possible |
 | **[AJOUT] Jour disponible (diagnostiqueur)** | Jour choisi par le diagnostiqueur dans l'intervalle de la campagne ; les occupants ne peuvent proposer des créneaux que sur ces jours |
 | **[AJOUT] Créneau horaire (occupant)** | Plage horaire proposée par un occupant uniquement parmi les jours disponibles du diagnostiqueur |
-| **[AJOUT] Seuil minimal de visites** | Nombre minimum de logements à visiter calculé selon la taille de l'immeuble : 10 % (30–99 lots) ou 10 + 5 % (100 lots ou plus) |
+| **[AJOUT] Seuil minimal de visites** | Nombre minimum de logements à visiter calculé selon la taille de l'immeuble : < 30 lots → pas de seuil ; 31–100 lots → 10 % ; > 100 lots → 5 % (min. 10) |
 
 ---
 
