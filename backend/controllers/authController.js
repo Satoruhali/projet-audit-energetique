@@ -2,13 +2,14 @@ const Entrepreneur = require('../models/Entrepreneur');
 
 exports.register = async (req, res) => {
   try {
-    const { nom, email, motDePasse, telephone, entreprise } = req.body;
+    const { nom, email, motDePasse, telephone, entreprise, password } = req.body;
+    const mdp = motDePasse || password;
 
     if (await Entrepreneur.findOne({ email })) {
       return res.status(400).json({ message: 'Cet email est déjà utilisé' });
     }
 
-    const entrepreneur = await Entrepreneur.create({ nom, email, motDePasse, telephone, entreprise });
+    const entrepreneur = await Entrepreneur.create({ nom, email, motDePasse: mdp, telephone, entreprise });
     const token = entrepreneur.genererToken();
 
     res.status(201).json({

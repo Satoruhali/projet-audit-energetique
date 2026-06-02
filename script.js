@@ -5,24 +5,84 @@
    RG9 : Pause 15 min entre visites
    ============================================= */
 
-/* ---------- MOCK DATA ---------- */
+/* ---------- AUTH ---------- */
+function getToken() { return localStorage.getItem('planif_token'); }
+function setToken(t) { localStorage.setItem('planif_token', t); }
+function clearToken() { localStorage.removeItem('planif_token'); }
+function getUser() {
+  const raw = localStorage.getItem('planif_user');
+  return raw ? JSON.parse(raw) : null;
+}
+function setUser(u) { localStorage.setItem('planif_user', JSON.stringify(u)); }
+function clearUser() { localStorage.removeItem('planif_user'); }
+
 /* ---------- API HELPERS ---------- */
 const API_BASE = (location.protocol === 'file:') ? '' : location.origin + '/api/entrepreneur';
+const API_AUTH = location.origin + '/api/auth';
 
-async function apiFetch(method, path, body = null) {
+async function apiFetch(method, path, body = null, useAuth = true) {
   try {
     if (!API_BASE) return null;
     const opts = {
       method,
       headers: { 'Content-Type': 'application/json' },
     };
+    if (useAuth) {
+      const token = getToken();
+      if (token) opts.headers['Authorization'] = 'Bearer ' + token;
+    }
     if (body) opts.body = JSON.stringify(body);
     const res = await fetch(`${API_BASE}${path}`, opts);
+    if (res.status === 401 && useAuth) {
+      clearToken(); clearUser();
+      navigate('#auth');
+      return null;
+    }
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return await res.json();
   } catch {
     return null;
   }
+}
+
+/* ---------- AUTH API ---------- */
+async function apiAuthLogin(email, password) {
+  try {
+    const res = await fetch(API_AUTH + '/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+    if (!res.ok) return { error: 'Email ou mot de passe incorrect' };
+    return await res.json();
+  } catch { return { error: 'Serveur injoignable' }; }
+}
+
+async function apiAuthRegister(name, email, password) {
+  try {
+    const res = await fetch(API_AUTH + '/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nom: name, email, password }),
+    });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      return { error: data.message || 'Erreur lors de l\'inscription' };
+    }
+    return await res.json();
+  } catch { return { error: 'Serveur injoignable' }; }
+}
+
+async function apiAuthMe() {
+  try {
+    const token = getToken();
+    if (!token) return null;
+    const res = await fetch(API_AUTH + '/me', {
+      headers: { 'Authorization': 'Bearer ' + token },
+    });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch { return null; }
 }
 
 async function apiCampagneCreate(data) {
@@ -130,7 +190,9 @@ function navigate(hash) {
   const path = hash.replace('#', '') || 'dashboard';
   $$('.view').forEach(v => v.classList.remove('active'));
 
-  if (path === 'dashboard') {
+  if (path === 'auth') {
+    showAuth();
+  } else if (path === 'dashboard') {
     showDashboard();
   } else if (path.startsWith('campaign/')) {
     const id = path.split('/')[1];
@@ -150,7 +212,123 @@ function navigate(hash) {
 }
 
 window.addEventListener('hashchange', () => navigate(window.location.hash));
-window.addEventListener('load', () => navigate(window.location.hash || '#dashboard'));
+window.addEventListener('load', () => {
+  const user = getUser();
+  const token = getToken();
+  if (token && user) {
+    navigate(window.location.hash || '#dashboard');
+  } else {
+    navigate('#auth');
+  }
+});
+
+/* ---------- AUTH UI ---------- */
+function showAuth() {
+  const view = $('#view-auth');
+  if (view) view.classList.add('active');
+  const userSection = $('#topbarUser');
+  if (userSection) userSection.style.display = 'none';
+  const nav = $('#mainNav');
+  if (nav) nav.querySelectorAll('.topbar__link').forEach(l => l.classList.remove('active'));
+}
+
+function updateTopbarUser(user) {
+  const section = $('#topbarUser');
+  if (!section) return;
+  if (user) {
+    section.style.display = 'flex';
+    $('#userName').textContent = user.nom || user.email || 'Utilisateur';
+  } else {
+    section.style.display = 'none';
+  }
+}
+
+$$('.auth-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    $$('.auth-tab').forEach(t => t.classList.remove('auth-tab--active'));
+    tab.classList.add('auth-tab--active');
+    const formName = tab.dataset.authTab;
+    $('#loginForm').style.display = formName === 'login' ? 'block' : 'none';
+    $('#registerForm').style.display = formName === 'register' ? 'block' : 'none';
+    $('#loginError').textContent = '';
+    $('#registerError').textContent = '';
+  });
+});
+
+$('#loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = $('#loginEmail').value.trim();
+  const password = $('#loginPassword').value;
+  const errorEl = $('#loginError');
+  errorEl.textContent = '';
+  const btn = e.target.querySelector('button[type="submit"]');
+  btn.disabled = true; btn.textContent = 'Connexion…';
+
+  const result = await apiAuthLogin(email, password);
+  btn.disabled = false; btn.textContent = 'Se connecter';
+
+  if (result.error) { errorEl.textContent = result.error; return; }
+  if (result.token && result.user) {
+    setToken(result.token);
+    setUser(result.user);
+    updateTopbarUser(result.user);
+    toast('Connecté en tant que ' + result.user.nom, 'success');
+    navigate('#dashboard');
+  } else if (result.token) {
+    setToken(result.token);
+    const me = await apiAuthMe();
+    if (me && me.nom) { setUser(me); updateTopbarUser(me); }
+    toast('Connecté', 'success');
+    navigate('#dashboard');
+  }
+});
+
+$('#registerForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const name = $('#registerName').value.trim();
+  const email = $('#registerEmail').value.trim();
+  const password = $('#registerPassword').value;
+  const confirm = $('#registerConfirm').value;
+  const errorEl = $('#registerError');
+  errorEl.textContent = '';
+
+  if (password !== confirm) { errorEl.textContent = 'Les mots de passe ne correspondent pas'; return; }
+  if (password.length < 6) { errorEl.textContent = 'Minimum 6 caractères pour le mot de passe'; return; }
+
+  const btn = e.target.querySelector('button[type="submit"]');
+  btn.disabled = true; btn.textContent = 'Inscription…';
+
+  const result = await apiAuthRegister(name, email, password);
+  btn.disabled = false; btn.textContent = 'Créer un compte';
+
+  if (result.error) { errorEl.textContent = result.error; return; }
+  if (result.token && result.user) {
+    setToken(result.token);
+    setUser(result.user);
+    updateTopbarUser(result.user);
+    toast('Compte créé : ' + result.user.nom, 'success');
+    navigate('#dashboard');
+  } else if (result.token) {
+    setToken(result.token);
+    const me = await apiAuthMe();
+    if (me && me.nom) { setUser(me); updateTopbarUser(me); }
+    toast('Compte créé', 'success');
+    navigate('#dashboard');
+  } else {
+    errorEl.textContent = 'Inscription réussie, mais connexion automatique impossible. Veuillez vous connecter.';
+    document.querySelector('[data-auth-tab="login"]').click();
+  }
+});
+
+$('#logoutBtn').addEventListener('click', () => {
+  clearToken(); clearUser();
+  updateTopbarUser(null);
+  APP.campaigns.length = 0;
+  renderCampaignList();
+  updateStats();
+  toast('Déconnecté', 'info');
+  navigate('#auth');
+});
 
 /* ---------- TOAST ---------- */
 function toast(message, type = 'success') {
@@ -252,6 +430,7 @@ function addMinutes(t, mins) {
 async function showDashboard() {
   const view = $('#view-dashboard');
   view.classList.add('active');
+  updateTopbarUser(getUser());
 
   // Tentative API : GET /api/entrepreneur/campagnes
   const apiCampagnes = await apiCampagnesList();
@@ -563,12 +742,10 @@ $('#campaignForm').addEventListener('submit', (e) => {
 
   if (!valid) { toast('Certains champs obligatoires sont manquants (en rouge)', 'warning'); return; }
 
+  // Étape 4.2 : tentative API réelle, fallback mock si indisponible
   async function submitCampagne() {
-    // Tentative API : POST /api/entrepreneur/campagnes
     const apiResult = await apiCampagneCreate({
       nom: adresse,
-      date_debut: dateDebut,
-      date_fin: dateFin,
       statut: 'active',
     });
 
@@ -577,7 +754,6 @@ $('#campaignForm').addEventListener('submit', (e) => {
 
     if (apiResult) {
       id_campagne = apiResult._id;
-      // Tentative API : POST /api/entrepreneur/campagnes/:id/logements
       const logementsPayload = locataires.map(l => ({
         numero: l.logement,
         etage: l.etage,
@@ -589,14 +765,14 @@ $('#campaignForm').addEventListener('submit', (e) => {
       logementsCreated = await apiCampagneLogementsStore(id_campagne, logementsPayload);
     }
 
+    let campaignId;
+
     if (apiResult && logementsCreated) {
-      // Succès API : stocker avec id_campagne
+      campaignId = id_campagne;
       const campaign = {
         id: id_campagne,
         id_campagne,
         adresse,
-        dateDebut,
-        dateFin,
         nbLogements: locataires.length,
         statut: 'active',
         locataires: locataires.map((l, i) => ({
@@ -608,14 +784,12 @@ $('#campaignForm').addEventListener('submit', (e) => {
       APP.campaigns.unshift(campaign);
       toast(`Campagne créée via API : ${adresse}`, 'success');
     } else {
-      // Fallback mock : création locale
+      campaignId = 'c_' + Date.now();
       toast('API indisponible — mode dégradé (mock)', 'info');
       const campaign = {
-        id: 'c_' + Date.now(),
+        id: campaignId,
         id_campagne: null,
         adresse,
-        dateDebut,
-        dateFin,
         nbLogements: locataires.length,
         statut: 'active',
         locataires,
@@ -628,6 +802,7 @@ $('#campaignForm').addEventListener('submit', (e) => {
     $('#showCreateForm').style.display = 'inline-flex';
     renderCampaignList();
     updateStats();
+    navigate('#jours/' + campaignId);
   }
 
   submitCampagne();

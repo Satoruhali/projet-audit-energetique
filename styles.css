@@ -97,6 +97,82 @@ a:hover { text-decoration: underline; }
   color: #2c3e50;
 }
 
+/* ---------- TOPBAR USER ---------- */
+.topbar__user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+.topbar__user-name {
+  font-size: .82rem;
+  font-weight: 600;
+  color: #2c3e50;
+  white-space: nowrap;
+}
+.btn--xs { padding: 4px 10px; font-size: .75rem; border-radius: 6px; }
+
+/* ---------- AUTH ---------- */
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 80px);
+  padding: 24px 16px;
+}
+.auth-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 40px 32px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 4px 20px rgba(0,0,0,.06);
+  border: 1px solid #eef2f7;
+}
+.auth-card__title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  text-align: center;
+  color: #1a2634;
+}
+.auth-card__title span { color: #2ecc71; }
+.auth-card__subtitle {
+  text-align: center;
+  color: #7a8a9e;
+  font-size: .9rem;
+  margin: 4px 0 24px;
+}
+.auth-tabs {
+  display: flex;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 2px solid #eef2f7;
+  margin-bottom: 24px;
+}
+.auth-tab {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  background: #f8fafc;
+  font-size: .88rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: #7a8a9e;
+  transition: all .2s;
+}
+.auth-tab--active {
+  background: #2ecc71;
+  color: #fff;
+}
+.auth-form { display: flex; flex-direction: column; gap: 14px; }
+.auth-form__error {
+  color: #e74c3c;
+  font-size: .82rem;
+  text-align: center;
+  min-height: 1.2em;
+}
+.btn--block { width: 100%; justify-content: center; }
+
 /* ---------- BUTTONS ---------- */
 .btn {
   display: inline-flex;
