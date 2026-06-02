@@ -63,16 +63,6 @@
               <label class="form-label" for="campAdresse">Adresse de l'immeuble</label>
               <input class="form-input" type="text" id="campAdresse" placeholder="12 Rue des Lilas, Paris 75011" required>
             </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label class="form-label" for="campDebut">Date de début</label>
-                <input class="form-input" type="date" id="campDebut" required>
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="campFin">Date de fin</label>
-                <input class="form-input" type="date" id="campFin" required>
-              </div>
-            </div>
             <div class="form-group">
               <label class="form-label" for="campNbLogements">Nombre d'appartements</label>
               <input class="form-input" type="number" id="campNbLogements" min="1" max="100" value="8" required>
@@ -109,7 +99,7 @@
             <thead>
               <tr>
                 <th>Adresse</th>
-                <th>Dates</th>
+                <th>Jours disp.</th>
                 <th>Statut</th>
                 <th>Progression</th>
                 <th class="th-actions">Actions</th>
@@ -156,6 +146,15 @@
           <span class="stat-card__value" id="detailTotal">0</span>
           <span class="stat-card__label">Total logements</span>
         </div>
+      </div>
+
+      <!-- JOURS DISPONIBLES -->
+      <div class="card" id="joursDisponiblesCard">
+        <div class="card__toolbar">
+          <h2 class="card__title">Jours disponibles pour les visites</h2>
+          <button class="btn btn--primary btn--sm" id="saveJoursBtn">Enregistrer les jours</button>
+        </div>
+        <div id="joursDisponiblesContainer" class="jours-grid"></div>
       </div>
 
       <!-- ONGLETS -->
@@ -228,7 +227,37 @@
     </section>
 
     <!-- =============================== -->
-    <!-- VUE 3 : PLANNING OPTIMISÉ       -->
+    <!-- VUE 3 : CHOIX DES JOURS         -->
+    <!-- =============================== -->
+    <section id="view-jours" class="view">
+
+      <div class="page-header">
+        <button class="btn btn--outline btn--sm" id="joursBackBtn">← Retour</button>
+        <div>
+          <h1 class="page-title">Choix des jours de visite</h1>
+          <p class="page-subtitle" id="joursCampSubtitle">Sélectionnez les jours où le diagnostiqueur peut intervenir</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn btn--outline btn--sm" id="joursSelectAll">Tout sélectionner</button>
+          <button class="btn btn--outline btn--sm" id="joursDeselectAll">Tout désélectionner</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card__toolbar">
+          <h2 class="card__title">Calendrier des 30 prochains jours</h2>
+          <span class="badge badge--blue" id="joursSelectedCount">0 jour(s) sélectionné(s)</span>
+        </div>
+        <div id="joursCalendar" class="jours-calendar"></div>
+        <div class="form-actions" style="margin-top:20px">
+          <button class="btn btn--primary" id="joursSaveBtn">Enregistrer et continuer</button>
+          <button class="btn btn--outline" id="joursSkipBtn">Passer cette étape</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- =============================== -->
+    <!-- VUE 4 : PLANNING OPTIMISÉ       -->
     <!-- =============================== -->
     <section id="view-planning" class="view">
 

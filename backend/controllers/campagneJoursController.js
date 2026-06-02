@@ -22,20 +22,11 @@ exports.remplacerJours = async (req, res) => {
       return res.status(404).json({ message: 'Campagne introuvable' });
     }
 
-    const debut = new Date(campagne.date_debut);
-    const fin = new Date(campagne.date_fin);
     const jours = value.jours;
     const vus = new Set();
 
     for (const jour of jours) {
       const d = new Date(jour);
-
-      if (d < debut || d > fin) {
-        return res.status(400).json({
-          message: `Le jour ${jour} est hors de l'intervalle [${campagne.date_debut.toISOString().split('T')[0]}, ${campagne.date_fin.toISOString().split('T')[0]}]`
-        });
-      }
-
       const iso = d.toISOString().split('T')[0];
       if (vus.has(iso)) {
         return res.status(400).json({

@@ -7,8 +7,6 @@ const campagneSchema = new mongoose.Schema({
     required: true
   },
   nom: { type: String, required: true, trim: true },
-  date_debut: { type: Date, required: true },
-  date_fin: { type: Date, required: true },
   statut: {
     type: String,
     enum: ['brouillon', 'en_cours', 'termine'],

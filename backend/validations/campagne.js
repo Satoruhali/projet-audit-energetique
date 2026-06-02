@@ -3,9 +3,8 @@ const Joi = require('joi');
 const creerCampagne = Joi.object({
   immeuble_id: Joi.string().required(),
   nom: Joi.string().trim().required(),
-  date_debut: Joi.date().required(),
-  date_fin: Joi.date().min(Joi.ref('date_debut')).required(),
-  statut: Joi.string().valid('brouillon', 'en_cours', 'termine').optional()
+  statut: Joi.string().valid('brouillon', 'en_cours', 'termine').optional(),
+  jours_disponibles: Joi.array().items(Joi.date().iso()).optional()
 });
 
 module.exports = { creerCampagne };

@@ -460,6 +460,74 @@ select.form-input { appearance: auto; }
 .view { display: none; }
 .view.active { display: block; }
 
+/* ---------- JOURS DISPONIBLES ---------- */
+.jours-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.jour-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 2px solid #e0e6ed;
+  border-radius: 10px;
+  font-size: .85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .2s;
+  background: #fff;
+  color: #2c3e50;
+  user-select: none;
+}
+.jour-chip:hover { border-color: #3498db; }
+.jour-chip--selected {
+  background: #e8f5e9;
+  border-color: #2ecc71;
+  color: #27ae60;
+}
+
+/* ---------- CALENDRIER JOURS ---------- */
+.jours-calendar {
+  margin-top: 4px;
+}
+.jours-month {
+  margin-bottom: 20px;
+}
+.jours-month__title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1a2634;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #eef2f7;
+  text-transform: capitalize;
+}
+.jour-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border: 2px solid #e0e6ed;
+  border-radius: 10px;
+  font-size: .82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .2s;
+  background: #fff;
+  color: #2c3e50;
+  user-select: none;
+}
+.jour-checkbox:hover { border-color: #3498db; background: #f8fafc; }
+.jour-checkbox--checked {
+  background: #e8f5e9;
+  border-color: #2ecc71;
+  color: #27ae60;
+}
+.jour-checkbox__input { display: none; }
+.jour-checkbox__label { line-height: 1; }
+
 /* ---------- RESPONSIVE : TABLET (480px+) ---------- */
 @media (min-width: 480px) {
   .stats { grid-template-columns: repeat(3, 1fr); }

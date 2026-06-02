@@ -49,8 +49,7 @@ const APP = {
       id: 'c1',
       id_campagne: null,
       adresse: '12 Rue des Lilas, Paris 75011',
-      dateDebut: '2026-06-01',
-      dateFin: '2026-06-10',
+      joursDisponibles: ['2026-06-01','2026-06-02','2026-06-03','2026-06-04','2026-06-05','2026-06-08','2026-06-09','2026-06-10'],
       nbLogements: 6,
       statut: 'active',
       locataires: [
@@ -66,8 +65,7 @@ const APP = {
       id: 'c2',
       id_campagne: null,
       adresse: '8 Avenue Victor Hugo, Lyon 69002',
-      dateDebut: '2026-07-15',
-      dateFin: '2026-07-25',
+      joursDisponibles: ['2026-07-15','2026-07-16','2026-07-17','2026-07-18','2026-07-21','2026-07-22','2026-07-23','2026-07-24','2026-07-25'],
       nbLogements: 4,
       statut: 'active',
       locataires: [
@@ -81,8 +79,7 @@ const APP = {
       id: 'c3',
       id_campagne: null,
       adresse: '3 Rue de la Paix, Marseille 13001',
-      dateDebut: '2026-05-01',
-      dateFin: '2026-05-08',
+      joursDisponibles: ['2026-05-01','2026-05-02','2026-05-03','2026-05-04','2026-05-05','2026-05-06'],
       nbLogements: 5,
       statut: 'termine',
       locataires: [
@@ -143,6 +140,10 @@ function navigate(hash) {
     const id = path.split('/')[1];
     APP.currentCampaignId = id;
     showPlanning(id);
+  } else if (path.startsWith('jours/')) {
+    const id = path.split('/')[1];
+    APP.currentCampaignId = id;
+    showJoursSelection(id);
   }
 
   $$('[data-nav]').forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + path));
@@ -306,7 +307,7 @@ function renderCampaignList() {
     return `
       <tr>
         <td><strong>${c.adresse}</strong></td>
-        <td>${formatDate(c.dateDebut)} — ${formatDate(c.dateFin)}</td>
+        <td>${c.joursDisponibles ? c.joursDisponibles.length + ' jours' : '—'}</td>
         <td><span class="status status--${statutClass}">${statutLabel}</span></td>
         <td>
           <div style="display:flex;align-items:center;gap:8px">
@@ -486,14 +487,11 @@ function attachRemoveHandlers() {
 
 $('#toStep2').addEventListener('click', () => {
   const adresse = $('#campAdresse').value.trim();
-  const dateDebut = $('#campDebut').value;
-  const dateFin = $('#campFin').value;
   const nbLogements = parseInt($('#campNbLogements').value);
 
-  if (!adresse || !dateDebut || !dateFin || !nbLogements) {
+  if (!adresse || !nbLogements) {
     toast('Veuillez remplir tous les champs de l\'étape 1', 'warning'); return;
   }
-  if (dateDebut > dateFin) { toast('La date de fin doit être après la date de début', 'warning'); return; }
 
   $('#formStep1').style.display = 'none';
   $('#formStep2').style.display = 'block';
@@ -517,8 +515,6 @@ $('#campaignForm').addEventListener('submit', (e) => {
   e.preventDefault();
 
   const adresse = $('#campAdresse').value.trim();
-  const dateDebut = $('#campDebut').value;
-  const dateFin = $('#campFin').value;
 
   const tenantRows = $$('.tenant-row');
   if (tenantRows.length === 0) { toast('Ajoutez au moins un locataire', 'warning'); return; }
@@ -654,7 +650,7 @@ function showDetail(id) {
   if (!camp) { navigate('#dashboard'); return; }
 
   $('#detailTitle').textContent = camp.adresse;
-  $('#detailSubtitle').textContent = `${formatDate(camp.dateDebut)} — ${formatDate(camp.dateFin)} · ${camp.nbLogements} logements`;
+  $('#detailSubtitle').textContent = `${camp.joursDisponibles ? camp.joursDisponibles.length : 0} jours disponibles · ${camp.nbLogements} logements`;
 
   const stats = campaignStats(camp);
   $('#detailRepondu').textContent = stats.repondu;
@@ -663,6 +659,7 @@ function showDetail(id) {
 
   renderReponses(camp);
   renderPlanningTab(camp);
+  renderJoursDisponibles(camp);
   activateTab('reponses');
 }
 
@@ -732,6 +729,55 @@ function renderPlanningTab(camp) {
   `).join('');
 }
 
+/* ---------- JOURS DISPONIBLES ---------- */
+function renderJoursDisponibles(camp) {
+  const container = $('#joursDisponiblesContainer');
+  if (!container) return;
+
+  const jours = camp.joursDisponibles || [];
+  const joursSet = new Set(jours);
+
+  const next30Days = [];
+  const today = new Date();
+  for (let i = 0; i < 30; i++) {
+    const d = new Date(today);
+    d.setDate(today.getDate() + i);
+    const iso = d.toISOString().split('T')[0];
+    const label = d.toLocaleDateString('fr-FR', { weekday: 'short', day: '2-digit', month: '2-digit' });
+    next30Days.push({ iso, label });
+  }
+
+  container.innerHTML = next30Days.map(d => `
+    <div class="jour-chip ${joursSet.has(d.iso) ? 'jour-chip--selected' : ''}" data-date="${d.iso}">
+      <span>${d.label}</span>
+    </div>
+  `).join('');
+
+  container.querySelectorAll('.jour-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      chip.classList.toggle('jour-chip--selected');
+    });
+  });
+}
+
+$('#saveJoursBtn')?.addEventListener('click', () => {
+  const camp = APP.campaigns.find(c => c.id === APP.currentCampaignId);
+  if (!camp) return;
+
+  const selected = [...$$('.jour-chip--selected')].map(chip => chip.dataset.date);
+  camp.joursDisponibles = selected;
+  toast(`Jours disponibles mis à jour (${selected.length} jour(s))`, 'success');
+
+  const container = $('#joursDisponiblesContainer');
+  const allChips = [...container.querySelectorAll('.jour-chip')];
+  const joursSet = new Set(selected);
+  allChips.forEach(chip => {
+    chip.classList.toggle('jour-chip--selected', joursSet.has(chip.dataset.date));
+  });
+  renderCampaignList();
+  $('#detailSubtitle').textContent = `${selected.length} jours disponibles · ${camp.nbLogements} logements`;
+});
+
 /* ---------- ONGLETS ---------- */
 function activateTab(name) {
   $$('.tab').forEach(t => t.classList.toggle('tab--active', t.dataset.tab === name));
@@ -779,6 +825,121 @@ $('#exportIcalBtn').addEventListener('click', () => toast('Export iCal simulé a
 $('#planExportPdf').addEventListener('click', () => toast('Export PDF simulé avec succès', 'success'));
 $('#planExportIcal').addEventListener('click', () => toast('Export iCal simulé avec succès', 'success'));
 
+/* ---------- VUE CHOIX DES JOURS ---------- */
+function showJoursSelection(id) {
+  const view = $('#view-jours');
+  view.classList.add('active');
+
+  const camp = APP.campaigns.find(c => c.id === id);
+  if (!camp) { navigate('#dashboard'); return; }
+
+  $('#joursCampSubtitle').textContent = `${camp.adresse} · ${camp.nbLogements} logements — Cochez les jours disponibles pour les visites`;
+  renderJourCalendar(camp);
+}
+
+function renderJourCalendar(camp) {
+  const container = $('#joursCalendar');
+  if (!container) return;
+
+  const jours = camp.joursDisponibles || [];
+  const joursSet = new Set(jours);
+
+  const today = new Date();
+  const months = [];
+
+  for (let i = 0; i < 30; i++) {
+    const d = new Date(today);
+    d.setDate(today.getDate() + i);
+    const iso = d.toISOString().split('T')[0];
+    const monthKey = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+    const monthLabel = d.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+    const dayNum = String(d.getDate()).padStart(2, '0');
+    const weekday = d.toLocaleDateString('fr-FR', { weekday: 'short' });
+
+    if (!months.find(m => m.key === monthKey)) {
+      months.push({ key: monthKey, label: monthLabel, days: [] });
+    }
+    const month = months.find(m => m.key === monthKey);
+    month.days.push({ iso, dayNum, weekday, label: `${weekday} ${dayNum}` });
+  }
+
+  container.innerHTML = months.map(m => `
+    <div class="jours-month">
+      <h3 class="jours-month__title">${m.label}</h3>
+      <div class="jours-grid">
+        ${m.days.map(d => `
+          <label class="jour-checkbox ${joursSet.has(d.iso) ? 'jour-checkbox--checked' : ''}">
+            <input type="checkbox" class="jour-checkbox__input" value="${d.iso}" ${joursSet.has(d.iso) ? 'checked' : ''}>
+            <span class="jour-checkbox__label">${d.label}</span>
+          </label>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+
+  container.querySelectorAll('.jour-checkbox__input').forEach(cb => {
+    cb.addEventListener('change', () => {
+      cb.closest('.jour-checkbox').classList.toggle('jour-checkbox--checked', cb.checked);
+      updateJoursCount();
+    });
+  });
+
+  updateJoursCount();
+}
+
+function updateJoursCount() {
+  const checked = $$('#joursCalendar .jour-checkbox__input:checked').length;
+  const badge = $('#joursSelectedCount');
+  if (badge) badge.textContent = `${checked} jour(s) sélectionné(s)`;
+}
+
+$('#joursSaveBtn')?.addEventListener('click', () => {
+  const camp = APP.campaigns.find(c => c.id === APP.currentCampaignId);
+  if (!camp) return;
+
+  const selected = [...$$('#joursCalendar .jour-checkbox__input:checked')].map(cb => cb.value);
+
+  if (selected.length === 0) {
+    toast('Sélectionnez au moins un jour disponible', 'warning');
+    return;
+  }
+
+  camp.joursDisponibles = selected;
+
+  // Simuler PUT /api/entrepreneur/campagnes/:id/jours-disponibles
+  toast(`✓ ${selected.length} jour(s) enregistré(s) pour ${camp.adresse}`, 'success');
+
+  renderCampaignList();
+  navigate('#campaign/' + camp.id);
+});
+
+$('#joursSkipBtn')?.addEventListener('click', () => {
+  const camp = APP.campaigns.find(c => c.id === APP.currentCampaignId);
+  if (camp) toast('Vous pourrez configurer les jours plus tard depuis le détail de la campagne', 'info');
+  navigate('#campaign/' + APP.currentCampaignId);
+});
+
+$('#joursSelectAll')?.addEventListener('click', () => {
+  $$('#joursCalendar .jour-checkbox__input').forEach(cb => {
+    cb.checked = true;
+    cb.closest('.jour-checkbox').classList.add('jour-checkbox--checked');
+  });
+  updateJoursCount();
+});
+
+$('#joursDeselectAll')?.addEventListener('click', () => {
+  $$('#joursCalendar .jour-checkbox__input').forEach(cb => {
+    cb.checked = false;
+    cb.closest('.jour-checkbox').classList.remove('jour-checkbox--checked');
+  });
+  updateJoursCount();
+});
+
+$('#joursBackBtn')?.addEventListener('click', () => {
+  if (APP.currentCampaignId) navigate('#campaign/' + APP.currentCampaignId);
+  else navigate('#dashboard');
+});
+
 /* ---------- VUE PLANNING OPTIMISÉ ---------- */
 function showPlanning(id) {
   const view = $('#view-planning');
@@ -787,7 +948,7 @@ function showPlanning(id) {
   const camp = APP.campaigns.find(c => c.id === id);
   if (!camp) { navigate('#dashboard'); return; }
 
-  $('#planningCampSubtitle').textContent = `${camp.adresse} · ${formatDate(camp.dateDebut)} — ${formatDate(camp.dateFin)}`;
+  $('#planningCampSubtitle').textContent = `${camp.adresse} · ${camp.joursDisponibles ? camp.joursDisponibles.length : 0} jours disponibles`;
 
   const plan = generatePlanning(camp.locataires);
 
