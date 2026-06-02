@@ -293,3 +293,26 @@ Mettre à jour le schéma relationnel pour intégrer les nouvelles règles méti
 - **Notes** : Tous les tests sont OK. GET /campagnes/:id corrigé (erreur 500 résolue). Serveur redémarré et validé.
 
 ---
+
+## 2026-06-01 — Phase 4 : Étape 4.1 et 4.2 terminées (matin)
+
+### Durée totale : ~4h
+
+### Étape 4.1 — Ajout des champs typologie, plancher, position dans le formulaire ✅
+- Ajout des sélecteurs "Typologie", "Plancher bas", "Plancher haut", "Position" par logement (Étape 1 du formulaire)
+- Étape 2 (créneau) : inchangée
+- Appel API `GET /api/referentiel/typologies` et `/api/referentiel/plancher-*` pour alimenter les listes déroulantes
+- Validation : ces champs sont désormais obligatoires
+
+### Étape 4.2 — Connexion campagne → API réelle ✅
+- Remplacement de `creerCampagne()` : plus de mock data → `POST /api/entrepreneur/campagnes`
+- Remplacement de `ajouterLogement()` → `POST /api/.../logements`
+- Ajout du champ `id_campagne` dans le store local
+- Remplacement du GET dashboard par `GET /api/entrepreneur/campagnes`
+- Conservation des mock data comme fallback temporaire si API indisponible
+
+### Points bloquants résolus
+- Aucun blocant rencontré
+- Dépendances respectées : Étape 1.1, 2.2 (pour 4.1) et Étape 4.1, 2.3 (pour 4.2)
+
+---
