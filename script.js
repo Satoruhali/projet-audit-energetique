@@ -117,6 +117,18 @@ async function apiCampagneShow(id) {
   return null;
 }
 
+async function apiCampagneLancerSelection(id) {
+  const result = await apiFetch('POST', `/campagnes/${id}/lancer-selection`);
+  if (result && result.nbSelectionnes !== undefined) return result;
+  return null;
+}
+
+async function apiCampagneJoursSave(id, jours) {
+  const result = await apiFetch('PUT', `/campagnes/${id}/jours-disponibles`, { jours });
+  if (result && result.jours) return result;
+  return null;
+}
+
 const APP = {
   campaigns: [
     {
@@ -133,7 +145,23 @@ const APP = {
         { id: 'l4', nom: 'Marc Lefèvre', email: 'marc.lefevre@email.fr', tel: '0622334455', logement: 'B4', etage: 1, etageLabel: '1er', digicode: '', statut: 'attente', creneau: null },
         { id: 'l5', nom: 'Julie Petit', email: 'julie.petit@email.fr', tel: '', logement: 'C5', etage: 2, etageLabel: '2e', digicode: '9012', statut: 'repondu', creneau: { date: '2026-06-03', debut: '09:00', fin: '09:30' } },
         { id: 'l6', nom: 'Thomas Roux', email: 'thomas.roux@email.fr', tel: '0633445566', logement: 'C6', etage: 2, etageLabel: '2e', digicode: '', statut: 'attente', creneau: null },
-      ]
+      ],
+      logements: [
+        { _id: 'lg1', numero: 'A1', etage: 0, typologie: 'T2', plancher_bas: 'Dalle pleine', plancher_haut: 'Dalle pleine', position: 'bas', selectionne_visite: true, locataire: { nom: 'Sophie Moreau' } },
+        { _id: 'lg2', numero: 'A2', etage: 0, typologie: 'T1', plancher_bas: 'Dalle pleine', plancher_haut: 'Dalle pleine', position: 'bas', selectionne_visite: true, locataire: { nom: 'Pierre Durand' } },
+        { _id: 'lg3', numero: 'B3', etage: 1, typologie: 'T3', plancher_bas: 'Dalle pleine', plancher_haut: 'Plancher bois', position: 'intermediaire', selectionne_visite: false, locataire: { nom: 'Camille Laurent' } },
+        { _id: 'lg4', numero: 'B4', etage: 1, typologie: 'T2', plancher_bas: 'Dalle alvéolée', plancher_haut: 'Dalle pleine', position: 'intermediaire', selectionne_visite: true, locataire: { nom: 'Marc Lefèvre' } },
+        { _id: 'lg5', numero: 'C5', etage: 2, typologie: 'T3', plancher_bas: 'Dalle alvéolée', plancher_haut: 'Plancher bois', position: 'haut', selectionne_visite: true, locataire: { nom: 'Julie Petit' } },
+        { _id: 'lg6', numero: 'C6', etage: 2, typologie: 'T2', plancher_bas: 'Dalle pleine', plancher_haut: 'Plancher bois', position: 'haut', selectionne_visite: false, locataire: { nom: 'Thomas Roux' } },
+      ],
+      selection: {
+        date_selection: '2026-06-01T10:00:00.000Z',
+        seuil_requis: 2,
+        seuil_obtenu: 4,
+        couverture: { typologies: ['T1', 'T2', 'T3'], planchersBas: ['Dalle pleine', 'Dalle alvéolée'], planchersHaut: ['Dalle pleine', 'Plancher bois'], positions: ['bas', 'intermediaire', 'haut'] },
+        couvertureComplete: true,
+        criteresManquants: []
+      }
     },
     {
       id: 'c2',
@@ -946,17 +974,39 @@ async function showDetail(id) {
     const detail = await apiCampagneShow(camp.id_campagne);
     if (detail) {
       camp.nbLogements = (detail.logements && detail.logements.length) || camp.nbLogements || 0;
+      camp.logements = (detail.logements || []).map(l => ({
+        _id: l._id,
+        numero: l.numero,
+        etage: l.etage,
+        typologie: l.typologie,
+        plancher_bas: l.plancher_bas,
+        plancher_haut: l.plancher_haut,
+        position: l.position,
+        selectionne_visite: l.selectionne_visite || false,
+        locataire: l.locataire || null,
+      }));
+      if (detail.selection) {
+        camp.selection = detail.selection;
+      }
       if (detail.locataires && detail.locataires.length > 0) {
-        camp.locataires = detail.locataires.map(l => ({
-          id: l._id,
-          nom: l.nom || '',
-          email: l.email || '',
-          logement: l.logement || l.numero || '',
-          etage: l.etage || 0,
-          etageLabel: l.etage === 0 ? 'RDC' : l.etage === -1 ? 'Sous-sol' : l.etage + 'e',
-          statut: l.statut || 'attente',
-          creneau: l.creneau || null,
-        }));
+        const creneaux = detail.creneaux || [];
+        camp.locataires = detail.locataires.map(l => {
+          const creneau = creneaux.find(c => String(c.locataire_id) === String(l._id));
+          return {
+            id: l._id,
+            nom: l.nom || '',
+            email: l.email || '',
+            logement: l.logement || l.numero || '',
+            etage: l.etage || 0,
+            etageLabel: l.etage === 0 ? 'RDC' : l.etage === -1 ? 'Sous-sol' : l.etage + 'e',
+            statut: creneau ? 'repondu' : 'attente',
+            creneau: creneau ? {
+              date: new Date(creneau.date_visite).toISOString().split('T')[0],
+              debut: creneau.heure_debut,
+              fin: creneau.heure_fin,
+            } : null,
+          };
+        });
       }
     }
   }
@@ -972,6 +1022,7 @@ async function showDetail(id) {
   renderReponses(camp);
   renderPlanningTab(camp);
   renderJoursDisponibles(camp);
+  renderEchantillonnage(camp);
   activateTab('reponses');
 }
 
@@ -1040,6 +1091,165 @@ function renderPlanningTab(camp) {
     </tr>
   `).join('');
 }
+
+/* ---------- ÉCHANTILLONNAGE ---------- */
+function renderEchantillonnage(camp) {
+  const hasSelection = camp.selection && camp.selection.date_selection;
+  const hasSelectedLogements = camp.logements && camp.logements.some(l => l.selectionne_visite);
+
+  const actionsCard = $('#selectionActionsCard');
+  const seuilCard = $('#selectionSeuilCard');
+  const couvCard = $('#selectionCouvertureCard');
+  const listCard = $('#selectionListCard');
+
+  if (!actionsCard) return;
+
+  if (hasSelection || hasSelectedLogements) {
+    actionsCard.style.display = 'none';
+    seuilCard.style.display = 'block';
+    couvCard.style.display = 'block';
+    listCard.style.display = 'block';
+
+    const s = camp.selection;
+    if (s) {
+      $('#seuilRequis').textContent = s.seuil_requis || 0;
+      $('#seuilObtenu').textContent = s.seuil_obtenu || 0;
+
+      const d = new Date(s.date_selection);
+      const dateStr = d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+      $('#selectionDateInfo').textContent = `Dernière sélection le ${dateStr}`;
+
+      const complete = s.couvertureComplete;
+      $('#couvertureStatus').textContent = complete
+        ? '✅ Tous les critères sont couverts par l\'échantillon sélectionné.'
+        : `⚠️ ${s.criteresManquants ? s.criteresManquants.length : 0} critère(s) non couvert(s) par l'échantillon.`;
+
+      renderCouverture(s.couverture, s.criteresManquants || []);
+    } else {
+      $('#seuilRequis').textContent = '—';
+      $('#seuilObtenu').textContent = '—';
+      $('#selectionDateInfo').textContent = '';
+      $('#couvertureStatus').textContent = 'Données de couverture non disponibles.';
+    }
+
+    renderSelectionnesListe(camp);
+  } else {
+    actionsCard.style.display = 'block';
+    seuilCard.style.display = 'none';
+    couvCard.style.display = 'none';
+    listCard.style.display = 'none';
+  }
+}
+
+function renderCouverture(couverture, criteresManquants) {
+  const container = $('#couvertureContainer');
+  if (!container) return;
+
+  const missingSet = new Set(criteresManquants);
+
+  const groupes = [
+    { titre: 'Typologies', items: couverture.typologies || [], prefix: 'typo:' },
+    { titre: 'Planchers bas', items: couverture.planchersBas || [], prefix: 'pb:' },
+    { titre: 'Planchers haut', items: couverture.planchersHaut || [], prefix: 'ph:' },
+    { titre: 'Positions', items: couverture.positions || [], prefix: 'pos:' },
+  ];
+
+  container.innerHTML = groupes.map(g => `
+    <div class="couverture-group">
+      <div class="couverture-group__title">${g.titre}</div>
+      <div class="couverture-grid">
+        ${g.items.map(item => {
+          const key = g.prefix + item;
+          const isMissing = missingSet.has(key);
+          return `<span class="couverture-chip ${isMissing ? 'couverture-chip--missing' : 'couverture-chip--covered'}">
+            ${isMissing ? '⚠' : '✓'} ${item}
+          </span>`;
+        }).join('')}
+        ${g.items.length === 0 ? '<span class="couverture-chip couverture-chip--empty">Aucun</span>' : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderSelectionnesListe(camp) {
+  const tbody = $('#selectionList');
+  const empty = $('#emptySelection');
+  const badge = $('#selectionCountBadge');
+
+  const logements = camp.logements || [];
+  const selectionnes = logements.filter(l => l.selectionne_visite);
+
+  if (selectionnes.length === 0) {
+    tbody.innerHTML = '';
+    if (empty) empty.style.display = 'block';
+    if (badge) badge.textContent = '0';
+    return;
+  }
+
+  if (empty) empty.style.display = 'none';
+  if (badge) badge.textContent = selectionnes.length + ' sélectionné(s)';
+
+  const etageOrder = { '-1': 0, '0': 1, '1': 2, '2': 3, '3': 4 };
+  const sorted = [...selectionnes].sort((a, b) => (etageOrder[a.etage] || a.etage) - (etageOrder[b.etage] || b.etage));
+
+  tbody.innerHTML = sorted.map(l => {
+    const nomLoc = l.locataire ? (l.locataire.nom || '—') : '—';
+    const etageLabel = l.etage === 0 ? 'RDC' : l.etage === -1 ? 'Sous-sol' : l.etage + 'e';
+    return `<tr>
+      <td><strong>${l.numero || l.logement || '—'}</strong></td>
+      <td>${etageLabel}</td>
+      <td>${l.typologie || '—'}</td>
+      <td>${l.plancher_bas || '—'}</td>
+      <td>${l.plancher_haut || '—'}</td>
+      <td>${l.position || '—'}</td>
+      <td>${nomLoc}</td>
+    </tr>`;
+  }).join('');
+}
+
+$('#lancerSelectionBtn')?.addEventListener('click', async () => {
+  const camp = APP.campaigns.find(c => c.id === APP.currentCampaignId);
+  if (!camp) return;
+
+  if (!camp.id_campagne) {
+    toast('API indisponible — sélection impossible en mode dégradé', 'warning');
+    return;
+  }
+
+  const btn = $('#lancerSelectionBtn');
+  btn.disabled = true;
+  btn.textContent = 'Sélection en cours…';
+
+  const result = await apiCampagneLancerSelection(camp.id_campagne);
+
+  btn.disabled = false;
+  btn.textContent = '🎯 Lancer la sélection';
+
+  if (!result) {
+    toast('Erreur lors du lancement de la sélection', 'error');
+    return;
+  }
+
+  camp.selection = {
+    date_selection: new Date().toISOString(),
+    seuil_requis: result.seuil.requis,
+    seuil_obtenu: result.seuil.obtenu,
+    couverture: result.couverture,
+    couvertureComplete: result.couvertureComplete,
+    criteresManquants: result.criteresManquants
+  };
+
+  if (camp.logements && result.selectionnes) {
+    const selectedIds = new Set(result.selectionnes.map(id => id.toString()));
+    camp.logements.forEach(l => {
+      const lid = (l._id || l.id || '').toString();
+      l.selectionne_visite = selectedIds.has(lid);
+    });
+  }
+
+  toast(result.message || 'Sélection terminée', 'success');
+  renderEchantillonnage(camp);
+});
 
 /* ---------- JOURS DISPONIBLES ---------- */
 function renderJoursDisponibles(camp) {
@@ -1217,7 +1427,7 @@ function updateJoursCount() {
   if (badge) badge.textContent = `${checked} jour(s) sélectionné(s)`;
 }
 
-$('#joursSaveBtn')?.addEventListener('click', () => {
+$('#joursSaveBtn')?.addEventListener('click', async () => {
   const camp = APP.campaigns.find(c => c.id === APP.currentCampaignId);
   if (!camp) return;
 
@@ -1230,7 +1440,16 @@ $('#joursSaveBtn')?.addEventListener('click', () => {
 
   camp.joursDisponibles = selected;
 
-  // Simuler PUT /api/entrepreneur/campagnes/:id/jours-disponibles
+  if (camp.id_campagne) {
+    const result = await apiCampagneJoursSave(camp.id_campagne, selected);
+    if (!result) {
+      toast('Impossible de sauvegarder les jours sur le serveur, mais ils sont enregistrés localement', 'warning');
+      renderCampaignList();
+      navigate('#campaign/' + camp.id);
+      return;
+    }
+  }
+
   toast(`✓ ${selected.length} jour(s) enregistré(s) pour ${camp.adresse}`, 'success');
 
   renderCampaignList();

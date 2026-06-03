@@ -2,6 +2,7 @@ const Campagne = require('../models/Campagne');
 const Immeuble = require('../models/Immeuble');
 const Logement = require('../models/Logement');
 const Locataire = require('../models/Locataire');
+const Creneau = require('../models/Creneau');
 const { creerCampagne } = require('../validations/campagne');
 const { lancerSelection } = require('../services/setCoverService');
 
@@ -58,7 +59,12 @@ exports.show = async (req, res) => {
       return res.status(404).json({ message: 'Campagne introuvable' });
     }
 
-    res.json(campagne);
+    const creneaux = await Creneau.find({ campagne_id: campagne._id }).lean();
+
+    const result = campagne.toJSON();
+    result.creneaux = creneaux;
+
+    res.json(result);
   } catch (err) {
     res.status(500).json({ message: 'Erreur lors de la récupération de la campagne' });
   }
@@ -106,6 +112,16 @@ exports.lancerSelection = async (req, res) => {
 
     const selectionnesIds = resultat.selectionnes;
 
+    campagne.selection = {
+      date_selection: new Date(),
+      seuil_requis: resultat.seuil.requis,
+      seuil_obtenu: resultat.seuil.obtenu,
+      couverture: resultat.couverture,
+      couvertureComplete: resultat.success,
+      criteresManquants: resultat.criteresManquants
+    };
+    await campagne.save();
+
     res.json({
       message: `Sélection terminée : ${selectionnesIds.length} logements sélectionnés`,
       nbSelectionnes: selectionnesIds.length,
@@ -113,7 +129,8 @@ exports.lancerSelection = async (req, res) => {
       couverture: resultat.couverture,
       seuil: resultat.seuil,
       couvertureComplete: resultat.success,
-      criteresManquants: resultat.criteresManquants
+      criteresManquants: resultat.criteresManquants,
+      selection: campagne.selection
     });
   } catch (err) {
     res.status(500).json({ message: 'Erreur lors du lancement de la sélection' });

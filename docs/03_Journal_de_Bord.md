@@ -388,3 +388,20 @@ Audit du plan d'attaque et du code existant pour identifier les failles pouvant 
 
 ### Tests : 22/22 ✅
 ### Statut : ✅ Terminé
+
+---
+
+## 📅 2026-06-03 — 11:30
+- **Tâche** : Phase 4.2 — Brancher le frontend aux vraies API (création campagne + dashboard + détail)
+- **Durée estimée** : 2h
+- **Durée réelle** : ⏳ à compléter
+- **Statut** : ✅ terminée
+- **Fichiers modifiés** : `ANALYSE_PROJET.md`, `PLAN D'ATTAQUE – RESTRUCTURATION PL.txt`, `backend/controllers/referentielController.js`, `backend/routes/referentielRoutes.js`, `script.js`
+- **Notes** :
+  - `creerCampagne()` ne push plus dans APP.campagnes (mock) ; appelle désormais la séquence API : POST /api/entrepreneur/immeubles → POST /api/entrepreneur/campagnes → POST /.../logements, avec fallback mock si serveur indisponible.
+  - Dashboard branché sur GET /api/entrepreneur/campagnes avec fusion API + locales.
+  - `showDetail()` devient async : fetch GET /api/entrepreneur/campagnes/:id si locataires absents.
+  - Référentiels (typologies, planchers, positions) chargés via API au DOMContentLoaded avec normalisation et détection de données mockées.
+  - Ajouté GET /api/referentiel/positions (controller + route).
+  - Helpers : `apiImmeubleCreate()`, `apiCampagneShow()`.
+---

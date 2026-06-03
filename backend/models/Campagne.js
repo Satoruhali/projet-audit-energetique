@@ -13,7 +13,20 @@ const campagneSchema = new mongoose.Schema({
     default: 'brouillon'
   },
   deletedAt: { type: Date, default: null },
-  jours_disponibles: [{ type: Date }]
+  jours_disponibles: [{ type: Date }],
+  selection: {
+    date_selection: { type: Date },
+    seuil_requis: { type: Number },
+    seuil_obtenu: { type: Number },
+    couverture: {
+      typologies: [String],
+      planchersBas: [String],
+      planchersHaut: [String],
+      positions: [String]
+    },
+    couvertureComplete: { type: Boolean },
+    criteresManquants: [String]
+  }
 }, { timestamps: true });
 
 campagneSchema.virtual('logements', {

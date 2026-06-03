@@ -216,6 +216,7 @@
       <div class="tabs" id="detailTabs">
         <button class="tab tab--active" data-tab="reponses">Réponses</button>
         <button class="tab" data-tab="planning">Planning</button>
+        <button class="tab" data-tab="echantillonnage">Échantillonnage</button>
       </div>
 
       <!-- CONTENU ONGLET RÉPONSES -->
@@ -278,6 +279,71 @@
             <p>Aucun planning généré. En attente des réponses des locataires.</p>
           </div>
         </div>
+      </div>
+
+      <!-- CONTENU ONGLET ÉCHANTILLONNAGE -->
+      <div class="tab-content" id="tab-echantillonnage">
+
+        <!-- Bouton Lancer la sélection -->
+        <div class="card" id="selectionActionsCard">
+          <div class="selection-actions">
+            <button class="btn btn--primary btn--lg" id="lancerSelectionBtn">
+              🎯 Lancer la sélection
+            </button>
+            <p class="selection-actions__help">Lance l'algorithme de set cover pour sélectionner un échantillon représentatif de logements.</p>
+          </div>
+        </div>
+
+        <!-- Résultat : seuil -->
+        <div class="card" id="selectionSeuilCard" style="display:none">
+          <h2 class="card__title">Seuil minimal</h2>
+          <div class="stats stats--sm">
+            <div class="stat-card stat-card--blue">
+              <span class="stat-card__value" id="seuilRequis">0</span>
+              <span class="stat-card__label">Requis</span>
+            </div>
+            <div class="stat-card stat-card--green">
+              <span class="stat-card__value" id="seuilObtenu">0</span>
+              <span class="stat-card__label">Sélectionnés</span>
+            </div>
+          </div>
+          <p class="selection-info" id="selectionDateInfo"></p>
+        </div>
+
+        <!-- Résultat : couverture des critères -->
+        <div class="card" id="selectionCouvertureCard" style="display:none">
+          <h2 class="card__title">Couverture des critères</h2>
+          <p class="card__subtitle" id="couvertureStatus"></p>
+          <div id="couvertureContainer"></div>
+        </div>
+
+        <!-- Résultat : liste des logements sélectionnés -->
+        <div class="card" id="selectionListCard" style="display:none">
+          <div class="card__toolbar">
+            <h2 class="card__title">Logements sélectionnés</h2>
+            <span class="badge badge--green" id="selectionCountBadge">0</span>
+          </div>
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Logement</th>
+                  <th>Étage</th>
+                  <th>Typologie</th>
+                  <th>Plancher bas</th>
+                  <th>Plancher haut</th>
+                  <th>Position</th>
+                  <th>Locataire</th>
+                </tr>
+              </thead>
+              <tbody id="selectionList"></tbody>
+            </table>
+          </div>
+          <div id="emptySelection" class="empty-state" style="display:none">
+            <p>Aucun logement sélectionné. Lancez l'algorithme pour générer l'échantillon.</p>
+          </div>
+        </div>
+
       </div>
     </section>
 

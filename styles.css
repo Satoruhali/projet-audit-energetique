@@ -494,6 +494,73 @@ select.form-input { appearance: auto; }
   color: #27ae60;
 }
 
+/* ---------- ÉCHANTILLONNAGE ---------- */
+.selection-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 24px 0;
+}
+.selection-actions__help {
+  font-size: .85rem;
+  color: #7a8a9e;
+  text-align: center;
+  max-width: 480px;
+}
+.btn--lg { padding: 14px 32px; font-size: 1rem; border-radius: 12px; }
+.selection-info {
+  font-size: .82rem;
+  color: #7a8a9e;
+  margin-top: 8px;
+}
+
+.card__subtitle {
+  font-size: .85rem;
+  color: #7a8a9e;
+  margin-bottom: 16px;
+  margin-top: -12px;
+}
+
+.couverture-group {
+  margin-bottom: 20px;
+}
+.couverture-group:last-child { margin-bottom: 0; }
+.couverture-group__title {
+  font-size: .82rem;
+  font-weight: 700;
+  color: #5a6a7e;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+}
+.couverture-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.couverture-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: .8rem;
+  font-weight: 600;
+}
+.couverture-chip--covered {
+  background: #e8f5e9;
+  color: #27ae60;
+}
+.couverture-chip--missing {
+  background: #fde8e8;
+  color: #e74c3c;
+}
+.couverture-chip--empty {
+  background: #f0f2f5;
+  color: #9aaabc;
+}
+
 /* ---------- EMPTY STATE ---------- */
 .empty-state {
   text-align: center;
