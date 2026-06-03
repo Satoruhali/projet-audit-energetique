@@ -1,6 +1,7 @@
 const TYPOLOGIES = ['T1', 'T2', 'T3', 'T4', 'T5', 'T6'];
 const PLANCHER_BAS = ['Dalle pleine', 'Dalle alvéolée', 'Poutrelles hourdis'];
 const PLANCHER_HAUT = ['Dalle pleine', 'Dalle alvéolée', 'Plancher bois'];
+const POSITIONS = ['bas', 'intermediaire', 'haut'];
 
 exports.getTypologies = (_req, res) => {
   res.json(TYPOLOGIES);
@@ -12,4 +13,8 @@ exports.getPlancherBas = (_req, res) => {
 
 exports.getPlancherHaut = (_req, res) => {
   res.json(PLANCHER_HAUT);
+};
+
+exports.getPositions = (_req, res) => {
+  res.json(POSITIONS);
 };

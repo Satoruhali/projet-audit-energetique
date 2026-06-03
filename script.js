@@ -17,9 +17,10 @@ function setUser(u) { localStorage.setItem('planif_user', JSON.stringify(u)); }
 function clearUser() { localStorage.removeItem('planif_user'); }
 
 /* ---------- API HELPERS ---------- */
-const API_BASE = (location.protocol === 'file:') ? '' : location.origin + '/api/entrepreneur';
-const API_AUTH = location.origin + '/api/auth';
-const API_PUBLIC = location.origin + '/api';
+const API_ORIGIN = 'http://localhost:3001';
+const API_BASE = API_ORIGIN + '/api/entrepreneur';
+const API_AUTH = API_ORIGIN + '/api/auth';
+const API_PUBLIC = API_ORIGIN + '/api';
 
 async function apiFetch(method, path, body = null, useAuth = true) {
   try {
@@ -101,6 +102,18 @@ async function apiCampagneLogementsStore(campagneId, logements) {
 async function apiCampagnesList() {
   const result = await apiFetch('GET', '/campagnes');
   if (result && Array.isArray(result)) return result;
+  return null;
+}
+
+async function apiImmeubleCreate(data) {
+  const result = await apiFetch('POST', '/immeubles', data);
+  if (result && result._id) return result;
+  return null;
+}
+
+async function apiCampagneShow(id) {
+  const result = await apiFetch('GET', `/campagnes/${id}`);
+  if (result && result._id) return result;
   return null;
 }
 
@@ -443,23 +456,22 @@ async function showDashboard() {
   view.classList.add('active');
   updateTopbarUser(getUser());
 
-  // Tentative API : GET /api/entrepreneur/campagnes
+  // Phase 4.2 : GET /api/entrepreneur/campagnes
   const apiCampagnes = await apiCampagnesList();
 
   if (apiCampagnes) {
-    // API disponible : merger avec les campagnes locales
     const localIds = new Set(APP.campaigns.map(c => c.id));
     const merged = apiCampagnes.map(c => ({
       id: c._id,
       id_campagne: c._id,
       adresse: c.nom || c.adresse || 'Sans nom',
-      dateDebut: c.date_debut ? c.date_debut.slice(0, 10) : '',
-      dateFin: c.date_fin ? c.date_fin.slice(0, 10) : '',
-      nbLogements: c.logements?.length || c.nbLogements || 0,
-      statut: c.statut === 'en_cours' ? 'active' : c.statut || 'active',
+      nbLogements: c.nbLogements || 0,
+      statut: c.statut === 'en_cours' ? 'active' : c.statut === 'termine' ? 'termine' : 'active',
       locataires: [],
+      joursDisponibles: c.jours_disponibles
+        ? c.jours_disponibles.map(d => typeof d === 'string' ? d.slice(0, 10) : new Date(d).toISOString().slice(0, 10))
+        : [],
     }));
-    // Ajouter les campagnes API qui ne sont pas déjà en local
     merged.forEach(c => {
       if (!localIds.has(c.id)) APP.campaigns.unshift(c);
     });
@@ -538,25 +550,112 @@ function updateStats() {
 }
 
 /* ---------- REFERENTIEL ---------- */
-async function loadReferentiel() {
-  if (location.protocol === 'file:') return;
-  const apiBase = location.origin + '/api/referentiel';
-  async function fetchJson(url) {
-    try {
-      const res = await fetch(url);
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      return await res.json();
-    } catch { return null; }
-  }
-  const [typologies, plancherBas, plancherHaut] = await Promise.all([
-    fetchJson(apiBase + '/typologies'),
-    fetchJson(apiBase + '/plancher-bas'),
-    fetchJson(apiBase + '/plancher-haut'),
-  ]);
-  if (typologies) APP.typologies = typologies;
-  if (plancherBas) APP.plancherBas = plancherBas;
-  if (plancherHaut) APP.plancherHaut = plancherHaut;
+function normalizeReferentielData(data) {
+  if (!Array.isArray(data)) return [];
+  return data.map(function (item) {
+    if (typeof item === 'string') return { id: item, label: item };
+    return {
+      id: item.id || item._id || item.value || item.code || String(item),
+      label: item.label || item.nom || item.name || item.libelle || String(item),
+    };
+  });
 }
+
+async function chargerReferentiels() {
+  if (location.protocol === 'file:') return;
+  var apiBase = location.origin + '/api/referentiel';
+
+  async function fetchReferentiel(url) {
+    try {
+      var res = await fetch(url);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      var data = await res.json();
+      var normalized = normalizeReferentielData(data);
+      if (normalized.length > 0) return normalized;
+      throw new Error('Données vides');
+    } catch (err) {
+      console.error('[Referentiel] Erreur ' + url + ': ' + err.message);
+      return [{ id: '', label: 'Erreur chargement' }];
+    }
+  }
+
+  var results = await Promise.allSettled([
+    fetchReferentiel(apiBase + '/typologies'),
+    fetchReferentiel(apiBase + '/plancher-bas'),
+    fetchReferentiel(apiBase + '/plancher-haut'),
+    fetchReferentiel(apiBase + '/positions'),
+  ]);
+
+  if (results[0].status === 'fulfilled') APP.typologies = results[0].value;
+  if (results[1].status === 'fulfilled') APP.plancherBas = results[1].value;
+  if (results[2].status === 'fulfilled') APP.plancherHaut = results[2].value;
+  if (results[3].status === 'fulfilled') APP.positions = results[3].value;
+
+  // Mettre à jour les lignes locataires déjà affichées
+  document.querySelectorAll('.tenant-row').forEach(function (row) {
+    var idx = row.dataset.index;
+    var typoEl = row.querySelector('[name="tenant_typologie_' + idx + '"]');
+    if (typoEl) typoEl.innerHTML = optionsHtml(APP.typologies);
+    var pbEl = row.querySelector('[name="tenant_plancher_bas_' + idx + '"]');
+    if (pbEl) pbEl.innerHTML = optionsHtml(APP.plancherBas);
+    var phEl = row.querySelector('[name="tenant_plancher_haut_' + idx + '"]');
+    if (phEl) phEl.innerHTML = optionsHtml(APP.plancherHaut);
+    var posEl = row.querySelector('[name="tenant_position_' + idx + '"]');
+    if (posEl) posEl.innerHTML = optionsHtml(APP.positions);
+  });
+}
+
+function verifierBranchementAPI() {
+  var checks = [
+    { key: 'typologies', nom: 'Typologie', prefix: 'tenant_typologie_' },
+    { key: 'plancherBas', nom: 'Plancher bas', prefix: 'tenant_plancher_bas_' },
+    { key: 'plancherHaut', nom: 'Plancher haut', prefix: 'tenant_plancher_haut_' },
+    { key: 'positions', nom: 'Position', prefix: 'tenant_position_' },
+  ];
+
+  checks.forEach(function (check) {
+    var data = APP[check.key];
+    var isError = !data || data.length === 0 ||
+      (data.length === 1 && data[0].label === 'Erreur chargement');
+
+    if (isError) {
+      console.error('[API_BRANCH_FAIL] : ' + check.nom + ' est toujours mocké ou vide');
+      document.querySelectorAll('[name^="' + check.prefix + '"]').forEach(function (el) {
+        el.style.border = '2px solid red';
+        setTimeout(function () { el.style.border = ''; }, 3000);
+      });
+      return;
+    }
+
+    data.forEach(function (item) {
+      var label = item.label || '';
+      if (label.toLowerCase().indexOf('mock') !== -1 || label.toLowerCase().indexOf('test') !== -1) {
+        console.error('[API_BRANCH_FAIL] : ' + check.nom + ' contient une option mockée: "' + label + '"');
+      }
+    });
+  });
+
+  // Vérifier les options dans le DOM
+  document.querySelectorAll(
+    '[name^="tenant_typologie_"] option, ' +
+    '[name^="tenant_plancher_bas_"] option, ' +
+    '[name^="tenant_plancher_haut_"] option, ' +
+    '[name^="tenant_position_"] option'
+  ).forEach(function (opt) {
+    var txt = opt.textContent.toLowerCase();
+    if (txt.indexOf('mock') !== -1 || txt.indexOf('test') !== -1) {
+      console.error('[API_BRANCH_FAIL] : Option mockée détectée dans le DOM: "' + opt.textContent + '"');
+    }
+  });
+
+  console.log('[API_BRANCH] Vérification terminée');
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+  chargerReferentiels().then(function () {
+    setTimeout(verifierBranchementAPI, 1000);
+  });
+});
 
 /* ---------- CRÉATION CAMPAGNE (2 ÉTAPES) ---------- */
 let tenantRowIndex = 0;
@@ -565,7 +664,6 @@ $('#showCreateForm').addEventListener('click', () => {
   $('#createForm').style.display = 'block';
   $('#showCreateForm').style.display = 'none';
   resetCampaignForm();
-  loadReferentiel();
 });
 
 $('#cancelForm').addEventListener('click', () => {
@@ -753,18 +851,29 @@ $('#campaignForm').addEventListener('submit', (e) => {
 
   if (!valid) { toast('Certains champs obligatoires sont manquants (en rouge)', 'warning'); return; }
 
-  // Étape 4.2 : tentative API réelle, fallback mock si indisponible
+  // Phase 4.2 : appel API réelle (immeuble → campagne → logements), fallback mock
   async function submitCampagne() {
-    const apiResult = await apiCampagneCreate({
-      nom: adresse,
-      statut: 'active',
-    });
+    let campaignId;
+    try {
+      const first = locataires[0] || {};
+      const immeuble = await apiImmeubleCreate({
+        nom: adresse,
+        adresse,
+        typologie: first.typologie || 'T1',
+        annee_construction: 2000,
+        plancher_bas: first.plancherBas || 'dalle',
+        plancher_haut: first.plancherHaut || 'combles',
+      });
+      if (!immeuble) throw new Error('Échec création immeuble');
 
-    let id_campagne = null;
-    let logementsCreated = [];
+      const apiResult = await apiCampagneCreate({
+        immeuble_id: immeuble._id,
+        nom: adresse,
+        statut: 'en_cours',
+      });
+      if (!apiResult) throw new Error('Échec création campagne');
+      const id_campagne = apiResult._id;
 
-    if (apiResult) {
-      id_campagne = apiResult._id;
       const logementsPayload = locataires.map(l => ({
         numero: l.logement,
         etage: l.etage,
@@ -774,12 +883,9 @@ $('#campaignForm').addEventListener('submit', (e) => {
         plancher_haut: l.plancherHaut || 'combles',
         position: l.position || 'intermediaire',
       }));
-      logementsCreated = await apiCampagneLogementsStore(id_campagne, logementsPayload);
-    }
+      const logementsCreated = await apiCampagneLogementsStore(id_campagne, logementsPayload);
+      if (!logementsCreated) throw new Error('Échec création logements');
 
-    let campaignId;
-
-    if (apiResult && logementsCreated) {
       campaignId = id_campagne;
       const campaign = {
         id: id_campagne,
@@ -794,19 +900,18 @@ $('#campaignForm').addEventListener('submit', (e) => {
         })),
       };
       APP.campaigns.unshift(campaign);
-      toast(`Campagne créée via API : ${adresse}`, 'success');
-    } else {
+      toast(`Campagne créée : ${adresse}`, 'success');
+    } catch (err) {
       campaignId = 'c_' + Date.now();
       toast('API indisponible — mode dégradé (mock)', 'info');
-      const campaign = {
+      APP.campaigns.unshift({
         id: campaignId,
         id_campagne: null,
         adresse,
         nbLogements: locataires.length,
         statut: 'active',
         locataires,
-      };
-      APP.campaigns.unshift(campaign);
+      });
     }
 
     resetCampaignForm();
@@ -829,12 +934,32 @@ $$('[data-nav]').forEach(l => l.addEventListener('click', () => {
 }));
 
 /* ---------- DÉTAIL CAMPAGNE ---------- */
-function showDetail(id) {
+async function showDetail(id) {
   const view = $('#view-detail');
   view.classList.add('active');
 
-  const camp = APP.campaigns.find(c => c.id === id);
+  let camp = APP.campaigns.find(c => c.id === id);
   if (!camp) { navigate('#dashboard'); return; }
+
+  // Phase 4.2 : fetch API detail si locataires absents
+  if ((!camp.locataires || camp.locataires.length === 0) && camp.id_campagne) {
+    const detail = await apiCampagneShow(camp.id_campagne);
+    if (detail) {
+      camp.nbLogements = (detail.logements && detail.logements.length) || camp.nbLogements || 0;
+      if (detail.locataires && detail.locataires.length > 0) {
+        camp.locataires = detail.locataires.map(l => ({
+          id: l._id,
+          nom: l.nom || '',
+          email: l.email || '',
+          logement: l.logement || l.numero || '',
+          etage: l.etage || 0,
+          etageLabel: l.etage === 0 ? 'RDC' : l.etage === -1 ? 'Sous-sol' : l.etage + 'e',
+          statut: l.statut || 'attente',
+          creneau: l.creneau || null,
+        }));
+      }
+    }
+  }
 
   $('#detailTitle').textContent = camp.adresse;
   $('#detailSubtitle').textContent = `${camp.joursDisponibles ? camp.joursDisponibles.length : 0} jours disponibles · ${camp.nbLogements} logements`;
