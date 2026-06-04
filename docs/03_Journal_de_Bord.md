@@ -421,3 +421,20 @@ Audit du plan d'attaque et du code existant pour identifier les failles pouvant 
   - Planning optimisé fonctionne désormais avec les données réelles (pas seulement mock)
   - 22/22 tests ✅ — commit `0c63bb9`
 ---
+
+## 📅 2026-06-04 — 11:09
+- **Tâche** : Phase 6.2 — Création de la route POST /api/entrepreneur/campagnes/:id/envoyer-emails (manquante) avec nodemailer + template différencié visité/non-visité + historique email_envoyes
+- **Durée estimée** : 2h
+- **Durée réelle** : ⏳ à compléter
+- **Statut** : ✅ terminée
+- **Fichiers modifiés** : `backend/models/EmailEnvoye.js` (créé), `backend/services/emailService.js` (créé), `backend/controllers/campagneController.js` (modifié), `backend/routes/campagneRoutes.js` (modifié), `backend/tests/envoyer-emails.test.js` (créé)
+- **Notes** :
+  - Modèle EmailEnvoye avec campagne_id, locataire_id, destinataire, sujet, corps, type (visite_programmee/pas_de_visite/relance), statut (envoye/echec), erreur
+  - Service email avec transporter nodemailer (fallback console.log si SMTP non configuré) + templates HTML
+  - Template A "visite_programmee" : lien personnalisé avec token pour choisir un créneau
+  - Template B "pas_de_visite" : simple information, aucune action requise
+  - Controller envoyerEmails : vérifie autorisation (entrepreneur→immeuble→campagne), boucle sur logements avec locataire, template différencié selon selectionne_visite, enregistre chaque envoi dans email_envoyes
+  - Route protégée par auth middleware
+  - Tests passants : 404 (campagne inconnue), 400 (aucun locataire), 200 (envoi 2 emails : 1 visité + 1 non-visité), vérification base email_envoyes (2 enregistrements)
+  - Commit: `761a76d`
+---
