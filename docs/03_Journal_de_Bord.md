@@ -405,3 +405,19 @@ Audit du plan d'attaque et du code existant pour identifier les failles pouvant 
   - Ajouté GET /api/referentiel/positions (controller + route).
   - Helpers : `apiImmeubleCreate()`, `apiCampagneShow()`.
 ---
+
+## 📅 2026-06-03 — 16:30
+- **Tâche** : Phase 6.1 — Onglet Échantillonnage + retour Créneaux dans show campagne
+- **Durée estimée** : 2h
+- **Durée réelle** : ⏳ à compléter
+- **Statut** : ✅ terminée
+- **Fichiers modifiés** : `backend/controllers/campagneController.js`, `backend/models/Campagne.js`, `index.html`, `script.js`, `styles.css`, `docs/03_Journal_de_Bord.md`
+- **Notes** :
+  - Nouvel onglet "Échantillonnage" dans view-detail avec bouton "Lancer la sélection" → POST /:id/lancer-selection
+  - Affiche seuil requis/obtenu, couverture (typologies/planchers/positions), logements sélectionnés
+  - Schéma `selection` persisté sur le modèle Campagne (date, seuil, couverture, critères manquants)
+  - `GET /campagnes/:id` renvoie désormais les Créneaux (collection séparée) dans la réponse
+  - Frontend fusionne les Créneaux dans les locataires : `statut='repondu'` si créneau existe, `'attente'` sinon
+  - Planning optimisé fonctionne désormais avec les données réelles (pas seulement mock)
+  - 22/22 tests ✅ — commit `0c63bb9`
+---

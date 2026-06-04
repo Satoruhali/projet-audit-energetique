@@ -8,7 +8,8 @@
     "dev": "nodemon backend/server.js",
     "test": "set NODE_ENV=testing&& node --test backend/tests/lien.test.js",
     "test:unit": "set NODE_ENV=testing&& node --test --test-name-pattern='timeToMinutes|chevauche' backend/tests/lien.test.js",
-    "test:int": "set NODE_ENV=testing&& node --test --test-name-pattern='API' backend/tests/lien.test.js"
+    "test:int": "set NODE_ENV=testing&& node --test --test-name-pattern='API' backend/tests/lien.test.js",
+    "seed": "node backend/seed.js"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
