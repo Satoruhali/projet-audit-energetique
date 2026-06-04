@@ -13,5 +13,6 @@ router.put('/:campagne_id/logements/:logement_id', auth, logementController.upda
 router.delete('/:campagne_id/logements/:logement_id', auth, logementController.delete);
 
 router.post('/:id/lancer-selection', auth, campagneController.lancerSelection);
+router.post('/:id/envoyer-emails', auth, campagneController.envoyerEmails);
 
 module.exports = router;
