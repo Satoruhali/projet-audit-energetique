@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rendez-vous — Planif'Audit</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: #f4f7fb;
+      color: #2c3e50;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+    .rdv-container {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding: 40px 16px;
+      background: linear-gradient(135deg, #f4f7fb 0%, #e8f5e9 100%);
+    }
+    .rdv-card {
+      background: #fff;
+      border-radius: 20px;
+      padding: 40px 32px;
+      width: 100%;
+      max-width: 560px;
+      box-shadow: 0 8px 32px rgba(0,0,0,.08);
+      border: 1px solid #eef2f7;
+    }
+    .rdv-card__header {
+      text-align: center;
+      margin-bottom: 28px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid #eef2f7;
+    }
+    .rdv-card__title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #1a2634;
+    }
+    .rdv-card__title span { color: #2ecc71; }
+    .rdv-card__subtitle {
+      font-size: .9rem;
+      color: #7a8a9e;
+      margin-top: 4px;
+    }
+    .rdv-section { margin-bottom: 24px; }
+    .rdv-section--center { text-align: center; padding: 40px 0; }
+    .rdv-section__title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #1a2634;
+      margin-bottom: 8px;
+    }
+    .rdv-section__desc {
+      font-size: .88rem;
+      color: #7a8a9e;
+      margin-bottom: 16px;
+    }
+    .rdv-info-card {
+      background: #f8fafc;
+      border-radius: 12px;
+      padding: 20px;
+      border: 1px solid #eef2f7;
+    }
+    .rdv-info__label {
+      font-size: .78rem;
+      font-weight: 600;
+      color: #7a8a9e;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      margin-top: 8px;
+    }
+    .rdv-info__label:first-child { margin-top: 0; }
+    .rdv-info__value {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #2c3e50;
+    }
+    .rdv-jours-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 360px;
+      overflow-y: auto;
+      padding: 4px 0;
+    }
+    .rdv-jour-btn {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+      border: 2px solid #e0e6ed;
+      border-radius: 12px;
+      background: #fff;
+      cursor: pointer;
+      transition: all .2s;
+      text-align: left;
+      width: 100%;
+      font-family: inherit;
+    }
+    .rdv-jour-btn--dispo:hover {
+      border-color: #2ecc71;
+      background: #f0fdf4;
+    }
+    .rdv-jour-btn--dispo:active {
+      transform: scale(.98);
+    }
+    .rdv-jour-btn--selected {
+      border-color: #2ecc71;
+      background: #e8f5e9;
+      box-shadow: 0 0 0 3px rgba(46,204,113,.2);
+    }
+    .rdv-jour-btn--indispo {
+      opacity: .5;
+      cursor: not-allowed;
+      background: #f8fafc;
+    }
+    .rdv-jour-btn__date {
+      font-size: .88rem;
+      font-weight: 600;
+      color: #2c3e50;
+    }
+    .rdv-jour-btn--selected .rdv-jour-btn__date { color: #27ae60; }
+    .rdv-jour-btn__status {
+      font-size: .72rem;
+      font-weight: 700;
+      padding: 2px 10px;
+      border-radius: 20px;
+    }
+    .rdv-jour-btn--dispo .rdv-jour-btn__status {
+      background: #e8f5e9;
+      color: #27ae60;
+    }
+    .rdv-jour-btn--selected .rdv-jour-btn__status {
+      background: #27ae60;
+      color: #fff;
+    }
+    .rdv-jour-btn--indispo .rdv-jour-btn__status {
+      background: #f0f2f5;
+      color: #b0bcc9;
+    }
+    .rdv-empty {
+      text-align: center;
+      padding: 30px 0;
+      color: #7a8a9e;
+      font-size: .9rem;
+    }
+    .rdv-confirmation {
+      text-align: center;
+      padding: 20px 0;
+    }
+    .rdv-confirmation__icon {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: #e8f5e9;
+      color: #2ecc71;
+      font-size: 2rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      line-height: 1;
+    }
+    .rdv-confirmation--error .rdv-confirmation__icon {
+      background: #fde8e8;
+      color: #e74c3c;
+    }
+    .rdv-confirmation__title {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: #1a2634;
+      margin-bottom: 8px;
+    }
+    .rdv-confirmation__desc {
+      font-size: .9rem;
+      color: #7a8a9e;
+      margin-bottom: 16px;
+    }
+    .rdv-confirmation__details {
+      background: #f8fafc;
+      border-radius: 12px;
+      padding: 16px 20px;
+      text-align: left;
+      margin-bottom: 16px;
+      border: 1px solid #eef2f7;
+    }
+    .rdv-confirmation__details p {
+      margin-bottom: 4px;
+      font-size: .9rem;
+      color: #2c3e50;
+    }
+    .rdv-confirmation__note {
+      font-size: .82rem;
+      color: #7a8a9e;
+      font-style: italic;
+    }
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; font-size: .85rem; font-weight: 600; margin-bottom: 6px; color: #3d4e63; }
+    .form-input {
+      width: 100%;
+      padding: 10px 14px;
+      border: 2px solid #e0e6ed;
+      border-radius: 10px;
+      font-size: .95rem;
+      transition: border-color .2s;
+      background: #fff;
+      color: #2c3e50;
+      font-family: inherit;
+    }
+    .form-input:focus { outline: none; border-color: #3498db; box-shadow: 0 0 0 3px rgba(52,152,219,.15); }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 20px;
+      border: 2px solid transparent;
+      border-radius: 10px;
+      font-size: .9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .2s;
+      white-space: nowrap;
+      font-family: inherit;
+    }
+    .btn--primary {
+      background: #2ecc71;
+      color: #fff;
+      border-color: #2ecc71;
+    }
+    .btn--primary:hover { background: #27ae60; border-color: #27ae60; }
+    .btn--block { width: 100%; justify-content: center; }
+    @media (min-width: 480px) {
+      .form-row { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="rdv-container">
+    <div class="rdv-card">
+      <div class="rdv-card__header">
+        <h1 class="rdv-card__title">Planif'<span>Audit</span></h1>
+        <p class="rdv-card__subtitle">Planification de votre visite énergétique</p>
+      </div>
+
+      <!-- ÉTAPE 1 : Infos occupant -->
+      <div id="rdv-info" class="rdv-section">
+        <div class="rdv-info-card">
+          <p class="rdv-info__label">Occupant</p>
+          <p class="rdv-info__value" id="rdvNom"></p>
+          <p class="rdv-info__label">Logement</p>
+          <p class="rdv-info__value" id="rdvLogement"></p>
+        </div>
+      </div>
+
+      <!-- CHARGEMENT -->
+      <div id="rdv-loading" class="rdv-section rdv-section--center">
+        <p>Chargement de vos disponibilités…</p>
+      </div>
+
+      <!-- ÉTAPE 2 : Choix du jour -->
+      <div id="rdv-jours" class="rdv-section" style="display:none">
+        <h2 class="rdv-section__title">Choisissez un jour pour la visite</h2>
+        <p class="rdv-section__desc">Sélectionnez une date parmi les jours disponibles ci-dessous.</p>
+        <div id="rdvJoursList" class="rdv-jours-grid"></div>
+      </div>
+
+      <!-- ÉTAPE 3 : Choix de l'heure -->
+      <div id="rdv-heure" class="rdv-section" style="display:none">
+        <h2 class="rdv-section__title">Choisissez un créneau horaire</h2>
+        <p class="rdv-section__desc" id="rdvDateSelected"></p>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="rdvHeureDebut">Heure de début</label>
+            <input class="form-input" type="time" id="rdvHeureDebut" value="09:00">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="rdvHeureFin">Heure de fin</label>
+            <input class="form-input" type="time" id="rdvHeureFin" value="09:30">
+          </div>
+        </div>
+        <button class="btn btn--primary btn--block" id="rdvSubmitBtn">Confirmer mon rendez-vous</button>
+      </div>
+
+      <!-- CONFIRMATION -->
+      <div id="rdv-confirmation" class="rdv-section" style="display:none">
+        <div class="rdv-confirmation">
+          <div class="rdv-confirmation__icon">✓</div>
+          <h2 class="rdv-confirmation__title">Rendez-vous confirmé !</h2>
+          <p class="rdv-confirmation__desc">Votre visite énergétique a été planifiée.</p>
+          <div class="rdv-confirmation__details" id="rdvConfirmDetails"></div>
+          <p class="rdv-confirmation__note">Un email de confirmation vous a été envoyé.</p>
+        </div>
+      </div>
+
+      <!-- ERREUR -->
+      <div id="rdv-erreur" class="rdv-section" style="display:none">
+        <div class="rdv-confirmation rdv-confirmation--error">
+          <div class="rdv-confirmation__icon">✕</div>
+          <h2 class="rdv-confirmation__title">Lien invalide</h2>
+          <p class="rdv-confirmation__desc" id="rdvErreurMsg">Ce lien n'est pas valide ou a expiré.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/rdv.js"></script>
+</body>
+</html>

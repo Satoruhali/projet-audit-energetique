@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connexion — Planif'Audit</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="container topbar__inner">
+      <a href="/dashboard" class="topbar__logo">Planif'<span>Audit</span></a>
+    </div>
+  </header>
+
+  <main class="main container">
+    <section class="view active" style="display:block">
+      <div class="auth-container">
+        <div class="auth-card">
+          <h1 class="auth-card__title">Planif'<span>Audit</span></h1>
+          <p class="auth-card__subtitle">Planification d'audits énergétiques</p>
+
+          <div class="auth-tabs">
+            <button class="auth-tab auth-tab--active" data-auth-tab="login">Connexion</button>
+            <button class="auth-tab" data-auth-tab="register">Inscription</button>
+          </div>
+
+          <form id="loginForm" class="auth-form">
+            <div class="form-group">
+              <label class="form-label" for="loginEmail">Email</label>
+              <input class="form-input" type="email" id="loginEmail" placeholder="exemple@email.fr" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="loginPassword">Mot de passe</label>
+              <input class="form-input" type="password" id="loginPassword" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="btn btn--primary btn--block">Se connecter</button>
+            <p class="auth-form__error" id="loginError"></p>
+          </form>
+
+          <form id="registerForm" class="auth-form" style="display:none">
+            <div class="form-group">
+              <label class="form-label" for="registerName">Nom de l'entreprise</label>
+              <input class="form-input" type="text" id="registerName" placeholder="Diagnostic Énergie Pro" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="registerEmail">Email</label>
+              <input class="form-input" type="email" id="registerEmail" placeholder="contact@diagnostic-pro.fr" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="registerPassword">Mot de passe</label>
+              <input class="form-input" type="password" id="registerPassword" placeholder="••••••••" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="registerConfirm">Confirmer le mot de passe</label>
+              <input class="form-input" type="password" id="registerConfirm" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="btn btn--primary btn--block">Créer un compte</button>
+            <p class="auth-form__error" id="registerError"></p>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="js/api.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/auth.js"></script>
+</body>
+</html>

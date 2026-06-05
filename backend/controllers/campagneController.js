@@ -139,6 +139,32 @@ exports.lancerSelection = async (req, res) => {
   }
 };
 
+exports.listEmails = async (req, res) => {
+  try {
+    const immeubles = await Immeuble.find({ id_entrepreneur: req.entrepreneur.id });
+    const immeubleIds = immeubles.map(i => i._id);
+
+    const campagne = await Campagne.findOne({
+      _id: req.params.id,
+      immeuble_id: { $in: immeubleIds },
+      deletedAt: null
+    });
+
+    if (!campagne) {
+      return res.status(404).json({ message: 'Campagne introuvable ou non autorisée' });
+    }
+
+    const emails = await EmailEnvoye.find({ campagne_id: campagne._id })
+      .sort({ date_envoi: -1 })
+      .limit(100)
+      .lean();
+
+    res.json({ emails });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur lors de la récupération de l\'historique des emails' });
+  }
+};
+
 exports.envoyerEmails = async (req, res) => {
   try {
     const immeubles = await Immeuble.find({ id_entrepreneur: req.entrepreneur.id });

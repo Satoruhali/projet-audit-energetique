@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Détail campagne — Planif'Audit</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="container topbar__inner">
+      <a href="/dashboard" class="topbar__logo">Planif'<span>Audit</span></a>
+      <nav class="topbar__nav" id="mainNav">
+        <a href="/dashboard" class="topbar__link">Tableau de bord</a>
+        <a href="/dashboard" class="topbar__link">Campagnes</a>
+      </nav>
+      <div class="topbar__user" id="topbarUser" style="display:none">
+        <span class="topbar__user-name" id="userName"></span>
+        <button class="btn btn--outline btn--xs" id="logoutBtn">Déconnexion</button>
+      </div>
+      <button class="topbar__toggle" id="menuToggle" aria-label="Menu">☰</button>
+    </div>
+  </header>
+
+  <main class="main container">
+
+    <div class="page-header">
+      <button class="btn btn--outline btn--sm" id="backToDashboard">← Retour</button>
+      <div>
+        <h1 class="page-title" id="detailTitle">Détail de la campagne</h1>
+        <p class="page-subtitle" id="detailSubtitle"></p>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn--outline btn--sm" id="genLinksBtn">🔗 Générer liens</button>
+      </div>
+    </div>
+
+    <!-- STATS DÉTAIL -->
+    <div class="stats stats--sm" id="detailStats">
+      <div class="stat-card stat-card--green">
+        <span class="stat-card__value" id="detailRepondu">0</span>
+        <span class="stat-card__label">Répondu</span>
+      </div>
+      <div class="stat-card stat-card--orange">
+        <span class="stat-card__value" id="detailEnAttente">0</span>
+        <span class="stat-card__label">En attente</span>
+      </div>
+      <div class="stat-card stat-card--blue">
+        <span class="stat-card__value" id="detailTotal">0</span>
+        <span class="stat-card__label">Total logements</span>
+      </div>
+    </div>
+
+    <!-- JOURS DISPONIBLES -->
+    <div class="card" id="joursDisponiblesCard">
+      <div class="card__toolbar">
+        <h2 class="card__title">Jours disponibles pour les visites</h2>
+        <button class="btn btn--primary btn--sm" id="saveJoursBtn">Enregistrer les jours</button>
+      </div>
+      <div id="joursDisponiblesContainer" class="jours-grid"></div>
+    </div>
+
+    <!-- ONGLETS -->
+    <div class="tabs" id="detailTabs">
+      <button class="tab tab--active" data-tab="reponses">Réponses</button>
+      <button class="tab" data-tab="planning">Planning</button>
+      <button class="tab" data-tab="echantillonnage">Échantillonnage</button>
+    </div>
+
+    <!-- CONTENU ONGLET RÉPONSES -->
+    <div class="tab-content tab-content--active" id="tab-reponses">
+      <div class="card">
+        <div class="card__toolbar">
+          <h2 class="card__title">Réponses des locataires</h2>
+          <button class="btn btn--outline btn--sm" id="relanceMassBtn">📧 Relancer tous</button>
+        </div>
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Logement</th>
+                <th>Nom</th>
+                <th>Étage</th>
+                <th>Statut</th>
+                <th>Créneau choisi</th>
+                <th class="th-actions">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="reponsesList"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONTENU ONGLET PLANNING -->
+    <div class="tab-content" id="tab-planning">
+      <div class="card">
+        <div class="card__toolbar">
+          <h2 class="card__title">Planning optimisé</h2>
+          <div class="btn-group">
+            <button class="btn btn--outline btn--sm" id="exportPdfBtn">📄 Exporter PDF</button>
+            <button class="btn btn--outline btn--sm" id="exportIcalBtn">📅 Exporter iCal</button>
+          </div>
+        </div>
+        <div class="planning-info">
+          <span class="badge badge--green">Trié par étage (RG3)</span>
+          <span class="badge badge--orange">Pause 15 min incluse (RG9)</span>
+          <span class="badge badge--blue">Pas de chevauchement (RG4)</span>
+        </div>
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Début</th>
+                <th>Fin</th>
+                <th>Étage</th>
+                <th>Logement</th>
+                <th>Nom</th>
+                <th class="th-actions">Modifier</th>
+              </tr>
+            </thead>
+            <tbody id="planningList"></tbody>
+          </table>
+        </div>
+        <div id="emptyPlanning" class="empty-state" style="display:none">
+          <p>Aucun planning généré. En attente des réponses des locataires.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONTENU ONGLET ÉCHANTILLONNAGE -->
+    <div class="tab-content" id="tab-echantillonnage">
+
+      <div class="card" id="selectionActionsCard">
+        <div class="selection-actions">
+          <button class="btn btn--primary btn--lg" id="lancerSelectionBtn">
+            🎯 Lancer la sélection
+          </button>
+          <p class="selection-actions__help">Lance l'algorithme de set cover pour sélectionner un échantillon représentatif de logements.</p>
+        </div>
+      </div>
+
+      <div class="card" id="selectionSeuilCard" style="display:none">
+        <h2 class="card__title">Seuil minimal</h2>
+        <div class="stats stats--sm">
+          <div class="stat-card stat-card--blue">
+            <span class="stat-card__value" id="seuilRequis">0</span>
+            <span class="stat-card__label">Requis</span>
+          </div>
+          <div class="stat-card stat-card--green">
+            <span class="stat-card__value" id="seuilObtenu">0</span>
+            <span class="stat-card__label">Sélectionnés</span>
+          </div>
+        </div>
+        <p class="selection-info" id="selectionDateInfo"></p>
+      </div>
+
+      <div class="card" id="selectionCouvertureCard" style="display:none">
+        <h2 class="card__title">Couverture des critères</h2>
+        <p class="card__subtitle" id="couvertureStatus"></p>
+        <div id="couvertureContainer"></div>
+      </div>
+
+      <div class="card" id="selectionListCard" style="display:none">
+        <div class="card__toolbar">
+          <h2 class="card__title">Logements sélectionnés</h2>
+          <span class="badge badge--green" id="selectionCountBadge">0</span>
+        </div>
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Logement</th>
+                <th>Étage</th>
+                <th>Typologie</th>
+                <th>Plancher bas</th>
+                <th>Plancher haut</th>
+                <th>Position</th>
+                <th>Locataire</th>
+              </tr>
+            </thead>
+            <tbody id="selectionList"></tbody>
+          </table>
+        </div>
+        <div id="emptySelection" class="empty-state" style="display:none">
+          <p>Aucun logement sélectionné. Lancez l'algorithme pour générer l'échantillon.</p>
+        </div>
+      </div>
+
+      <div class="card" id="emailSendCard" style="display:none">
+        <h2 class="card__title">Envoi d'emails aux locataires</h2>
+        <div class="stats stats--sm" id="emailStatsContainer">
+          <div class="stat-card stat-card--blue">
+            <span class="stat-card__value" id="emailVisitesCount">0</span>
+            <span class="stat-card__label">Visite programmée</span>
+          </div>
+          <div class="stat-card stat-card--orange">
+            <span class="stat-card__value" id="emailNonVisitesCount">0</span>
+            <span class="stat-card__label">Pas de visite</span>
+          </div>
+        </div>
+        <p class="selection-info" id="emailSendInfo">Les locataires avec un email recevront un lien personnalisé.</p>
+        <button class="btn btn--primary btn--lg" id="envoyerEmailsBtn">
+          ✉️ Envoyer les emails
+        </button>
+      </div>
+
+      <div class="card" id="emailHistoryCard" style="display:none">
+        <div class="card__toolbar">
+          <h2 class="card__title">Historique des envois</h2>
+          <span class="badge badge--blue" id="emailCountBadge">0</span>
+        </div>
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Destinataire</th>
+                <th>Type</th>
+                <th>Statut</th>
+                <th>Date d'envoi</th>
+              </tr>
+            </thead>
+            <tbody id="emailHistoryList"></tbody>
+          </table>
+        </div>
+        <div id="emptyEmailHistory" class="empty-state" style="display:none">
+          <p>Aucun email envoyé pour cette campagne.</p>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="js/api.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/detail.js"></script>
+</body>
+</html>

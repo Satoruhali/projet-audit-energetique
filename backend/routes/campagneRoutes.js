@@ -3,6 +3,7 @@ const router = express.Router();
 const auth = require('../middlewares/auth');
 const campagneController = require('../controllers/campagneController');
 const logementController = require('../controllers/logementController');
+const locataireController = require('../controllers/locataireController');
 
 router.post('/', auth, campagneController.store);
 router.get('/', auth, campagneController.index);
@@ -13,6 +14,8 @@ router.put('/:campagne_id/logements/:logement_id', auth, logementController.upda
 router.delete('/:campagne_id/logements/:logement_id', auth, logementController.delete);
 
 router.post('/:id/lancer-selection', auth, campagneController.lancerSelection);
+router.get('/:id/emails', auth, campagneController.listEmails);
+router.post('/:id/locataires', auth, locataireController.storeBatch);
 router.post('/:id/envoyer-emails', auth, campagneController.envoyerEmails);
 
 module.exports = router;

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Choix des jours — Planif'Audit</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="container topbar__inner">
+      <a href="/dashboard" class="topbar__logo">Planif'<span>Audit</span></a>
+      <nav class="topbar__nav" id="mainNav">
+        <a href="/dashboard" class="topbar__link">Tableau de bord</a>
+        <a href="/dashboard" class="topbar__link">Campagnes</a>
+      </nav>
+      <div class="topbar__user" id="topbarUser" style="display:none">
+        <span class="topbar__user-name" id="userName"></span>
+        <button class="btn btn--outline btn--xs" id="logoutBtn">Déconnexion</button>
+      </div>
+      <button class="topbar__toggle" id="menuToggle" aria-label="Menu">☰</button>
+    </div>
+  </header>
+
+  <main class="main container">
+
+    <div class="page-header">
+      <button class="btn btn--outline btn--sm" id="joursBackBtn">← Retour</button>
+      <div>
+        <h1 class="page-title">Choix des jours de visite</h1>
+        <p class="page-subtitle" id="joursCampSubtitle">Sélectionnez les jours où le diagnostiqueur peut intervenir</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn--outline btn--sm" id="joursSelectAll">Tout sélectionner</button>
+        <button class="btn btn--outline btn--sm" id="joursDeselectAll">Tout désélectionner</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card__toolbar">
+        <h2 class="card__title">Calendrier des 30 prochains jours</h2>
+        <span class="badge badge--blue" id="joursSelectedCount">0 jour(s) sélectionné(s)</span>
+      </div>
+      <div id="joursCalendar" class="jours-calendar"></div>
+      <div class="form-actions" style="margin-top:20px">
+        <button class="btn btn--primary" id="joursSaveBtn">Enregistrer et continuer</button>
+        <button class="btn btn--outline" id="joursSkipBtn">Passer cette étape</button>
+      </div>
+    </div>
+  </main>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="js/api.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/jours.js"></script>
+</body>
+</html>

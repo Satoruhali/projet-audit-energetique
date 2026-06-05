@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planning optimisé — Planif'Audit</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="container topbar__inner">
+      <a href="/dashboard" class="topbar__logo">Planif'<span>Audit</span></a>
+      <nav class="topbar__nav" id="mainNav">
+        <a href="/dashboard" class="topbar__link">Tableau de bord</a>
+        <a href="/dashboard" class="topbar__link">Campagnes</a>
+      </nav>
+      <div class="topbar__user" id="topbarUser" style="display:none">
+        <span class="topbar__user-name" id="userName"></span>
+        <button class="btn btn--outline btn--xs" id="logoutBtn">Déconnexion</button>
+      </div>
+      <button class="topbar__toggle" id="menuToggle" aria-label="Menu">☰</button>
+    </div>
+  </header>
+
+  <main class="main container">
+
+    <div class="page-header">
+      <button class="btn btn--outline btn--sm" id="backToDetail">← Retour au détail</button>
+      <div>
+        <h1 class="page-title">Planning optimisé</h1>
+        <p class="page-subtitle" id="planningCampSubtitle"></p>
+      </div>
+      <div class="btn-group">
+        <button class="btn btn--outline btn--sm" id="planExportPdf">📄 PDF</button>
+        <button class="btn btn--outline btn--sm" id="planExportIcal">📅 iCal</button>
+      </div>
+    </div>
+
+    <div class="planning-info">
+      <span class="badge badge--green">Trié par étage croissant (RG3)</span>
+      <span class="badge badge--orange">Pause 15 min entre visites (RG9)</span>
+      <span class="badge badge--blue">Aucun chevauchement (RG4)</span>
+    </div>
+
+    <!-- TIMELINE -->
+    <div class="timeline" id="planningTimeline"></div>
+
+    <div class="card">
+      <h2 class="card__title">Détail des visites</h2>
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+                <th>#</th>
+                <th>Date</th>
+                <th>Créneau</th>
+                <th>Étage</th>
+                <th>Logement</th>
+                <th>Nom</th>
+                <th>Durée</th>
+                <th class="th-actions">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="planningDetailList"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="card__title">Modifier un créneau</h2>
+      <form id="modifySlotForm">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="modifLogement">Logement</label>
+            <select class="form-input" id="modifLogement"></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="modifDate">Nouvelle date</label>
+            <input class="form-input" type="date" id="modifDate">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="modifDebut">Nouveau début</label>
+            <input class="form-input" type="time" id="modifDebut">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="modifFin">Nouvelle fin</label>
+            <input class="form-input" type="time" id="modifFin">
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn--primary">Appliquer la modification</button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="js/api.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/planning.js"></script>
+</body>
+</html>
