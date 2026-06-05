@@ -436,5 +436,35 @@ Audit du plan d'attaque et du code existant pour identifier les failles pouvant 
   - Controller envoyerEmails : vérifie autorisation (entrepreneur→immeuble→campagne), boucle sur logements avec locataire, template différencié selon selectionne_visite, enregistre chaque envoi dans email_envoyes
   - Route protégée par auth middleware
   - Tests passants : 404 (campagne inconnue), 400 (aucun locataire), 200 (envoi 2 emails : 1 visité + 1 non-visité), vérification base email_envoyes (2 enregistrements)
-  - Commit: `761a76d`
+   - Commit: `761a76d`
+---
+
+## 📅 2026-06-05 — 11:30
+- **Tâche** : Restructuration du frontend en dossier dédié `frontend/` avec fichiers modulaires (js/, html, css) + mise à jour backend
+- **Durée estimée** : 2h
+- **Durée réelle** : ⏳ à compléter
+- **Statut** : ✅ terminée
+- **Fichiers modifiés** : `frontend/auth.html`, `frontend/dashboard.html`, `frontend/detail.html`, `frontend/jours.html`, `frontend/planning.html`, `frontend/rdv.html`, `frontend/css/style.css`, `frontend/js/api.js`, `frontend/js/auth.js`, `frontend/js/dashboard.js`, `frontend/js/detail.js`, `frontend/js/jours.js`, `frontend/js/planning.js`, `frontend/js/rdv.js`, `frontend/js/utils.js`, `backend/controllers/campagneController.js`, `backend/server.js`, `backend/routes/campagneRoutes.js`
+- **Notes** :
+  - Découpage de l'ancien monolithe `index.html` + `script.js` en 6 pages HTML, 7 modules JS, 1 feuille de style mutualisée
+  - Chaque module JS (auth, dashboard, detail, jours, planning, rdv, utils) expose son initialiseur sur `window`
+  - Routes pages mises à jour dans `server.js` pour servir les nouveaux fichiers
+  - Suppression des fichiers racine `index.html` et `script.js`
+  - Commit: `308fb7b`
+---
+
+## 📅 2026-06-05 — 14:15
+- **Tâche** : Migration complète de MongoDB (Mongoose) vers MySQL (Sequelize) — modèles, contrôleurs, middlewares, seed, tests, documentation
+- **Durée estimée** : 3h
+- **Durée réelle** : ⏳ à compléter
+- **Statut** : ✅ terminée
+- **Fichiers modifiés** : (38 fichiers) `backend/config/database.js` (créé), `backend/db/migrate.js` (créé), `backend/db/migration.sql` (créé), `backend/models/index.js` (créé), `backend/models/JoursDisponible.js` (créé), `backend/models/TypePlancher.js` (créé), `backend/models/Typologie.js` (créé), `backend/controllers/locataireController.js` (créé), `backend/models/Campagne.js`, `backend/models/Creneau.js`, `backend/models/EmailEnvoye.js`, `backend/models/Entrepreneur.js`, `backend/models/Immeuble.js`, `backend/models/Locataire.js`, `backend/models/Logement.js`, `backend/controllers/authController.js`, `backend/controllers/campagneController.js`, `backend/controllers/campagneJoursController.js`, `backend/controllers/immeubleController.js`, `backend/controllers/lienController.js`, `backend/controllers/logementController.js`, `backend/middlewares/auth.js`, `backend/middlewares/errorHandler.js`, `backend/seed.js`, `backend/server.js`, `backend/tests/*.test.js`, `backend/validations/campagne.js`, `docs/*.md`, `package.json`, `package-lock.json`, `.opencode/`, `opencode.json`
+- **Notes** :
+  - Remplacement de `mongoose.connect()` par `sequelize.authenticate()` + `sequelize.sync()` dans `server.js`
+  - Tous les modèles réécrits : `sequelize.define()` au lieu de `mongoose.Schema`, types MySQL (INTEGER, STRING, ENUM, BOOLEAN, TEXT), associations via `belongsTo`/`hasMany`
+  - Contrôleurs adaptés : remplacement de `find()`, `findById()`, `save()`, `findByIdAndUpdate()` par `findAll()`, `findByPk()`, `create()`, `update()`, `destroy()` Sequelize
+  - Suppression du dossier `Agent.ia/` (déplacé dans `.opencode/`)
+  - Ajout des fichiers de configuration opencode (`.opencode/rules/`, `.opencode/skills/`, `opencode.json`)
+  - Mise à jour de la documentation technique (`docs/05_Documentation_Technique.md`) et plan projet (`docs/01_Plan_Organisation_Projet.md`)
+  - Commit: `b960d08`
 ---
