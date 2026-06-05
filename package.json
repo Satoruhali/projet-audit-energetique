@@ -9,7 +9,8 @@
     "test": "set NODE_ENV=testing&& node --test backend/tests/lien.test.js",
     "test:unit": "set NODE_ENV=testing&& node --test --test-name-pattern='timeToMinutes|chevauche' backend/tests/lien.test.js",
     "test:int": "set NODE_ENV=testing&& node --test --test-name-pattern='API' backend/tests/lien.test.js",
-    "seed": "node backend/seed.js"
+    "seed": "node backend/seed.js",
+    "migrate": "node backend/db/migrate.js"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
@@ -19,13 +20,14 @@
     "express-rate-limit": "^8.5.2",
     "joi": "^17.11.0",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^9.6.2",
+    "mariadb": "^3.5.2",
     "mysql2": "^3.6.5",
-    "nodemailer": "^6.9.7"
+    "nodemailer": "^6.9.7",
+    "sequelize": "^6.37.7"
   },
   "devDependencies": {
-    "mongodb-memory-server": "^11.2.0",
     "nodemon": "^3.0.2",
+    "sqlite3": "^5.1.7",
     "supertest": "^7.2.2"
   }
 }

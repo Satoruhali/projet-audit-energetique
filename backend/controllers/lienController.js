@@ -1,6 +1,9 @@
+const { Op } = require('sequelize');
 const Locataire = require('../models/Locataire');
 const Campagne = require('../models/Campagne');
+const Immeuble = require('../models/Immeuble');
 const Creneau = require('../models/Creneau');
+const JoursDisponible = require('../models/JoursDisponible');
 const { creneauSchema } = require('../validations/lien');
 
 function timeToMinutes(t) {
@@ -18,32 +21,53 @@ exports.chevauche = chevauche;
 exports.getLien = async (req, res) => {
   try {
     const { token } = req.params;
-    const locataire = await Locataire.findOne({ token });
+    const locataire = await Locataire.findOne({ where: { token_acces: token } });
     if (!locataire) {
       return res.status(404).json({ message: 'Lien invalide ou expiré' });
     }
 
-    const campagne = await Campagne.findById(locataire.campagne_id);
+    const logement = await require('../models/Logement').findOne({
+      where: { locataire_id: locataire.id }
+    });
+
+    if (!logement) {
+      return res.status(404).json({ message: 'Logement introuvable' });
+    }
+
+    const immeuble = await Immeuble.findByPk(logement.batiment_id);
+    if (!immeuble) {
+      return res.status(404).json({ message: 'Immeuble introuvable' });
+    }
+
+    const campagne = await Campagne.findOne({
+      where: { batiment_id: logement.batiment_id }
+    });
+
     if (!campagne) {
       return res.status(404).json({ message: 'Campagne introuvable' });
     }
 
-    const joursDisponibles = (campagne.jours_disponibles || []).map(d => {
-      const date = new Date(d);
-      return date.toISOString().split('T')[0];
+    const joursDisponibles = await JoursDisponible.findAll({
+      where: {
+        id_entrepreneur: immeuble.id_entrepreneur,
+        est_disponible: true
+      },
+      order: [['date', 'ASC']]
     });
 
     res.json({
       locataire: {
         nom: locataire.nom,
-        prenom: locataire.prenom,
-        logement: locataire.logement_id
+        prenom: ''
       },
       campagne: {
-        id: campagne._id,
+        id: campagne.id,
         nom: campagne.nom
       },
-      jours_disponibles: joursDisponibles
+      jours_disponibles: joursDisponibles.map(j => {
+        const d = new Date(j.date);
+        return d.toISOString().split('T')[0];
+      })
     });
   } catch (err) {
     console.error('Erreur getLien:', err);
@@ -66,39 +90,58 @@ exports.postCreneau = async (req, res) => {
       return res.status(400).json({ message: 'L\'heure de fin doit être postérieure à l\'heure de début' });
     }
 
-    const locataire = await Locataire.findOne({ token });
+    const locataire = await Locataire.findOne({ where: { token_acces: token } });
     if (!locataire) {
       return res.status(404).json({ message: 'Lien invalide ou expiré' });
     }
 
-    const creneauExistant = await Creneau.findOne({ locataire_id: locataire._id, campagne_id: locataire.campagne_id });
-    if (creneauExistant) {
-      return res.status(400).json({ message: 'Un créneau a déjà été réservé pour ce lien' });
+    const logement = await require('../models/Logement').findOne({
+      where: { locataire_id: locataire.id }
+    });
+
+    if (!logement) {
+      return res.status(404).json({ message: 'Logement introuvable' });
     }
 
-    const campagne = await Campagne.findById(locataire.campagne_id);
+    const campagne = await Campagne.findOne({
+      where: { batiment_id: logement.batiment_id }
+    });
+
     if (!campagne) {
       return res.status(404).json({ message: 'Campagne introuvable' });
     }
 
+    const creneauExistant = await Creneau.findOne({
+      where: { id_logement: logement.id, id_campagne: campagne.id }
+    });
+    if (creneauExistant) {
+      return res.status(400).json({ message: 'Un créneau a déjà été réservé pour ce lien' });
+    }
+
+    const immeuble = await Immeuble.findByPk(logement.batiment_id);
+
     const dateStr = new Date(date_visite).toISOString().split('T')[0];
-    const joursDisponibles = (campagne.jours_disponibles || []).map(d =>
-      new Date(d).toISOString().split('T')[0]
+
+    const joursDisponibles = await JoursDisponible.findAll({
+      where: {
+        id_entrepreneur: immeuble.id_entrepreneur,
+        est_disponible: true
+      }
+    });
+
+    const joursDates = joursDisponibles.map(j =>
+      new Date(j.date).toISOString().split('T')[0]
     );
 
-    if (!joursDisponibles.includes(dateStr)) {
+    if (!joursDates.includes(dateStr)) {
       return res.status(400).json({ message: 'La date sélectionnée n\'est pas disponible' });
     }
 
-    const debut = new Date(date_visite);
-    debut.setHours(0, 0, 0, 0);
-
-    const fin = new Date(date_visite);
-    fin.setHours(23, 59, 59, 999);
-
-    const existants = await Creneau.find({
-      campagne_id: campagne._id,
-      date_visite: { $gte: debut, $lte: fin }
+    const existants = await Creneau.findAll({
+      where: {
+        id_campagne: campagne.id,
+        date_visite: date_visite
+      }
     });
 
     for (const existant of existants) {
@@ -110,8 +153,8 @@ exports.postCreneau = async (req, res) => {
     }
 
     const creneau = await Creneau.create({
-      locataire_id: locataire._id,
-      campagne_id: campagne._id,
+      id_logement: logement.id,
+      id_campagne: campagne.id,
       date_visite: date_visite,
       heure_debut,
       heure_fin,
@@ -121,7 +164,7 @@ exports.postCreneau = async (req, res) => {
     if (locataire.email) {
       console.log(`[EMAIL SIMULÉ] Confirmation envoyée à ${locataire.email}`);
       console.log(`[EMAIL SIMULÉ] Sujet: Confirmation de votre rendez-vous`);
-      console.log(`[EMAIL SIMULÉ] Corps: Bonjour ${locataire.prenom} ${locataire.nom},`);
+      console.log(`[EMAIL SIMULÉ] Corps: Bonjour ${locataire.nom},`);
       console.log(`[EMAIL SIMULÉ] Votre rendez-vous est confirmé le ${dateStr} de ${heure_debut} à ${heure_fin}.`);
     }
 
@@ -136,7 +179,7 @@ exports.postCreneau = async (req, res) => {
     });
   } catch (err) {
     console.error('Erreur postCreneau:', err);
-    if (err.code === 11000) {
+    if (err.name === 'SequelizeUniqueConstraintError') {
       return res.status(409).json({ message: 'Un créneau existe déjà pour ce locataire ou ce créneau horaire' });
     }
     res.status(500).json({ message: 'Erreur serveur' });

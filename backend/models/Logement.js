@@ -1,46 +1,73 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const sequelize = require('../config/database');
 
-const TYPOLOGIES = ['T1', 'T2', 'T3', 'T4', 'T5', 'T6'];
-
-const logementSchema = new mongoose.Schema({
-  campagne_id: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Campagne',
-    required: true
+const Logement = sequelize.define('logements', {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true
   },
-  numero: { type: String, required: true, trim: true },
-  etage: { type: Number, required: true },
-  surface: { type: Number, required: true },
-  loyer_estime: { type: Number },
-  typologie: {
-    type: String,
-    enum: TYPOLOGIES,
-    required: true
+  batiment_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false
   },
-  plancher_bas: { type: String, required: true, trim: true },
-  plancher_haut: { type: String, required: true, trim: true },
+  numero: {
+    type: DataTypes.STRING(50),
+    allowNull: false
+  },
+  etage: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+  },
+  locataire_id: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
+  id_typologie: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
+  id_type_plancher_bas: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
+  id_type_plancher_haut: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
   position: {
-    type: String,
-    enum: ['bas', 'intermediaire', 'haut'],
-    required: true
+    type: DataTypes.ENUM('rez_de_chaussee', 'intermediaire', 'dernier_etage'),
+    allowNull: true
+  },
+  selectionne_visite: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false
+  },
+  surface: {
+    type: DataTypes.FLOAT,
+    allowNull: true
+  },
+  loyer_estime: {
+    type: DataTypes.FLOAT,
+    allowNull: true
   },
   statut: {
-    type: String,
-    enum: ['libre', 'occupe', 'reserve'],
-    default: 'libre'
+    type: DataTypes.ENUM('libre', 'occupe', 'reserve'),
+    defaultValue: 'libre'
   },
-  selectionne_visite: { type: Boolean, default: false },
-  deletedAt: { type: Date, default: null }
-}, { timestamps: true });
-
-logementSchema.virtual('locataire', {
-  ref: 'Locataire',
-  localField: '_id',
-  foreignField: 'logement_id',
-  justOne: true
+  deleted_at: {
+    type: DataTypes.DATE,
+    allowNull: true
+  }
+}, {
+  timestamps: false,
+  tableName: 'logements',
+  defaultScope: {
+    where: { deleted_at: null }
+  },
+  scopes: {
+    withDeleted: { where: {} }
+  }
 });
 
-logementSchema.set('toJSON', { virtuals: true });
-logementSchema.set('toObject', { virtuals: true });
-
-module.exports = mongoose.model('Logement', logementSchema);
+module.exports = Logement;

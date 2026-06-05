@@ -1,47 +1,64 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const sequelize = require('../config/database');
 
-const campagneSchema = new mongoose.Schema({
-  immeuble_id: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Immeuble',
-    required: true
+const Campagne = sequelize.define('campagnes', {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true
   },
-  nom: { type: String, required: true, trim: true },
+  batiment_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+  },
+  nom: {
+    type: DataTypes.STRING(255),
+    allowNull: false
+  },
+  date_debut_possible: {
+    type: DataTypes.DATEONLY,
+    allowNull: false
+  },
+  date_fin_possible: {
+    type: DataTypes.DATEONLY,
+    allowNull: false
+  },
   statut: {
-    type: String,
-    enum: ['brouillon', 'en_cours', 'termine'],
-    default: 'brouillon'
+    type: DataTypes.ENUM('brouillon', 'ouverte', 'planification_terminee', 'termine'),
+    defaultValue: 'brouillon'
   },
-  deletedAt: { type: Date, default: null },
-  jours_disponibles: [{ type: Date }],
+  nb_min_visites: {
+    type: DataTypes.INTEGER,
+    defaultValue: 1
+  },
+  pct_min_visites: {
+    type: DataTypes.FLOAT,
+    defaultValue: 50.00
+  },
   selection: {
-    date_selection: { type: Date },
-    seuil_requis: { type: Number },
-    seuil_obtenu: { type: Number },
-    couverture: {
-      typologies: [String],
-      planchersBas: [String],
-      planchersHaut: [String],
-      positions: [String]
+    type: DataTypes.TEXT,
+    allowNull: true,
+    get() {
+      const raw = this.getDataValue('selection');
+      return raw ? JSON.parse(raw) : null;
     },
-    couvertureComplete: { type: Boolean },
-    criteresManquants: [String]
+    set(value) {
+      this.setDataValue('selection', JSON.stringify(value));
+    }
+  },
+  deleted_at: {
+    type: DataTypes.DATE,
+    allowNull: true
   }
-}, { timestamps: true });
-
-campagneSchema.virtual('logements', {
-  ref: 'Logement',
-  localField: '_id',
-  foreignField: 'campagne_id'
+}, {
+  timestamps: false,
+  tableName: 'campagnes',
+  defaultScope: {
+    where: { deleted_at: null }
+  },
+  scopes: {
+    withDeleted: { where: {} }
+  }
 });
 
-campagneSchema.virtual('locataires', {
-  ref: 'Locataire',
-  localField: '_id',
-  foreignField: 'campagne_id'
-});
-
-campagneSchema.set('toJSON', { virtuals: true });
-campagneSchema.set('toObject', { virtuals: true });
-
-module.exports = mongoose.model('Campagne', campagneSchema);
+module.exports = Campagne;

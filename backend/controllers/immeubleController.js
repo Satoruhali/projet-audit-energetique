@@ -3,7 +3,9 @@ const { creerImmeuble } = require('../validations/immeuble');
 
 exports.list = async (req, res) => {
   try {
-    const immeubles = await Immeuble.find({ id_entrepreneur: req.entrepreneur.id });
+    const immeubles = await Immeuble.findAll({
+      where: { id_entrepreneur: req.entrepreneur.id }
+    });
     res.json(immeubles);
   } catch (err) {
     res.status(500).json({ message: 'Erreur lors de la récupération des immeubles' });

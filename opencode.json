@@ -1,0 +1,19 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "instructions": [
+    ".opencode/rules/regle-acces-fichiers.md",
+    ".opencode/rules/regle-analyse-pre-tache.md"
+  ],
+  "model": "opencode/big-pickle",
+  "username": "wassi",
+  "command": {
+    "journal": {
+      "description": "Ajoute une entrée dans le journal de bord du projet",
+      "template": "Ajoute une entrée dans le journal de bord en suivant les instructions dans .opencode/skills/journal/SKILL.md"
+    }
+  },
+  "permission": {
+    "edit": "ask",
+    "bash": "ask"
+  }
+}

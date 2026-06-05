@@ -1,23 +1,50 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const sequelize = require('../config/database');
 
-const immeubleSchema = new mongoose.Schema({
-  nom: { type: String, required: true, trim: true },
-  adresse: { type: String, required: true, trim: true },
-  typologie: {
-    type: String,
-    required: true,
-    enum: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6']
+const Immeuble = sequelize.define('immeubles', {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true
   },
-  annee_construction: { type: Number, required: true },
-  plancher_bas: { type: String, required: true, trim: true },
-  plancher_haut: { type: String, required: true, trim: true },
-  surface_totale: { type: Number },
-  nombre_etages: { type: Number },
+  nom: {
+    type: DataTypes.STRING(255),
+    allowNull: false
+  },
+  adresse: {
+    type: DataTypes.TEXT
+  },
+  nb_etages: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0
+  },
   id_entrepreneur: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Entrepreneur',
-    required: true
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
+  typologie: {
+    type: DataTypes.STRING(10),
+    allowNull: true
+  },
+  annee_construction: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
+  plancher_bas: {
+    type: DataTypes.STRING(100),
+    allowNull: true
+  },
+  plancher_haut: {
+    type: DataTypes.STRING(100),
+    allowNull: true
+  },
+  surface_totale: {
+    type: DataTypes.FLOAT,
+    allowNull: true
   }
-}, { timestamps: true });
+}, {
+  timestamps: false,
+  tableName: 'immeubles'
+});
 
-module.exports = mongoose.model('Immeuble', immeubleSchema);
+module.exports = Immeuble;

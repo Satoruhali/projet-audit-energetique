@@ -1,27 +1,57 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const sequelize = require('../config/database');
 
-const creneauSchema = new mongoose.Schema({
-  locataire_id: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Locataire',
-    required: true
+const Creneau = sequelize.define('creneaux', {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true
   },
-  campagne_id: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Campagne',
-    required: true
+  id_logement: {
+    type: DataTypes.INTEGER,
+    allowNull: false
   },
-  date_visite: { type: Date, required: true },
-  heure_debut: { type: String, required: true },
-  heure_fin: { type: String, required: true },
+  id_campagne: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+  },
+  id_jour_disponible: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
+  date_visite: {
+    type: DataTypes.DATEONLY,
+    allowNull: false
+  },
+  heure_debut: {
+    type: DataTypes.TIME,
+    allowNull: false
+  },
+  heure_fin: {
+    type: DataTypes.TIME,
+    allowNull: false
+  },
+  ordre_visite: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
   statut: {
-    type: String,
-    enum: ['reserve', 'confirme', 'annule'],
-    default: 'reserve'
+    type: DataTypes.ENUM('propose', 'reserve', 'confirme', 'effectue', 'annule'),
+    defaultValue: 'propose'
   }
-}, { timestamps: true });
+}, {
+  timestamps: false,
+  tableName: 'creneaux',
+  indexes: [
+    {
+      unique: true,
+      fields: ['id_campagne', 'id_logement']
+    },
+    {
+      unique: true,
+      fields: ['id_campagne', 'date_visite', 'heure_debut']
+    }
+  ]
+});
 
-creneauSchema.index({ campagne_id: 1, date_visite: 1, heure_debut: 1 }, { unique: true });
-creneauSchema.index({ locataire_id: 1, campagne_id: 1 }, { unique: true });
-
-module.exports = mongoose.model('Creneau', creneauSchema);
+module.exports = Creneau;

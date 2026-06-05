@@ -1,22 +1,36 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const sequelize = require('../config/database');
 
-const locataireSchema = new mongoose.Schema({
-  campagne_id: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Campagne',
-    required: true
+const Locataire = sequelize.define('locataires', {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true
   },
-  logement_id: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Logement',
-    required: true
+  nom: {
+    type: DataTypes.STRING(255),
+    allowNull: false
   },
-  nom: { type: String, required: true, trim: true },
-  prenom: { type: String, required: true, trim: true },
-  email: { type: String, trim: true, lowercase: true },
-  telephone: { type: String, trim: true },
-  date_entree: { type: Date },
-  token: { type: String, unique: true, sparse: true, index: true }
-}, { timestamps: true });
+  email: {
+    type: DataTypes.STRING(255),
+    allowNull: false,
+    unique: true
+  },
+  telephone: {
+    type: DataTypes.STRING(50)
+  },
+  date_inscription: {
+    type: DataTypes.DATE,
+    defaultValue: DataTypes.NOW
+  },
+  token_acces: {
+    type: DataTypes.STRING(64),
+    allowNull: true,
+    unique: true
+  }
+}, {
+  timestamps: false,
+  tableName: 'locataires'
+});
 
-module.exports = mongoose.model('Locataire', locataireSchema);
+module.exports = Locataire;

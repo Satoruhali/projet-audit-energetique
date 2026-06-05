@@ -1,3 +1,4 @@
+const { Op } = require('sequelize');
 const Campagne = require('../models/Campagne');
 const Logement = require('../models/Logement');
 const Immeuble = require('../models/Immeuble');
@@ -10,13 +11,13 @@ exports.storeBatch = async (req, res) => {
       return res.status(400).json({ message: error.details[0].message });
     }
 
-    const immeubles = await Immeuble.find({ id_entrepreneur: req.entrepreneur.id });
-    const immeubleIds = immeubles.map(i => i._id);
+    const immeubles = await Immeuble.findAll({
+      where: { id_entrepreneur: req.entrepreneur.id }
+    });
+    const immeubleIds = immeubles.map(i => i.id);
 
     const campagne = await Campagne.findOne({
-      _id: req.params.id,
-      immeuble_id: { $in: immeubleIds },
-      deletedAt: null
+      where: { id: req.params.id, batiment_id: { [Op.in]: immeubleIds } }
     });
 
     if (!campagne) {
@@ -25,10 +26,10 @@ exports.storeBatch = async (req, res) => {
 
     const logements = value.map(l => ({
       ...l,
-      campagne_id: campagne._id
+      batiment_id: campagne.batiment_id
     }));
 
-    const created = await Logement.insertMany(logements);
+    const created = await Logement.bulkCreate(logements);
     res.status(201).json(created);
   } catch (err) {
     res.status(500).json({ message: 'Erreur lors de la création des logements' });
@@ -42,29 +43,29 @@ exports.update = async (req, res) => {
       return res.status(400).json({ message: error.details[0].message });
     }
 
-    const immeubles = await Immeuble.find({ id_entrepreneur: req.entrepreneur.id });
-    const immeubleIds = immeubles.map(i => i._id);
+    const immeubles = await Immeuble.findAll({
+      where: { id_entrepreneur: req.entrepreneur.id }
+    });
+    const immeubleIds = immeubles.map(i => i.id);
 
     const campagne = await Campagne.findOne({
-      _id: req.params.campagne_id,
-      immeuble_id: { $in: immeubleIds },
-      deletedAt: null
+      where: { id: req.params.campagne_id, batiment_id: { [Op.in]: immeubleIds } }
     });
 
     if (!campagne) {
       return res.status(404).json({ message: 'Campagne introuvable ou non autorisée' });
     }
 
-    const logement = await Logement.findOneAndUpdate(
-      { _id: req.params.logement_id, campagne_id: req.params.campagne_id, deletedAt: null },
-      { $set: value },
-      { new: true, runValidators: true }
+    const [affected] = await Logement.update(
+      value,
+      { where: { id: req.params.logement_id, batiment_id: campagne.batiment_id } }
     );
 
-    if (!logement) {
+    if (affected === 0) {
       return res.status(404).json({ message: 'Logement introuvable' });
     }
 
+    const logement = await Logement.findByPk(req.params.logement_id);
     res.json(logement);
   } catch (err) {
     res.status(500).json({ message: 'Erreur lors de la mise à jour du logement' });
@@ -73,26 +74,25 @@ exports.update = async (req, res) => {
 
 exports.delete = async (req, res) => {
   try {
-    const immeubles = await Immeuble.find({ id_entrepreneur: req.entrepreneur.id });
-    const immeubleIds = immeubles.map(i => i._id);
+    const immeubles = await Immeuble.findAll({
+      where: { id_entrepreneur: req.entrepreneur.id }
+    });
+    const immeubleIds = immeubles.map(i => i.id);
 
     const campagne = await Campagne.findOne({
-      _id: req.params.campagne_id,
-      immeuble_id: { $in: immeubleIds },
-      deletedAt: null
+      where: { id: req.params.campagne_id, batiment_id: { [Op.in]: immeubleIds } }
     });
 
     if (!campagne) {
       return res.status(404).json({ message: 'Campagne introuvable ou non autorisée' });
     }
 
-    const logement = await Logement.findOneAndUpdate(
-      { _id: req.params.logement_id, campagne_id: req.params.campagne_id, deletedAt: null },
-      { $set: { deletedAt: new Date() } },
-      { new: true }
+    const [affected] = await Logement.update(
+      { deleted_at: new Date() },
+      { where: { id: req.params.logement_id, batiment_id: campagne.batiment_id } }
     );
 
-    if (!logement) {
+    if (affected === 0) {
       return res.status(404).json({ message: 'Logement introuvable' });
     }
 

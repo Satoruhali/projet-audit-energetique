@@ -10,15 +10,15 @@ const auth = async (req, res, next) => {
     }
 
     const decoded = jwt.verify(header.split(' ')[1], process.env.JWT_SECRET);
-    const entrepreneur = await Entrepreneur.findById(decoded.id);
+    const entrepreneur = await Entrepreneur.findByPk(decoded.id);
 
     if (!entrepreneur) {
       return res.status(401).json({ message: 'Utilisateur introuvable' });
     }
 
     req.entrepreneur = {
-      id: entrepreneur._id, nom: entrepreneur.nom,
-      email: entrepreneur.email, role: entrepreneur.role
+      id: entrepreneur.id, nom: entrepreneur.nom,
+      email: entrepreneur.email
     };
 
     next();

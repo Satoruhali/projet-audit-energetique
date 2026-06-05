@@ -1,5 +1,7 @@
+const { Op } = require('sequelize');
 const Campagne = require('../models/Campagne');
 const Immeuble = require('../models/Immeuble');
+const JoursDisponible = require('../models/JoursDisponible');
 const { mettreAJoursDisponibles } = require('../validations/campagneJours');
 
 exports.remplacerJours = async (req, res) => {
@@ -9,13 +11,13 @@ exports.remplacerJours = async (req, res) => {
       return res.status(400).json({ message: error.details[0].message });
     }
 
-    const immeubles = await Immeuble.find({ id_entrepreneur: req.entrepreneur.id });
-    const immeubleIds = immeubles.map(i => i._id);
+    const immeubles = await Immeuble.findAll({
+      where: { id_entrepreneur: req.entrepreneur.id }
+    });
+    const immeubleIds = immeubles.map(i => i.id);
 
     const campagne = await Campagne.findOne({
-      _id: req.params.id,
-      immeuble_id: { $in: immeubleIds },
-      deletedAt: null
+      where: { id: req.params.id, batiment_id: { [Op.in]: immeubleIds } }
     });
 
     if (!campagne) {
@@ -36,10 +38,24 @@ exports.remplacerJours = async (req, res) => {
       vus.add(iso);
     }
 
-    campagne.jours_disponibles = jours.map(j => new Date(j));
-    await campagne.save();
+    await JoursDisponible.destroy({
+      where: { id_entrepreneur: req.entrepreneur.id }
+    });
 
-    res.json({ message: 'Jours disponibles mis à jour avec succès', jours: campagne.jours_disponibles });
+    const joursCrees = [];
+    for (const jour of jours) {
+      const jd = await JoursDisponible.create({
+        id_entrepreneur: req.entrepreneur.id,
+        date: new Date(jour),
+        est_disponible: true
+      });
+      joursCrees.push(jd);
+    }
+
+    res.json({
+      message: 'Jours disponibles mis à jour avec succès',
+      jours: joursCrees.map(j => j.date)
+    });
   } catch (err) {
     res.status(500).json({ message: 'Erreur lors de la mise à jour des jours disponibles' });
   }
@@ -47,20 +63,28 @@ exports.remplacerJours = async (req, res) => {
 
 exports.recupererJours = async (req, res) => {
   try {
-    const immeubles = await Immeuble.find({ id_entrepreneur: req.entrepreneur.id });
-    const immeubleIds = immeubles.map(i => i._id);
+    const immeubles = await Immeuble.findAll({
+      where: { id_entrepreneur: req.entrepreneur.id }
+    });
+    const immeubleIds = immeubles.map(i => i.id);
 
     const campagne = await Campagne.findOne({
-      _id: req.params.id,
-      immeuble_id: { $in: immeubleIds },
-      deletedAt: null
+      where: { id: req.params.id, batiment_id: { [Op.in]: immeubleIds } }
     });
 
     if (!campagne) {
       return res.status(404).json({ message: 'Campagne introuvable' });
     }
 
-    res.json({ jours: campagne.jours_disponibles || [] });
+    const jours = await JoursDisponible.findAll({
+      where: {
+        id_entrepreneur: req.entrepreneur.id,
+        est_disponible: true
+      },
+      order: [['date', 'ASC']]
+    });
+
+    res.json({ jours: jours.map(j => j.date) });
   } catch (err) {
     res.status(500).json({ message: 'Erreur lors de la récupération des jours disponibles' });
   }

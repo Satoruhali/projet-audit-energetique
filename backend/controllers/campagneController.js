@@ -1,3 +1,4 @@
+const { Op } = require('sequelize');
 const Campagne = require('../models/Campagne');
 const Immeuble = require('../models/Immeuble');
 const Logement = require('../models/Logement');
@@ -16,14 +17,19 @@ exports.store = async (req, res) => {
     }
 
     const immeuble = await Immeuble.findOne({
-      _id: value.immeuble_id,
-      id_entrepreneur: req.entrepreneur.id
+      where: { id: value.immeuble_id, id_entrepreneur: req.entrepreneur.id }
     });
     if (!immeuble) {
       return res.status(404).json({ message: 'Immeuble introuvable ou non autorisé' });
     }
 
-    const campagne = await Campagne.create(value);
+    const campagne = await Campagne.create({
+      batiment_id: value.immeuble_id,
+      nom: value.nom,
+      statut: value.statut || 'brouillon',
+      date_debut_possible: new Date(),
+      date_fin_possible: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+    });
     res.status(201).json(campagne);
   } catch (err) {
     res.status(500).json({ message: 'Erreur lors de la création de la campagne' });
@@ -32,12 +38,13 @@ exports.store = async (req, res) => {
 
 exports.index = async (req, res) => {
   try {
-    const immeubles = await Immeuble.find({ id_entrepreneur: req.entrepreneur.id });
-    const immeubleIds = immeubles.map(i => i._id);
+    const immeubles = await Immeuble.findAll({
+      where: { id_entrepreneur: req.entrepreneur.id }
+    });
+    const immeubleIds = immeubles.map(i => i.id);
 
-    const campagnes = await Campagne.find({
-      immeuble_id: { $in: immeubleIds },
-      deletedAt: null
+    const campagnes = await Campagne.findAll({
+      where: { batiment_id: { [Op.in]: immeubleIds } }
     });
 
     res.json(campagnes);
@@ -48,22 +55,38 @@ exports.index = async (req, res) => {
 
 exports.show = async (req, res) => {
   try {
-    const immeubles = await Immeuble.find({ id_entrepreneur: req.entrepreneur.id });
-    const immeubleIds = immeubles.map(i => i._id);
+    const immeubles = await Immeuble.findAll({
+      where: { id_entrepreneur: req.entrepreneur.id }
+    });
+    const immeubleIds = immeubles.map(i => i.id);
 
     const campagne = await Campagne.findOne({
-      _id: req.params.id,
-      immeuble_id: { $in: immeubleIds },
-      deletedAt: null
-    }).populate(['logements', 'locataires']);
+      where: { id: req.params.id, batiment_id: { [Op.in]: immeubleIds } }
+    });
 
     if (!campagne) {
       return res.status(404).json({ message: 'Campagne introuvable' });
     }
 
-    const creneaux = await Creneau.find({ campagne_id: campagne._id }).lean();
+    const logements = await Logement.findAll({
+      where: { batiment_id: campagne.batiment_id }
+    });
+
+    const locataires = await Locataire.findAll({
+      include: [{
+        model: Logement,
+        required: true,
+        where: { batiment_id: campagne.batiment_id }
+      }]
+    });
+
+    const creneaux = await Creneau.findAll({
+      where: { id_campagne: campagne.id }
+    });
 
     const result = campagne.toJSON();
+    result.logements = logements;
+    result.locataires = locataires;
     result.creneaux = creneaux;
 
     res.json(result);
@@ -74,48 +97,41 @@ exports.show = async (req, res) => {
 
 exports.lancerSelection = async (req, res) => {
   try {
-    const immeubles = await Immeuble.find({ id_entrepreneur: req.entrepreneur.id });
-    const immeubleIds = immeubles.map(i => i._id);
+    const immeubles = await Immeuble.findAll({
+      where: { id_entrepreneur: req.entrepreneur.id }
+    });
+    const immeubleIds = immeubles.map(i => i.id);
 
     const campagne = await Campagne.findOne({
-      _id: req.params.id,
-      immeuble_id: { $in: immeubleIds },
-      deletedAt: null
+      where: { id: req.params.id, batiment_id: { [Op.in]: immeubleIds } }
     });
 
     if (!campagne) {
       return res.status(404).json({ message: 'Campagne introuvable ou non autorisée' });
     }
 
-    if (!campagne.jours_disponibles || campagne.jours_disponibles.length === 0) {
-      return res.status(400).json({ message: 'La campagne doit avoir des jours_disponibles définis avant de lancer la sélection' });
-    }
-
-    const logements = await Logement.find({
-      campagne_id: campagne._id,
-      deletedAt: null
+    const logements = await Logement.findAll({
+      where: { batiment_id: campagne.batiment_id }
     });
 
     if (logements.length === 0) {
       return res.status(400).json({ message: 'Aucun logement trouvé dans cette campagne' });
     }
 
-    await Logement.updateMany(
-      { campagne_id: campagne._id, deletedAt: null },
-      { $set: { selectionne_visite: false } }
+    await Logement.update(
+      { selectionne_visite: false },
+      { where: { batiment_id: campagne.batiment_id } }
     );
 
     const resultat = lancerSelection(logements);
 
-    await Logement.updateMany(
-      { _id: { $in: resultat.selectionnes }, deletedAt: null },
-      { $set: { selectionne_visite: true } }
+    await Logement.update(
+      { selectionne_visite: true },
+      { where: { id: { [Op.in]: resultat.selectionnes }, batiment_id: campagne.batiment_id } }
     );
 
-    const selectionnesIds = resultat.selectionnes;
-
     campagne.selection = {
-      date_selection: new Date(),
+      date_selection: new Date().toISOString(),
       seuil_requis: resultat.seuil.requis,
       seuil_obtenu: resultat.seuil.obtenu,
       couverture: resultat.couverture,
@@ -125,9 +141,9 @@ exports.lancerSelection = async (req, res) => {
     await campagne.save();
 
     res.json({
-      message: `Sélection terminée : ${selectionnesIds.length} logements sélectionnés`,
-      nbSelectionnes: selectionnesIds.length,
-      selectionnes: selectionnesIds,
+      message: `Sélection terminée : ${resultat.selectionnes.length} logements sélectionnés`,
+      nbSelectionnes: resultat.selectionnes.length,
+      selectionnes: resultat.selectionnes,
       couverture: resultat.couverture,
       seuil: resultat.seuil,
       couvertureComplete: resultat.success,
@@ -141,23 +157,24 @@ exports.lancerSelection = async (req, res) => {
 
 exports.listEmails = async (req, res) => {
   try {
-    const immeubles = await Immeuble.find({ id_entrepreneur: req.entrepreneur.id });
-    const immeubleIds = immeubles.map(i => i._id);
+    const immeubles = await Immeuble.findAll({
+      where: { id_entrepreneur: req.entrepreneur.id }
+    });
+    const immeubleIds = immeubles.map(i => i.id);
 
     const campagne = await Campagne.findOne({
-      _id: req.params.id,
-      immeuble_id: { $in: immeubleIds },
-      deletedAt: null
+      where: { id: req.params.id, batiment_id: { [Op.in]: immeubleIds } }
     });
 
     if (!campagne) {
       return res.status(404).json({ message: 'Campagne introuvable ou non autorisée' });
     }
 
-    const emails = await EmailEnvoye.find({ campagne_id: campagne._id })
-      .sort({ date_envoi: -1 })
-      .limit(100)
-      .lean();
+    const emails = await EmailEnvoye.findAll({
+      where: { id_campagne: campagne.id },
+      order: [['date_envoi', 'DESC']],
+      limit: 100
+    });
 
     res.json({ emails });
   } catch (err) {
@@ -167,23 +184,23 @@ exports.listEmails = async (req, res) => {
 
 exports.envoyerEmails = async (req, res) => {
   try {
-    const immeubles = await Immeuble.find({ id_entrepreneur: req.entrepreneur.id });
-    const immeubleIds = immeubles.map(i => i._id);
+    const immeubles = await Immeuble.findAll({
+      where: { id_entrepreneur: req.entrepreneur.id }
+    });
+    const immeubleIds = immeubles.map(i => i.id);
 
     const campagne = await Campagne.findOne({
-      _id: req.params.id,
-      immeuble_id: { $in: immeubleIds },
-      deletedAt: null
+      where: { id: req.params.id, batiment_id: { [Op.in]: immeubleIds } }
     });
 
     if (!campagne) {
       return res.status(404).json({ message: 'Campagne introuvable ou non autorisée' });
     }
 
-    const logements = await Logement.find({
-      campagne_id: campagne._id,
-      deletedAt: null
-    }).populate('locataire');
+    const logements = await Logement.findAll({
+      where: { batiment_id: campagne.batiment_id },
+      include: [{ model: Locataire }]
+    });
 
     const logementsAvecLocataire = logements.filter(l => l.locataire && l.locataire.email);
 
@@ -191,7 +208,7 @@ exports.envoyerEmails = async (req, res) => {
       return res.status(400).json({ message: 'Aucun locataire avec email trouvé dans cette campagne' });
     }
 
-    const immeuble = await Immeuble.findById(campagne.immeuble_id);
+    const immeuble = await Immeuble.findByPk(campagne.batiment_id);
 
     const resultats = [];
 
@@ -206,7 +223,7 @@ exports.envoyerEmails = async (req, res) => {
             nom: locataire.nom,
             nom_campagne: campagne.nom,
             nom_immeuble: immeuble ? immeuble.nom : '',
-            token: locataire.token
+            token: locataire.token_acces
           })
         : templatePasDeVisite({
             prenom: locataire.prenom,
@@ -222,8 +239,8 @@ exports.envoyerEmails = async (req, res) => {
       });
 
       const emailRecord = await EmailEnvoye.create({
-        campagne_id: campagne._id,
-        locataire_id: locataire._id,
+        id_campagne: campagne.id,
+        id_locataire: locataire.id,
         destinataire: locataire.email,
         sujet: template.sujet,
         corps: template.corps,
@@ -233,7 +250,7 @@ exports.envoyerEmails = async (req, res) => {
       });
 
       resultats.push({
-        locataire_id: locataire._id,
+        locataire_id: locataire.id,
         email: locataire.email,
         type,
         statut: emailRecord.statut,

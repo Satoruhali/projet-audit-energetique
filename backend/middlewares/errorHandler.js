@@ -1,3 +1,5 @@
+const { UniqueConstraintError, ValidationError } = require('sequelize');
+
 class AppError extends Error {
   constructor(message, statusCode) {
     super(message);
@@ -14,12 +16,12 @@ const errorHandler = (err, req, res, _next) => {
     });
   }
 
-  if (err.name === 'ValidationError') {
-    const messages = Object.values(err.errors).map(e => e.message);
+  if (err instanceof ValidationError) {
+    const messages = err.errors.map(e => e.message);
     return res.status(400).json({ message: messages.join(', ') });
   }
 
-  if (err.code === 11000) {
+  if (err instanceof UniqueConstraintError) {
     return res.status(409).json({ message: 'Conflit : cette ressource existe déjà' });
   }
 

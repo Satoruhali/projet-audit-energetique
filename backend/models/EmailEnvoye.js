@@ -1,48 +1,51 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const sequelize = require('../config/database');
 
-const emailEnvoyeSchema = new mongoose.Schema({
-  campagne_id: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Campagne',
-    required: true
+const EmailEnvoye = sequelize.define('emails_envoyes', {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true
   },
-  locataire_id: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Locataire',
-    required: true
+  id_locataire: {
+    type: DataTypes.INTEGER,
+    allowNull: false
   },
-  destinataire: {
-    type: String,
-    required: true,
-    trim: true,
-    lowercase: true
-  },
-  sujet: {
-    type: String,
-    required: true
-  },
-  corps: {
-    type: String,
-    required: true
+  id_campagne: {
+    type: DataTypes.INTEGER,
+    allowNull: false
   },
   type: {
-    type: String,
-    enum: ['visite_programmee', 'pas_de_visite', 'relance'],
-    required: true
-  },
-  statut: {
-    type: String,
-    enum: ['envoye', 'echec'],
-    default: 'envoye'
+    type: DataTypes.ENUM('visite_programmee', 'pas_de_visite', 'relance', 'invitation_visite', 'rappel_visite', 'non_visite', 'relance_generique'),
+    allowNull: false
   },
   date_envoi: {
-    type: Date,
-    default: Date.now
+    type: DataTypes.DATE,
+    defaultValue: DataTypes.NOW
+  },
+  statut: {
+    type: DataTypes.ENUM('envoye', 'echoue', 'echec', 'ouvert', 'clique'),
+    defaultValue: 'envoye'
+  },
+  destinataire: {
+    type: DataTypes.STRING(255),
+    allowNull: true
+  },
+  sujet: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  corps: {
+    type: DataTypes.TEXT,
+    allowNull: true
   },
   erreur: {
-    type: String,
-    default: null
+    type: DataTypes.TEXT,
+    allowNull: true
   }
-}, { timestamps: true });
+}, {
+  timestamps: false,
+  tableName: 'emails_envoyes'
+});
 
-module.exports = mongoose.model('EmailEnvoye', emailEnvoyeSchema);
+module.exports = EmailEnvoye;

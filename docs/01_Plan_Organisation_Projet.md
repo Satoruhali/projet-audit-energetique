@@ -1,39 +1,33 @@
 # 1. Plan d'Organisation de Projet
 
 **Projet :** Planif'Audit — Application de planification de visites pour audit énergétique  
-**Version :** 1.1 — 21/05/2026  
+**Version :** 3.0 — Juin 2026  
 **Auteur :** Wassi
 
 ---
 
 ## 1. État des lieux
 
-### Séances réalisées (10 séances en 3 jours)
+### Séances réalisées
 
-| Séance | Date | Durée | Objet |
-|--------|------|-------|-------|
-| 1 | 18/05 | — | Création du dossier professionnel v1.0 |
-| 2 | 18/05 | — | Restructuration du dossier (1 fichier → 5 fichiers) |
-| 3 | 19/05 | — | Spécifications complètes (personas, stories, wireframes, cas d'usage, règles de gestion, glossaire) |
-| 4 | 19/05 | — | Génération frontend complet (HTML/CSS/JS), 3 vues, mobile-first |
-| 5 | 19/05 | — | Rédaction `index.html` (SPA, hash routing, formulaires, tableaux) |
-| 6 | 19/05 | — | Rédaction `styles.css` (reset, variables, responsive, composants) |
-| 7 | 19/05 | — | Rédaction `script.js` (mock data, CRUD, planning RG3/RG4/RG9, toasts) |
-| 8 | 20/05 | — | Restructuration arborescence (Agent.ia/, skills/, prompts/, specifications/, docs/, backup/) |
-| 9 | 20/05 | — | Refonte formulaire création campagne (2 étapes, champs locataires) |
-| 10 | 20/05 | 3h | Organisation de la base de données MariaDB (5 tables) |
+| Séance | Date | Objet |
+|--------|------|-------|
+| 1–10 | 18–20/05 | Création initiale : specs, frontend v1, schéma BDD, structure projet |
+| 11+ | 21/05–05/06 | Backend complet (auth JWT, CRUD, set cover, jours dispo, liens RDV, emails), frontend modulaire (8 pages, 8 modules JS), tests (40 tests), documentation technique |
 
 ### Avancement global estimé
 
 | Lot | Statut | % estimé |
 |-----|--------|----------|
 | Spécifications / Conception | ✅ Terminé | 100 % |
-| Frontend (HTML/CSS/JS) | ✅ Terminé (v1 avec mock data) | 100 % |
-| Modèle de données (schéma BDD) | ✅ Terminé | 100 % |
-| Backend (API Node.js + Express) | ⬜ Structure vide | 0 % |
-| Base de données (script SQL) | ✅ Script de test existant | 50 % |
-| Documentation technique | ⬜ Non commencé | 0 % |
-| Tests d'intégration | ⬜ Non commencé | 0 % |
+| Frontend (HTML/CSS/JS modulaire) | ✅ Terminé (8 pages, 8 modules JS, API réelle + fallback mock) | 100 % |
+| Backend (API Node.js + Express) | ✅ Terminé (auth JWT, CRUD, set cover, jours dispo, liens RDV) | 100 % |
+| Base de données MongoDB (Mongoose) | ✅ Terminé (6 collections, opérationnel) | 100 % |
+| Algorithme set cover (RG11–RG15) | ✅ Terminé (service intégré + démo standalone) | 100 % |
+| Tests automatisés | ✅ 40 tests (unitaires + intégration) | 100 % |
+| Base de données MariaDB (cible future) | ⬜ Schéma défini, migration à faire | 50 % |
+| Module emails (nodemailer) | ⬜ Installé, simulation console uniquement | 50 % |
+| Planning optimisé (tri étage, pause) | ⬜ Logique frontend existante, backend à faire | 40 % |
 | Déploiement | ⬜ Non commencé | 0 % |
 
 ---
@@ -43,49 +37,70 @@
 ```
 C:\Users\wassi\projet-audit-energetique\
 │
-├── index.html                 # Frontend — Vue principale (SPA)
-├── styles.css                 # Frontend — Styles
-├── script.js                  # Frontend — Logique métier (mock data actuellement)
+├── frontend\                       # Application cliente (SPA)
+│   ├── index.html                  # Point d'entrée (redirige)
+│   ├── auth.html                   # Connexion / inscription
+│   ├── dashboard.html              # Tableau de bord
+│   ├── detail.html                 # Détail campagne
+│   ├── planning.html               # Planning optimisé
+│   ├── jours.html                  # Jours disponibles
+│   ├── rdv.html                    # Page publique RDV
+│   ├── css/
+│   │   └── style.css               # Styles responsive
+│   └── js/
+│       ├── api.js                  # Wrapper fetch + JWT + fallback mock
+│       ├── utils.js                # Utilitaires (dates, toasts)
+│       ├── auth.js                 # Auth (login/register)
+│       ├── dashboard.js            # Tableau de bord
+│       ├── detail.js               # Détail campagne
+│       ├── planning.js             # Planning optimisé
+│       ├── jours.js                # Jours disponibles
+│       └── rdv.js                  # Réservation publique
 │
-├── backend\
-│   ├── config\                # Connexion base de données
-│   │   └── db.js              # (à créer)
-│   ├── models\                # Modèles Sequelize ou queries SQL
-│   │   ├── entrepreneurs.js   # (à créer)
-│   │   ├── immeubles.js       # (à créer)
-│   │   ├── campagnes.js       # (à créer)
-│   │   ├── locataires.js      # (à créer)
-│   │   └── creneaux.js        # (à créer)
-│   ├── routes\                # Routes API REST
-│   │   ├── auth.js            # (à créer)
-│   │   ├── campagnes.js       # (à créer)
-│   │   ├── locataires.js      # (à créer)
-│   │   └── creneaux.js        # (à créer)
-│   ├── controllers\           # Logique des endpoints
-│   │   ├── authController.js  # (à créer)
-│   │   ├── campagneController.js  # (à créer)
-│   │   ├── locataireController.js # (à créer)
-│   │   └── creneauController.js   # (à créer)
-│   ├── middleware\            # Authentification, validation
-│   │   └── auth.js            # (à créer)
-│   ├── validations\           # Schémas de validation (Joi/Zod)
-│   │   └── campagne.js        # (à créer)
-│   └── server.js              # (à créer) Point d'entrée Express
+├── backend\                        # API REST (Express)
+│   ├── server.js                   # Point d'entrée
+│   ├── app.js                      # Middleware + routes
+│   ├── middlewares/
+│   │   ├── auth.js                 # JWT
+│   │   └── errorHandler.js         # Gestion erreurs
+│   ├── models/
+│   │   ├── Entrepreneur.js         # Mongoose
+│   │   ├── Immeuble.js
+│   │   ├── Campagne.js
+│   │   ├── Logement.js
+│   │   ├── Locataire.js
+│   │   └── Creneau.js
+│   ├── controllers/
+│   │   ├── authController.js
+│   │   ├── immeubleController.js
+│   │   ├── campagneController.js
+│   │   ├── logementController.js
+│   │   ├── locataireController.js
+│   │   ├── campagneJoursController.js
+│   │   ├── referentielController.js
+│   │   └── lienController.js
+│   ├── routes/
+│   │   ├── authRoutes.js
+│   │   ├── immeubleRoutes.js
+│   │   ├── campagneRoutes.js
+│   │   ├── campagneJoursRoutes.js
+│   │   ├── referentielRoutes.js
+│   │   └── lienRoutes.js
+│   ├── services/
+│   │   └── setCoverService.js      # Algorithme set cover
+│   ├── validations/                # Schémas Joi
+│   │   ├── campagne.js
+│   │   ├── campagneJours.js
+│   │   ├── immeuble.js
+│   │   ├── logement.js
+│   │   └── lien.js
+│   ├── tests/
+│   │   └── lien.test.js            # 22 tests
+│   ├── seed.js                     # Initialisation données
+│   ├── check_all.js                # Vérification
+│   └── check_campaign.js
 │
-├── database\
-│   ├── schema.sql             # Schéma final de la base de données
-│   ├── seed.sql               # Données de test (à créer)
-│   └── migrations\            # Migrations versionnées (à créer si besoin)
-│
-├── docs\
-│   ├── 01_Plan_Organisation_Projet.md   # Ce fichier
-│   ├── 02_Specifications.md             # Synthèse des specs (ou lien vers specifications/)
-│   ├── 03_Journal_de_Bord.md            # Suivi des séances
-│   ├── 04_Suivi_Modifications.md        # Historique des modifications
-│   ├── 05_Documentation_Technique.md    # Documentation finale
-│   └── TODO_LIST.md                     # To-do list quotidienne
-│
-├── specifications\            # Fiches de conception modulaires
+├── specifications/                 # Cahier des charges
 │   ├── brief-projet.md
 │   ├── user-stories.md
 │   ├── personas.md
@@ -94,70 +109,70 @@ C:\Users\wassi\projet-audit-energetique\
 │   ├── cas-utilisation.md
 │   └── glossaire.md
 │
-├── Agent.ia\                 # Configuration agent IA (OpenCode)
-│   └── config.json
+├── docs/                           # Documentation projet
+│   ├── 01_Plan_Organisation_Projet.md
+│   ├── 02_Specifications.md
+│   ├── 03_Journal_de_Bord.md
+│   ├── 04_Suivi_Modifications.md
+│   ├── 05_Documentation_Technique.md
+│   ├── db_documentation.md
+│   └── TODO_LIST.md
 │
-├── prompts\                  # Log des prompts utilisés
-│   └── prompts.log
-│
-├── skills\                   # Skills OpenCode (à définir)
-│
-├── testdb.sql                # Script SQL de test (existant)
-│
-├── backup\                   # Sauvegardes du projet
-│
-├── image\                    # Captures d'écran, schémas, maquettes
-│
-├── package.json              # (à créer) Dépendances Node.js
-├── .env                      # (à créer) Variables d'environnement
-└── .gitignore                # (à créer) Fichiers à ignorer
+├── Agent.ia/                       # Configuration OpenCode
+├── exemple-set-cover.js            # Démo algorithme
+├── exemple-set-cover.test.js       # 18 tests set cover
+├── testdb.sql                      # Script SQL MariaDB (cible future)
+├── ANALYSE_PROJET.md               # Analyse complète
+├── package.json                    # Dépendances
+├── .env                            # Variables d'environnement
+└── .gitignore                      # Ignorés
 ```
 
 ---
 
 ## 3. Checklist des tâches restantes
 
-### Phase A — Backend (API REST)
+### ✅ Phase A — Backend (API REST) — TERMINÉE
 
-| # | Tâche | Priorité | Durée estimée |
-|---|-------|----------|---------------|
-| A1 | Initialiser le projet Node.js (`npm init`, `package.json`) | Haute | 30 min |
-| A2 | Installer les dépendances (express, mariadb, dotenv, cors, bcrypt, jsonwebtoken) | Haute | 15 min |
-| A3 | Créer la configuration de connexion MariaDB (`backend/config/db.js`) | Haute | 30 min |
-| A4 | Mettre à jour le script SQL final (`database/schema.sql`) aligné avec le schéma journal séance 10 | Haute | 1h |
-| A5 | Créer les modèles SQL (requêtes paramétrées) pour les 5 tables | Haute | 2h |
-| A6 | Créer les routes et controllers REST (CRUD campagnes, locataires, créneaux) | Haute | 3h |
-| A7 | Implémenter l'authentification entrepreneur (inscription / connexion JWT) | Haute | 2h |
-| A8 | Implémenter la validation des entrées (middleware Joi ou validation manuelle) | Moyenne | 1h |
-| A9 | Créer le point d'entrée `server.js` avec montage des routes | Haute | 30 min |
-| A10 | Tester les endpoints avec curl ou Postman | Haute | 1h |
+| # | Tâche | Statut |
+|---|-------|--------|
+| A1 | Initialiser le projet Node.js (`npm init`, `package.json`) | ✅ Fait |
+| A2 | Installer les dépendances | ✅ Fait |
+| A3 | Créer la configuration de connexion | ✅ Fait (MongoDB via Mongoose) |
+| A4 | Mettre à jour le script SQL final | ✅ Fait (`testdb.sql`, 10 tables) |
+| A5 | Créer les modèles | ✅ Fait (6 modèles Mongoose) |
+| A6 | Créer les routes et controllers REST | ✅ Fait (8 contrôleurs, 6 routeurs) |
+| A7 | Implémenter l'authentification JWT | ✅ Fait (bcrypt + jsonwebtoken) |
+| A8 | Implémenter la validation des entrées | ✅ Fait (Joi, 5 schémas) |
+| A9 | Créer le point d'entrée `server.js` | ✅ Fait |
+| A10 | Tester les endpoints | ✅ Fait (22 tests API) |
 
-### Phase B — Connexion Frontend / Backend
+### ✅ Phase B — Connexion Frontend / Backend — TERMINÉE
 
-| # | Tâche | Priorité | Durée estimée |
-|---|-------|----------|---------------|
-| B1 | Remplacer les mock data dans `script.js` par des appels fetch à l'API | Haute | 2h |
-| B2 | Gérer les états de chargement et les erreurs API dans le frontend | Haute | 1h |
-| B3 | Ajouter un formulaire de connexion pour les entrepreneurs | Moyenne | 1h |
-| B4 | Implémenter la persistance des sessions (token JWT stocké localStorage) | Haute | 1h |
+| # | Tâche | Statut |
+|---|-------|--------|
+| B1 | Remplacer les mock data par des appels fetch à l'API | ✅ Fait (api.js avec fallback mock) |
+| B2 | Gérer les états de chargement et les erreurs API | ✅ Fait |
+| B3 | Ajouter un formulaire de connexion | ✅ Fait (auth.html + auth.js) |
+| B4 | Implémenter la persistance des sessions (token JWT localStorage) | ✅ Fait |
 
-### Phase C — Tests
+### ✅ Phase C — Tests — TERMINÉE
 
-| # | Tâche | Priorité | Durée estimée |
-|---|-------|----------|---------------|
-| C1 | Écrire des tests d'intégration backend (supertest + jest) | Moyenne | 2h |
-| C2 | Tester les contraintes métier (RG3 tri étage, RG4 pas chevauchement, RG9 pause 15 min) en backend | Haute | 1h30 |
-| C3 | Tester les scénarios de bout en bout (création campagne → saisie locataires → génération planning) | Moyenne | 1h30 |
-| C4 | Vérifier la compatibilité mobile du frontend (responsive) | Basse | 1h |
+| # | Tâche | Statut |
+|---|-------|--------|
+| C1 | Écrire des tests d'intégration backend | ✅ Fait (22 tests lien.test.js) |
+| C2 | Tester l'algorithme set cover | ✅ Fait (18 tests exemple-set-cover.test.js) |
+| C3 | Tester les contraintes (chevauchement, timeToMinutes) | ✅ Fait (11 tests unitaires) |
+| C4 | Compatibilité mobile | ✅ Fait (CSS responsive, breakpoints) |
 
 ### Phase D — Documentation
 
-| # | Tâche | Priorité | Durée estimée |
-|---|-------|----------|---------------|
-| D1 | Alimenter `05_Documentation_Technique.md` (architecture, modèle de données, guide d'installation, déploiement) | Haute | 2h |
-| D2 | Compléter `04_Suivi_Modifications.md` avec l'historique | Moyenne | 30 min |
-| D3 | Remplir le `TODO_LIST.md` avec les objectifs quotidiens | Basse | 15 min |
-| D4 | Rédiger un README.md à la racine du projet (présentation, installation, usage) | Moyenne | 1h |
+| # | Tâche | Priorité | Durée estimée | Statut |
+|---|-------|----------|---------------|--------|
+| D1 | Alimenter `05_Documentation_Technique.md` (architecture, modèle de données, guide d'installation, déploiement) | Haute | 2h | ✅ Fait |
+| D2 | Compléter `04_Suivi_Modifications.md` avec l'historique | Moyenne | 30 min | ⬜ À faire |
+| D3 | Mettre à jour `TODO_LIST.md` | Basse | 15 min | ⬜ À faire |
+| D4 | Rédiger un README.md à la racine du projet | Moyenne | 1h | ⬜ À faire |
 
 ### Phase E — Échantillonnage réglementaire (NOUVEAU)
 
@@ -195,63 +210,45 @@ C:\Users\wassi\projet-audit-energetique\
 
 ---
 
-## 4. Calendrier prévisionnel
+## 4. Calendrier — état réel vs restant
 
-Rythme observé : **~2-3 séances par jour**, séances de **~3h**.  
-Estimation basée sur une disponibilité de **2 à 3 créneaux par jour**.
+### Phases terminées (100 %)
 
-| Phase | Début | Fin | Séances estimées |
-|-------|-------|-----|------------------|
-| **A — Backend** | 21/05 | 23/05 | 4 séances |
-| **B — Frontend/API** | 23/05 | 24/05 | 2 séances |
-| **C — Tests** | 24/05 | 25/05 | 2 séances |
-| **D — Documentation** | 25/05 | 26/05 | 1 séance |
-| **E — Fonctionnalités avancées** | 26/05 | 29/05 | 4 séances |
-| **F — Déploiement** | 29/05 | 30/05 | 1 séance |
-| **Livraison finale** | **30/05** | — | — |
+| Phase | Contenu |
+|-------|---------|
+| **A — Backend** | API REST complète (auth, CRUD, set cover, jours dispo, liens RDV) |
+| **B — Frontend/API** | Frontend modulaire (8 pages, 8 modules JS) connecté aux API réelles |
+| **C — Tests** | 40 tests (set cover, réservation créneaux, timeToMinutes, chevauchement) |
 
-### Plan détaillé par jour
+### Phases restantes
 
-| Date | Séances | Objectif principal |
-|------|---------|--------------------|
-| 21/05 | 1 | Initialisation Node.js, dépendances, `db.js`, `schema.sql` final |
-| 21/05 | 2 | Modèles SQL (5 tables) + routes campagnes |
-| 22/05 | 3 | Routes locataires + créneaux + controllers |
-| 22/05 | 4 | Authentification JWT + middleware |
-| 23/05 | 5 | Connexion API → frontend (remplacement mock data) |
-| 23/05 | 6 | Gestion erreurs, états chargement, formulaire connexion |
-| 24/05 | 7 | Tests d'intégration backend + tests contraintes métier |
-| 24/05 | 8 | Tests E2E (parcours complet) |
-| 25/05 | 9 | Documentation technique + README + suivi |
-| 26/05 | 10 | Portail locataire (choix créneau public) |
-| 26/05 | 11 | Emails d'invitation |
-| 27/05 | 12 | Import CSV |
-| 27/05 | 13 | Export planning PDF |
-| 28/05 | 14 | Dashboard stats réelles, finitions UI |
-| 28/05 | 15 | Déploiement, `.env`, HTTPS, mise en production |
-| 29/05 | 16 | Tests finaux, corrections, livraison |
+| Phase | Séances estimées | Priorité |
+|-------|------------------|----------|
+| **D — Documentation** | 1 séance | Haute |
+| **E — Échantillonnage avancé** | 2 séances | Haute |
+| **F — Déploiement + finalisation** | 2 séances | Moyenne |
 
 ---
 
 ## 5. Livrables intermédiaires et finaux
 
-| Livrable | Format | Échéance | Statut |
-|----------|--------|----------|--------|
-| Cahier des charges / Spécifications | Markdown (`specifications/*.md`) | J1 (18/05) | ✅ Livré |
-| Maquettes (wireframes) | ASCII dans Markdown | J1 (18/05) | ✅ Livré |
-| Frontend v1 (mock data) | HTML/CSS/JS | J2 (19/05) | ✅ Livré |
-| Schéma de base de données | Markdown + SQL | J2 (20/05) | ✅ Livré |
-| Backend API REST | Node.js / Express | J4 (23/05) | ⬜ À faire |
-| Frontend v2 (API réelle) | HTML/CSS/JS | J5 (24/05) | ⬜ À faire |
-| Rapport de tests | Markdown | J5 (25/05) | ⬜ À faire |
-| Documentation technique | `05_Documentation_Technique.md` | J6 (26/05) | ⬜ À faire |
-| **[AJOUT]** Algorithme de sélection des logements | Backend (Node.js) | J5 (24/05) | ⬜ À faire |
-| **[AJOUT]** Interface configuration immeuble + échantillonnage | Frontend (HTML/CSS/JS) | J6 (25/05) | ⬜ À faire |
-| **[AJOUT]** Module disponibilités croisées (diagnostiqueur → occupant) | Backend + Frontend | J7 (26/05) | ⬜ À faire |
-| **[AJOUT]** Module d'envoi d'emails différenciés | Backend (nodemailer) | J8 (27/05) | ⬜ À faire |
-| Portail locataire | HTML/JS (page publique) | J7 (27/05) | ⬜ À faire |
-| Application déployée | URL accessible | J10 (30/05) | ⬜ À faire |
-| **Livrable final complet** | Dossier structuré + code + docs | **J11 (31/05)** | ⬜ À faire |
+| Livrable | Format | Statut |
+|----------|--------|--------|
+| Cahier des charges / Spécifications | Markdown (`specifications/*.md`) | ✅ Livré |
+| Maquettes (wireframes) | ASCII dans Markdown | ✅ Livré |
+| Frontend v1 (mock data) | HTML/CSS/JS | ✅ Livré |
+| Frontend v2 (modulaire, 8 pages, API réelle) | `frontend/` (HTML/CSS/JS) | ✅ Livré |
+| Backend API REST complet | Node.js / Express (`backend/`) | ✅ Livré |
+| Algorithme de sélection set cover | `services/setCoverService.js` | ✅ Livré |
+| Module jours disponibles diagnostiqueur | Backend + Frontend | ✅ Livré |
+| Portail locataire (RDV public) | `rdv.html` + `rdv.js` | ✅ Livré |
+| Tests automatisés (40 tests) | `node:test` + supertest | ✅ Livré |
+| Schéma BDD MongoDB | 6 collections Mongoose | ✅ Livré |
+| Schéma BDD MariaDB (cible) | `testdb.sql` (10 tables) | ✅ Livré |
+| Documentation technique | `docs/05_Documentation_Technique.md` | ✅ Livré |
+| Module d'envoi d'emails différenciés | nodemailer | ⬜ Simulation console |
+| Planning optimisé (backend) | Algorithme de planification | ⬜ À faire |
+| Application déployée | URL accessible | ⬜ À faire |
 
 ---
 
@@ -286,26 +283,31 @@ Estimation basée sur une disponibilité de **2 à 3 créneaux par jour**.
 
 | Risque | Impact | Probabilité | Mitigation |
 |--------|--------|-------------|------------|
-| **Incohérence schéma BDD** : le script `testdb.sql` utilise une structure différente (batiments, appartements) du schéma décrit en séance 10 (immeubles, entrepreneurs) | Élevé | Haute | Aligner le script SQL final sur le schéma du journal (séance 10) avant de commencer le backend |
-| **Mock data vs données réelles** : le frontend est figé avec des données simulées, le branchement API demandera des adaptations | Moyen | Haute | Prévoir une couche de service dans `script.js` pour remplacer progressivement les fetch |
-| **Absence de package.json** : le projet n'a pas encore de fichier de dépendances | Élevé | Haute | Initialiser `npm init` en début de phase A |
-| **Rythme soutenu** : 3j de travail intensif, risque d'essoufflement | Faible | Moyenne | Prioriser les phases A→B→C avant les options (E) |
-| **Pas de tests automatisés** actuellement | Moyen | Haute | Ajouter les tests en phase C avant les fonctionnalités avancées |
-| **Sécurité** : mot de passe BDD en dur dans le code | Élevé | Moyenne | Utiliser `.env` dès le début du backend |
-| **Dépendance à OpenCode** : certaines parties ont été générées par IA | Faible | Faible | Relire et comprendre le code généré avant de le modifier |
+| **MongoDB vs MariaDB** : le backend tourne sur MongoDB, la cible est MariaDB — la migration devra être planifiée | Moyen | Moyenne | Garder une couche d'abstraction dans les modèles ; `testdb.sql` déjà prêt |
+| **Planning optimisé non backendé** : la logique RG3/RG4/RG9 existe dans le frontend mais pas encore en API | Moyen | Haute | Implémenter le endpoint de génération de planning côté backend |
+| **nodemailer en simulation** : les emails sont loggés dans la console, pas encore envoyés | Faible | Haute | Brancher SMTP via `.env` et finaliser les templates |
+| **Tests de bout en bout** : pas de test E2E automatisé (parcours complet) | Moyen | Moyenne | Ajouter des tests d'intégration multipoints |
+| **Déploiement non fait** : l'application tourne uniquement en local | Élevé | Haute | Préparer le déploiement (Render/Railway, MongoDB Atlas, HTTPS) |
+| **Sécurité** : clés JWT/SMTP dans `.env` déjà géré | Faible | Faible | Vérifier que `.env` est bien dans `.gitignore` |
 
 ---
 
-## 8. Prochaine action immédiate
+## 8. Prochaines actions immédiates
 
-**Priorité n°1 :** Initialiser le projet Node.js et aligner le schéma SQL final.
+**Priorité n°1 :** Génération du planning optimisé (backend).
+- Implémenter l'algorithme de planification (tri étage RG3, pause 15 min RG9, pas chevauchement RG4)
+- Créer un endpoint `POST /api/entrepreneur/campagnes/:id/generer-planning`
+- Retourner le planning ordonné avec les créneaux définitifs
 
-- `npm init -y` dans le dossier racine
-- Copier/coller la structure du schéma séance 10 dans `database/schema.sql`
-- Supprimer ou archiver `testdb.sql` (structure provisoire)
-- Installer les dépendances : `npm install express mariadb dotenv cors bcrypt jsonwebtoken`
-- Ajouter `node_modules/` et `.env` au `.gitignore`
-- Créer `backend/config/db.js` avec la connexion MariaDB
+**Priorité n°2 :** Brancher l'envoi d'emails réel (nodemailer).
+- Configurer SMTP dans `.env`
+- Remplacer `console.log` par un envoi réel
+- Gérer les templates d'emails différenciés (visité / non visité)
+
+**Priorité n°3 :** Déploiement.
+- Choisir un hébergeur (Render / Railway / VPS)
+- Configurer MongoDB en production (MongoDB Atlas)
+- Mettre en place HTTPS
 
 ---
 
