@@ -5,6 +5,8 @@ const Logement = require('../models/Logement');
 const Locataire = require('../models/Locataire');
 const Creneau = require('../models/Creneau');
 const EmailEnvoye = require('../models/EmailEnvoye');
+const Typologie = require('../models/Typologie');
+const TypePlancher = require('../models/TypePlancher');
 const { creerCampagne } = require('../validations/campagne');
 const { lancerSelection } = require('../services/setCoverService');
 const { sendMail, templateVisiteProgrammee, templatePasDeVisite } = require('../services/emailService');
@@ -32,6 +34,7 @@ exports.store = async (req, res) => {
     });
     res.status(201).json(campagne);
   } catch (err) {
+    console.error('ERREUR campagneController.store:', err);
     res.status(500).json({ message: 'Erreur lors de la création de la campagne' });
   }
 };
@@ -69,7 +72,13 @@ exports.show = async (req, res) => {
     }
 
     const logements = await Logement.findAll({
-      where: { batiment_id: campagne.batiment_id }
+      where: { batiment_id: campagne.batiment_id },
+      include: [
+        { model: Typologie, attributes: ['code'] },
+        { model: TypePlancher, as: 'plancherBas', attributes: ['nom'] },
+        { model: TypePlancher, as: 'plancherHaut', attributes: ['nom'] },
+        { model: Locataire }
+      ]
     });
 
     const locataires = await Locataire.findAll({
@@ -85,7 +94,15 @@ exports.show = async (req, res) => {
     });
 
     const result = campagne.toJSON();
-    result.logements = logements;
+    result.logements = logements.map(l => {
+      const plain = l.toJSON();
+      return {
+        ...plain,
+        typologie: plain.typologie?.code || null,
+        plancher_bas: plain.plancherBas?.nom || null,
+        plancher_haut: plain.plancherHaut?.nom || null
+      };
+    });
     result.locataires = locataires;
     result.creneaux = creneaux;
 
@@ -111,7 +128,12 @@ exports.lancerSelection = async (req, res) => {
     }
 
     const logements = await Logement.findAll({
-      where: { batiment_id: campagne.batiment_id }
+      where: { batiment_id: campagne.batiment_id },
+      include: [
+        { model: Typologie, attributes: ['code'] },
+        { model: TypePlancher, as: 'plancherBas', attributes: ['nom'] },
+        { model: TypePlancher, as: 'plancherHaut', attributes: ['nom'] }
+      ]
     });
 
     if (logements.length === 0) {
@@ -123,7 +145,19 @@ exports.lancerSelection = async (req, res) => {
       { where: { batiment_id: campagne.batiment_id } }
     );
 
-    const resultat = lancerSelection(logements);
+    const logementsData = logements.map(l => {
+      const plain = l.toJSON();
+      return {
+        id: plain.id,
+        etage: plain.etage,
+        typologie: plain.typologie?.code || null,
+        plancher_bas: plain.plancherBas?.nom || null,
+        plancher_haut: plain.plancherHaut?.nom || null,
+        position: plain.position || null
+      };
+    });
+
+    const resultat = lancerSelection(logementsData);
 
     await Logement.update(
       { selectionne_visite: true },

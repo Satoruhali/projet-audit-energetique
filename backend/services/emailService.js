@@ -6,17 +6,16 @@ function getTransporter() {
   if (transporter) return transporter;
 
   const host = process.env.SMTP_HOST;
-  const port = parseInt(process.env.SMTP_PORT) || 587;
+  const port = parseInt(process.env.SMTP_PORT) || 1025;
   const user = process.env.SMTP_USER;
   const pass = process.env.SMTP_PASS;
 
-  if (host && host !== 'smtp.example.com' && user && pass) {
-    transporter = nodemailer.createTransport({
-      host,
-      port,
-      secure: port === 465,
-      auth: { user, pass }
-    });
+  if (host && host !== 'smtp.example.com') {
+    const transportOpts = { host, port, secure: port === 465 };
+    if (user && pass) {
+      transportOpts.auth = { user, pass };
+    }
+    transporter = nodemailer.createTransport(transportOpts);
   } else {
     transporter = null;
   }

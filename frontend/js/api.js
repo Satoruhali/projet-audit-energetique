@@ -87,7 +87,7 @@ async function apiAuthMe() {
 /* ---------- CAMPAGNE API ---------- */
 async function apiCampagneCreate(data) {
   const result = await apiFetch('POST', '/campagnes', data);
-  if (result && result._id) return result;
+  if (result && result.id) return result;
   return null;
 }
 
@@ -111,13 +111,13 @@ async function apiCampagnesList() {
 
 async function apiImmeubleCreate(data) {
   const result = await apiFetch('POST', '/immeubles', data);
-  if (result && result._id) return result;
+  if (result && result.id) return result;
   return null;
 }
 
 async function apiCampagneShow(id) {
   const result = await apiFetch('GET', `/campagnes/${id}`);
-  if (result && result._id) return result;
+  if (result && result.id) return result;
   return null;
 }
 

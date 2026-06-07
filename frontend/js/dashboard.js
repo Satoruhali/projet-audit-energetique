@@ -11,8 +11,8 @@ async function showDashboard() {
   if (apiCampagnes) {
     const localIds = new Set(APP.campaigns.map(c => c.id));
     const merged = apiCampagnes.map(c => ({
-      id: c._id,
-      id_campagne: c._id,
+      id: c.id,
+      id_campagne: c.id,
       adresse: c.nom || c.adresse || 'Sans nom',
       nbLogements: c.nbLogements || 0,
       statut: c.statut === 'en_cours' ? 'active' : c.statut === 'termine' ? 'termine' : 'active',
@@ -78,7 +78,7 @@ function renderCampaignList() {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
       const id = btn.dataset.delete;
-      APP.campaigns = APP.campaigns.filter(c => c.id !== id);
+      APP.campaigns = APP.campaigns.filter(c => String(c.id) !== id);
       toast('Campagne supprimée', 'info');
       renderCampaignList();
       updateStats();
@@ -304,12 +304,12 @@ $('#campaignForm').addEventListener('submit', (e) => {
       if (!immeuble) throw new Error('Échec création immeuble');
 
       const apiResult = await apiCampagneCreate({
-        immeuble_id: immeuble._id,
+        immeuble_id: immeuble.id,
         nom: adresse,
         statut: 'en_cours',
       });
       if (!apiResult) throw new Error('Échec création campagne');
-      const id_campagne = apiResult._id;
+      const id_campagne = apiResult.id;
 
       const logementsPayload = locataires.map(l => ({
         numero: l.logement,
@@ -328,7 +328,7 @@ $('#campaignForm').addEventListener('submit', (e) => {
         const prenom = parts[0] || '';
         const nom = parts.slice(1).join(' ') || parts[0] || '';
         return {
-          logement_id: logementsCreated[i]._id,
+          logement_id: logementsCreated[i].id,
           nom,
           prenom,
           email: l.email,
@@ -346,8 +346,8 @@ $('#campaignForm').addEventListener('submit', (e) => {
         statut: 'active',
         locataires: locataires.map((l, i) => ({
           ...l,
-          id: logementsCreated[i]?._id || l.id,
-          id_logement: logementsCreated[i]?._id || null,
+          id: logementsCreated[i]?.id || l.id,
+          id_logement: logementsCreated[i]?.id || null,
         })),
       };
       APP.campaigns.unshift(campaign);

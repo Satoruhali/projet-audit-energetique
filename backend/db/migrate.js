@@ -7,8 +7,11 @@ async function migrate() {
     console.log('MySQL connecté');
 
     await sequelize.query(`ALTER TABLE campagnes ADD COLUMN IF NOT EXISTS nom VARCHAR(255) NOT NULL DEFAULT ''`);
-    await sequelize.query(`ALTER TABLE campagnes ADD COLUMN IF NOT EXISTS selection JSON NULL`);
+    await sequelize.query(`ALTER TABLE campagnes ADD COLUMN IF NOT EXISTS selection TEXT NULL`);
     await sequelize.query(`ALTER TABLE campagnes ADD COLUMN IF NOT EXISTS deleted_at DATETIME NULL`);
+
+    // Mise à jour de l'ENUM statut pour inclure tous les statuts du modèle
+    await sequelize.query(`ALTER TABLE campagnes MODIFY COLUMN statut ENUM('brouillon','en_cours','ouverte','planification_terminee','termine') DEFAULT 'brouillon'`);
 
     await sequelize.query(`ALTER TABLE logements ADD COLUMN IF NOT EXISTS surface FLOAT NULL`);
     await sequelize.query(`ALTER TABLE logements ADD COLUMN IF NOT EXISTS loyer_estime FLOAT NULL`);

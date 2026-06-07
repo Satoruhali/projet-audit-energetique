@@ -101,7 +101,7 @@ async function seed() {
     id_typologie: 2,
     id_type_plancher_bas: 1,
     id_type_plancher_haut: 6,
-    position: 'rez_de_chaussee',
+    position: 'bas',
     statut: 'occupe',
     selectionne_visite: true
   });

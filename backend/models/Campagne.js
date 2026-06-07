@@ -24,7 +24,7 @@ const Campagne = sequelize.define('campagnes', {
     allowNull: false
   },
   statut: {
-    type: DataTypes.ENUM('brouillon', 'ouverte', 'planification_terminee', 'termine'),
+    type: DataTypes.ENUM('brouillon', 'en_cours', 'ouverte', 'planification_terminee', 'termine'),
     defaultValue: 'brouillon'
   },
   nb_min_visites: {

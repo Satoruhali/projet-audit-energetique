@@ -36,7 +36,7 @@ const Logement = sequelize.define('logements', {
     allowNull: true
   },
   position: {
-    type: DataTypes.ENUM('rez_de_chaussee', 'intermediaire', 'dernier_etage'),
+    type: DataTypes.ENUM('bas', 'intermediaire', 'haut'),
     allowNull: true
   },
   selectionne_visite: {

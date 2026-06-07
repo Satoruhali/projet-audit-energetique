@@ -4,15 +4,64 @@
 
 /* ---------- DÉTAIL CAMPAGNE ---------- */
 async function showDetail(id) {
-  let camp = APP.campaigns.find(c => c.id === id);
-  if (!camp) { window.location.href = '/dashboard'; return; }
+  let camp = APP.campaigns.find(c => String(c.id) === String(id));
+  if (!camp) {
+    const detail = await apiCampagneShow(id);
+    if (detail) {
+      const creneaux = detail.creneaux || [];
+      camp = {
+        id: detail.id,
+        id_campagne: detail.id,
+        adresse: detail.nom || 'Sans nom',
+        nbLogements: (detail.logements && detail.logements.length) || 0,
+        statut: detail.statut === 'en_cours' ? 'active' : 'termine',
+        joursDisponibles: [],
+        logements: (detail.logements || []).map(l => ({
+          _id: l.id,
+          numero: l.numero,
+          etage: l.etage,
+          typologie: l.typologie,
+          plancher_bas: l.plancher_bas,
+          plancher_haut: l.plancher_haut,
+          position: l.position,
+          selectionne_visite: l.selectionne_visite || false,
+          locataire: l.locataire || null,
+        })),
+        locataires: (detail.locataires || []).map(l => {
+          const logement = l.logement || l.logements?.[0] || {};
+          const creneau = creneaux.find(c => String(c.locataire_id) === String(l.id));
+          return {
+            id: l.id,
+            nom: l.nom || '',
+            email: l.email || '',
+            logement: logement.numero || l.numero || '',
+            etage: logement.etage ?? l.etage ?? 0,
+            etageLabel: (logement.etage ?? l.etage ?? 0) === 0 ? 'RDC' : (logement.etage ?? l.etage ?? 0) === -1 ? 'Sous-sol' : (logement.etage ?? l.etage ?? 0) + 'e',
+            statut: creneau ? 'repondu' : 'attente',
+            creneau: creneau ? {
+              date: new Date(creneau.date_visite).toISOString().split('T')[0],
+              debut: creneau.heure_debut,
+              fin: creneau.heure_fin,
+            } : null,
+          };
+        }),
+      };
+      if (detail.selection) {
+        camp.selection = detail.selection;
+      }
+      APP.campaigns.push(camp);
+    } else {
+      window.location.href = '/dashboard';
+      return;
+    }
+  }
 
   if ((!camp.locataires || camp.locataires.length === 0) && camp.id_campagne) {
     const detail = await apiCampagneShow(camp.id_campagne);
     if (detail) {
       camp.nbLogements = (detail.logements && detail.logements.length) || camp.nbLogements || 0;
       camp.logements = (detail.logements || []).map(l => ({
-        _id: l._id,
+        _id: l.id,
         numero: l.numero,
         etage: l.etage,
         typologie: l.typologie,
@@ -28,14 +77,15 @@ async function showDetail(id) {
       if (detail.locataires && detail.locataires.length > 0) {
         const creneaux = detail.creneaux || [];
         camp.locataires = detail.locataires.map(l => {
-          const creneau = creneaux.find(c => String(c.locataire_id) === String(l._id));
+          const logement = l.logement || l.logements?.[0] || {};
+          const creneau = creneaux.find(c => String(c.locataire_id) === String(l.id));
           return {
-            id: l._id,
+            id: l.id,
             nom: l.nom || '',
             email: l.email || '',
-            logement: l.logement || l.numero || '',
-            etage: l.etage || 0,
-            etageLabel: l.etage === 0 ? 'RDC' : l.etage === -1 ? 'Sous-sol' : l.etage + 'e',
+            logement: logement.numero || l.numero || '',
+            etage: logement.etage ?? l.etage ?? 0,
+            etageLabel: (logement.etage ?? l.etage ?? 0) === 0 ? 'RDC' : (logement.etage ?? l.etage ?? 0) === -1 ? 'Sous-sol' : (logement.etage ?? l.etage ?? 0) + 'e',
             statut: creneau ? 'repondu' : 'attente',
             creneau: creneau ? {
               date: new Date(creneau.date_visite).toISOString().split('T')[0],
@@ -91,7 +141,7 @@ function renderReponses(camp) {
 
   tbody.querySelectorAll('[data-relance]').forEach(btn => {
     btn.addEventListener('click', () => {
-      const loc = camp.locataires.find(l => l.id === btn.dataset.relance);
+      const loc = camp.locataires.find(l => String(l.id) === btn.dataset.relance);
       if (loc) {
         loc.statut = 'relance';
         toast(`Relance envoyée à ${loc.logement}`, 'info');
@@ -160,7 +210,7 @@ function renderJoursDisponibles(camp) {
 }
 
 $('#saveJoursBtn')?.addEventListener('click', () => {
-  const camp = APP.campaigns.find(c => c.id === APP.currentCampaignId);
+  const camp = APP.campaigns.find(c => String(c.id) === String(APP.currentCampaignId));
   if (!camp) return;
 
   const selected = [...$$('.jour-chip--selected')].map(chip => chip.dataset.date);
@@ -191,7 +241,7 @@ $('#backToDashboard').addEventListener('click', () => window.location.href = '/d
 
 /* ---------- RELANCE MASSE ---------- */
 $('#relanceMassBtn').addEventListener('click', () => {
-  const camp = APP.campaigns.find(c => c.id === APP.currentCampaignId);
+  const camp = APP.campaigns.find(c => String(c.id) === String(APP.currentCampaignId));
   if (!camp) return;
   const enAttente = camp.locataires.filter(l => l.statut === 'attente');
   enAttente.forEach(l => l.statut = 'relance');
@@ -201,7 +251,7 @@ $('#relanceMassBtn').addEventListener('click', () => {
 
 /* ---------- GÉNÉRER LIENS ---------- */
 $('#genLinksBtn').addEventListener('click', () => {
-  const camp = APP.campaigns.find(c => c.id === APP.currentCampaignId);
+  const camp = APP.campaigns.find(c => String(c.id) === String(APP.currentCampaignId));
   if (!camp) return;
   const baseUrl = window.location.origin + '/rendez-vous/';
   const liens = camp.locataires.map(l => {
@@ -412,7 +462,7 @@ function renderEmailHistory(camp) {
 }
 
 $('#lancerSelectionBtn')?.addEventListener('click', async () => {
-  const camp = APP.campaigns.find(c => c.id === APP.currentCampaignId);
+  const camp = APP.campaigns.find(c => String(c.id) === String(APP.currentCampaignId));
   if (!camp) return;
 
   if (!camp.id_campagne) {
@@ -444,7 +494,7 @@ $('#lancerSelectionBtn')?.addEventListener('click', async () => {
   };
 
   if (camp.logements && result.selectionnes) {
-    const selectedIds = new Set(result.selectionnes.map(id => id.toString()));
+    const selectedIds = new Set(result.selectionnes.filter(id => id != null).map(id => id.toString()));
     camp.logements.forEach(l => {
       const lid = (l._id || l.id || '').toString();
       l.selectionne_visite = selectedIds.has(lid);
@@ -456,7 +506,7 @@ $('#lancerSelectionBtn')?.addEventListener('click', async () => {
 });
 
 $('#envoyerEmailsBtn')?.addEventListener('click', async () => {
-  const camp = APP.campaigns.find(c => c.id === APP.currentCampaignId);
+  const camp = APP.campaigns.find(c => String(c.id) === String(APP.currentCampaignId));
   if (!camp) return;
 
   if (!camp.id_campagne) {

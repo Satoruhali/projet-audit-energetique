@@ -54,7 +54,7 @@ async function setup() {
     etage: 1,
     surface: 45,
     loyer_estime: 800,
-    position: 'rez_de_chaussee',
+    position: 'bas',
     statut: 'occupe',
     selectionne_visite: true
   });
@@ -65,7 +65,7 @@ async function setup() {
     etage: 2,
     surface: 35,
     loyer_estime: 600,
-    position: 'dernier_etage',
+    position: 'haut',
     statut: 'occupe',
     selectionne_visite: false
   });

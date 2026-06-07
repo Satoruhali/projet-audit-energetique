@@ -208,7 +208,14 @@ RENAME TABLE campagnes_audit TO campagnes;
 -- Ajouter les nouvelles colonnes
 ALTER TABLE campagnes 
     ADD COLUMN nb_min_visites INT DEFAULT 1,
-    ADD COLUMN pct_min_visites DECIMAL(5,2) DEFAULT 50.00;
+    ADD COLUMN pct_min_visites DECIMAL(5,2) DEFAULT 50.00,
+    ADD COLUMN nom VARCHAR(255) NOT NULL DEFAULT '',
+    ADD COLUMN selection TEXT NULL,
+    ADD COLUMN deleted_at DATETIME NULL;
+
+-- Mettre à jour l'ENUM statut pour inclure les valeurs du modèle
+ALTER TABLE campagnes 
+    MODIFY COLUMN statut ENUM('brouillon','en_cours','ouverte','planification_terminee','termine') DEFAULT 'brouillon';
 
 -- Ajouter token_acces à locataires
 ALTER TABLE locataires ADD COLUMN token_acces VARCHAR(64) UNIQUE NULL;

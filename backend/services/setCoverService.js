@@ -1,16 +1,16 @@
 function construireCriteres(logements) {
   const criteres = new Set();
 
-  const typologies = new Set(logements.map(l => l.typologie));
+  const typologies = new Set(logements.map(l => l.typologie).filter(v => v != null));
   for (const t of typologies) criteres.add(`typo:${t}`);
 
-  const planchersBas = new Set(logements.map(l => l.plancher_bas));
+  const planchersBas = new Set(logements.map(l => l.plancher_bas).filter(v => v != null));
   for (const p of planchersBas) criteres.add(`pb:${p}`);
 
-  const planchersHaut = new Set(logements.map(l => l.plancher_haut));
+  const planchersHaut = new Set(logements.map(l => l.plancher_haut).filter(v => v != null));
   for (const p of planchersHaut) criteres.add(`ph:${p}`);
 
-  const positions = new Set(logements.map(l => l.position));
+  const positions = new Set(logements.map(l => l.position).filter(v => v != null));
   for (const p of positions) criteres.add(`pos:${p}`);
 
   return criteres;
@@ -18,10 +18,10 @@ function construireCriteres(logements) {
 
 function criteresCouvertPar(logement) {
   const couverts = new Set();
-  couverts.add(`typo:${logement.typologie}`);
-  couverts.add(`pb:${logement.plancher_bas}`);
-  couverts.add(`ph:${logement.plancher_haut}`);
-  couverts.add(`pos:${logement.position}`);
+  if (logement.typologie != null) couverts.add(`typo:${logement.typologie}`);
+  if (logement.plancher_bas != null) couverts.add(`pb:${logement.plancher_bas}`);
+  if (logement.plancher_haut != null) couverts.add(`ph:${logement.plancher_haut}`);
+  if (logement.position != null) couverts.add(`pos:${logement.position}`);
   return couverts;
 }
 
@@ -30,7 +30,7 @@ function selectionSetCover(logements) {
   const selection = [];
 
   const avecCriteres = logements.map(l => ({
-    _id: l._id,
+    id: l.id,
     etage: l.etage,
     typologie: l.typologie,
     plancher_bas: l.plancher_bas,
@@ -78,8 +78,8 @@ function calculerSeuilMinimal(nbLogements) {
 function completerJusquaSeuil(selection, logements, seuil) {
   if (selection.length >= seuil) return selection;
 
-  const selectionIds = new Set(selection.map(l => l._id.toString()));
-  const exclus = logements.filter(l => !selectionIds.has(l._id.toString()));
+  const selectionIds = new Set(selection.map(l => l.id.toString()));
+  const exclus = logements.filter(l => !selectionIds.has(l.id.toString()));
   exclus.sort((a, b) => a.etage - b.etage);
 
   const result = [...selection];
@@ -91,7 +91,7 @@ function completerJusquaSeuil(selection, logements, seuil) {
 }
 
 function lancerSelection(logements) {
-  const logementsData = logements.map(l => l.toObject ? l.toObject() : l);
+  const logementsData = logements.map(l => l.toJSON ? l.toJSON() : l);
 
   const resultat = selectionSetCover(logementsData);
 
@@ -103,12 +103,12 @@ function lancerSelection(logements) {
 
   return {
     success: resultat.ilRestait.length === 0,
-    selectionnes: selectionComplete.map(l => l._id),
+    selectionnes: selectionComplete.map(l => l.id),
     couverture: {
-      typologies: [...new Set(selectionComplete.map(l => l.typologie))],
-      planchersBas: [...new Set(selectionComplete.map(l => l.plancher_bas))],
-      planchersHaut: [...new Set(selectionComplete.map(l => l.plancher_haut))],
-      positions: [...new Set(selectionComplete.map(l => l.position))]
+      typologies: [...new Set(selectionComplete.map(l => l.typologie).filter(v => v != null))],
+      planchersBas: [...new Set(selectionComplete.map(l => l.plancher_bas).filter(v => v != null))],
+      planchersHaut: [...new Set(selectionComplete.map(l => l.plancher_haut).filter(v => v != null))],
+      positions: [...new Set(selectionComplete.map(l => l.position).filter(v => v != null))]
     },
     seuil: { requis: calculerSeuilMinimal(logementsData.length), obtenu: selectionComplete.length },
     criteresManquants: resultat.ilRestait

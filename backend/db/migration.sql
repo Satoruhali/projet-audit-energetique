@@ -7,8 +7,11 @@ USE audit_energetique;
 
 -- Campagnes : ajout des colonnes manquantes
 ALTER TABLE campagnes ADD COLUMN IF NOT EXISTS nom VARCHAR(255) NOT NULL DEFAULT '';
-ALTER TABLE campagnes ADD COLUMN IF NOT EXISTS selection JSON NULL;
+ALTER TABLE campagnes ADD COLUMN IF NOT EXISTS selection TEXT NULL;
 ALTER TABLE campagnes ADD COLUMN IF NOT EXISTS deleted_at DATETIME NULL;
+
+-- Mise à jour de l'ENUM statut pour inclure tous les statuts du modèle
+ALTER TABLE campagnes MODIFY COLUMN statut ENUM('brouillon','en_cours','ouverte','planification_terminee','termine') DEFAULT 'brouillon';
 
 -- Logements : ajout des colonnes métier
 ALTER TABLE logements ADD COLUMN IF NOT EXISTS surface FLOAT NULL;
