@@ -143,6 +143,22 @@ async function apiCampagneEnvoyerEmails(id) {
   } catch { return { error: 'Serveur injoignable' }; }
 }
 
+async function apiCampagneRelancer(id) {
+  try {
+    const token = getToken();
+    if (!token) return null;
+    const res = await fetch(`${API_BASE}/campagnes/${id}/relancer`, {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      return { error: err.message || 'Erreur lors de la relance' };
+    }
+    return await res.json();
+  } catch { return { error: 'Serveur injoignable' }; }
+}
+
 async function apiCampagneEmailHistory(id) {
   const result = await apiFetch('GET', `/campagnes/${id}/emails`);
   if (result && result.emails) return result.emails;

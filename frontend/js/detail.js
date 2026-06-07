@@ -140,12 +140,18 @@ function renderReponses(camp) {
   }).join('');
 
   tbody.querySelectorAll('[data-relance]').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', async () => {
       const loc = camp.locataires.find(l => String(l.id) === btn.dataset.relance);
-      if (loc) {
-        loc.statut = 'relance';
-        toast(`Relance envoyée à ${loc.logement}`, 'info');
-        renderReponses(camp);
+      if (!loc || !camp.id_campagne) return;
+      btn.disabled = true;
+      const result = await apiCampagneRelancer(camp.id_campagne);
+      btn.disabled = false;
+      if (result && !result.error) {
+        const nb = result.total_envoyes || 0;
+        toast(`Relance envoyée à ${loc.logement} (${nb} locataire(s) relancé(s))`, 'success');
+        renderEmailHistory(camp);
+      } else {
+        toast('Erreur lors de la relance', 'warning');
       }
     });
   });
@@ -240,13 +246,22 @@ $$('[data-tab]').forEach(tab => {
 $('#backToDashboard').addEventListener('click', () => window.location.href = '/dashboard');
 
 /* ---------- RELANCE MASSE ---------- */
-$('#relanceMassBtn').addEventListener('click', () => {
+$('#relanceMassBtn').addEventListener('click', async () => {
   const camp = APP.campaigns.find(c => String(c.id) === String(APP.currentCampaignId));
-  if (!camp) return;
-  const enAttente = camp.locataires.filter(l => l.statut === 'attente');
-  enAttente.forEach(l => l.statut = 'relance');
-  toast(`Relance envoyée à ${enAttente.length} locataire(s)`, 'success');
-  renderReponses(camp);
+  if (!camp || !camp.id_campagne) return;
+  const btn = $('#relanceMassBtn');
+  btn.disabled = true;
+  btn.textContent = 'Envoi en cours…';
+  const result = await apiCampagneRelancer(camp.id_campagne);
+  btn.disabled = false;
+  btn.textContent = '📧 Relancer tous les non-répondants';
+  if (result && !result.error) {
+    const nb = result.total_envoyes || 0;
+    toast(`${nb} relance(s) envoyée(s)`, 'success');
+    renderEmailHistory(camp);
+  } else {
+    toast('Erreur lors de la relance', 'warning');
+  }
 });
 
 /* ---------- GÉNÉRER LIENS ---------- */

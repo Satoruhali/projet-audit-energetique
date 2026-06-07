@@ -26,7 +26,7 @@ function getTransporter() {
 const BASE_URL = process.env.BASE_URL || 'http://localhost:3001';
 
 function templateVisiteProgrammee({ prenom, nom, nom_campagne, nom_immeuble, token }) {
-  const lien = `${BASE_URL}/liens/${token}`;
+  const lien = `${BASE_URL}/rendez-vous/${token}`;
   const sujet = `Programmation de votre visite — ${nom_campagne}`;
   const corps = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px;">
@@ -51,6 +51,24 @@ function templatePasDeVisite({ prenom, nom, nom_campagne, nom_immeuble }) {
       <p>Nous vous remercions de votre participation à la campagne <strong>${nom_campagne}</strong> pour l'immeuble <strong>${nom_immeuble}</strong>.</p>
       <p>Votre logement n'a pas été retenu pour une visite cette fois-ci. Aucune action n'est nécessaire de votre part.</p>
       <p>Nous vous remercions pour votre confiance.</p>
+      <p>Cordialement,<br>L'équipe Planif'Audit</p>
+    </div>
+  `;
+  return { sujet, corps };
+}
+
+function templateRelance({ prenom, nom, nom_campagne, nom_immeuble, token }) {
+  const lien = `${BASE_URL}/rendez-vous/${token}`;
+  const sujet = `Relance — ${nom_campagne}`;
+  const corps = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px;">
+      <h2>Bonjour ${prenom} ${nom},</h2>
+      <p>Nous n'avons pas encore reçu votre choix de créneau pour la visite de votre logement dans l'immeuble <strong>${nom_immeuble}</strong> dans le cadre de la campagne <strong>${nom_campagne}</strong>.</p>
+      <p>Merci de cliquer sur le lien ci-dessous <strong>dès que possible</strong> pour sélectionner un créneau de visite :</p>
+      <p style="text-align: center;">
+        <a href="${lien}" style="display: inline-block; padding: 12px 24px; background-color: #2563eb; color: #ffffff; text-decoration: none; border-radius: 6px;">Choisir un créneau</a>
+      </p>
+      <p>Ce lien est personnel et valable pour une seule réservation.</p>
       <p>Cordialement,<br>L'équipe Planif'Audit</p>
     </div>
   `;
@@ -84,5 +102,6 @@ async function sendMail({ to, subject, html }) {
 module.exports = {
   sendMail,
   templateVisiteProgrammee,
-  templatePasDeVisite
+  templatePasDeVisite,
+  templateRelance
 };

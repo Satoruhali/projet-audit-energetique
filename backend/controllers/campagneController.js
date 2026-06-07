@@ -9,7 +9,7 @@ const Typologie = require('../models/Typologie');
 const TypePlancher = require('../models/TypePlancher');
 const { creerCampagne } = require('../validations/campagne');
 const { lancerSelection } = require('../services/setCoverService');
-const { sendMail, templateVisiteProgrammee, templatePasDeVisite } = require('../services/emailService');
+const { sendMail, templateVisiteProgrammee, templatePasDeVisite, templateRelance } = require('../services/emailService');
 
 exports.store = async (req, res) => {
   try {
@@ -305,5 +305,102 @@ exports.envoyerEmails = async (req, res) => {
   } catch (err) {
     console.error('Erreur envoyerEmails:', err);
     res.status(500).json({ message: 'Erreur lors de l\'envoi des emails' });
+  }
+};
+
+exports.envoyerRelances = async (req, res) => {
+  try {
+    const immeubles = await Immeuble.findAll({
+      where: { id_entrepreneur: req.entrepreneur.id }
+    });
+    const immeubleIds = immeubles.map(i => i.id);
+
+    const campagne = await Campagne.findOne({
+      where: { id: req.params.id, batiment_id: { [Op.in]: immeubleIds } }
+    });
+
+    if (!campagne) {
+      return res.status(404).json({ message: 'Campagne introuvable ou non autorisée' });
+    }
+
+    const logements = await Logement.findAll({
+      where: { batiment_id: campagne.batiment_id, selectionne_visite: true },
+      include: [{ model: Locataire }]
+    });
+
+    const locatairesAvecEmail = logements
+      .filter(l => l.locataire && l.locataire.email)
+      .map(l => l.locataire);
+
+    if (locatairesAvecEmail.length === 0) {
+      return res.status(400).json({ message: 'Aucun locataire avec email sélectionné pour visite' });
+    }
+
+    const creneaux = await Creneau.findAll({
+      where: { id_campagne: campagne.id }
+    });
+    const logementIdsAvecCreneau = creneaux.map(c => c.id_logement);
+    const logementsAvecCreneau = await Logement.findAll({
+      where: { id: logementIdsAvecCreneau }
+    });
+    const locatairesAvecCreneau = new Set(logementsAvecCreneau.map(l => l.locataire_id));
+
+    const nonRepondants = locatairesAvecEmail.filter(l => !locatairesAvecCreneau.has(l.id));
+
+    if (nonRepondants.length === 0) {
+      return res.json({ message: 'Tous les locataires ont déjà répondu', total: 0, total_envoyes: 0, total_erreurs: 0, details: [] });
+    }
+
+    const immeuble = await Immeuble.findByPk(campagne.batiment_id);
+    const resultats = [];
+
+    for (const locataire of nonRepondants) {
+      const template = templateRelance({
+        prenom: locataire.prenom,
+        nom: locataire.nom,
+        nom_campagne: campagne.nom,
+        nom_immeuble: immeuble ? immeuble.nom : '',
+        token: locataire.token_acces
+      });
+
+      const { success, error } = await sendMail({
+        to: locataire.email,
+        subject: template.sujet,
+        html: template.corps
+      });
+
+      const emailRecord = await EmailEnvoye.create({
+        id_campagne: campagne.id,
+        id_locataire: locataire.id,
+        destinataire: locataire.email,
+        sujet: template.sujet,
+        corps: template.corps,
+        type: 'relance',
+        statut: success ? 'envoye' : 'echec',
+        erreur: error || null
+      });
+
+      resultats.push({
+        locataire_id: locataire.id,
+        email: locataire.email,
+        type: 'relance',
+        statut: emailRecord.statut,
+        erreur: error || null
+      });
+    }
+
+    const totalEnvoyes = resultats.filter(r => r.statut === 'envoye').length;
+    const totalErreurs = resultats.filter(r => r.statut === 'echec').length;
+
+    res.json({
+      message: `${totalEnvoyes} relance(s) envoyée(s), ${totalErreurs} erreur(s)`,
+      total: resultats.length,
+      total_envoyes: totalEnvoyes,
+      total_erreurs: totalErreurs,
+      details: resultats
+    });
+  } catch (err) {
+    console.error('Erreur envoyerRelances:', err);
+    res.status(500).json({ message: 'Erreur lors de l\'envoi des relances' });
   }
 };

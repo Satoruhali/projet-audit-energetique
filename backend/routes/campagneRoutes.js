@@ -17,5 +17,6 @@ router.post('/:id/lancer-selection', auth, campagneController.lancerSelection);
 router.get('/:id/emails', auth, campagneController.listEmails);
 router.post('/:id/locataires', auth, locataireController.storeBatch);
 router.post('/:id/envoyer-emails', auth, campagneController.envoyerEmails);
+router.post('/:id/relancer', auth, campagneController.envoyerRelances);
 
 module.exports = router;
