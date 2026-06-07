@@ -170,3 +170,9 @@ async function apiCampagneJoursSave(id, jours) {
   if (result && result.jours) return result;
   return null;
 }
+
+async function apiCampagneJoursLoad(id) {
+  const result = await apiFetch('GET', `/campagnes/${id}/jours-disponibles`);
+  if (result && result.jours) return result.jours;
+  return [];
+}

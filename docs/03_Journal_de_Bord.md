@@ -465,6 +465,42 @@ Audit du plan d'attaque et du code existant pour identifier les failles pouvant 
   - Contrôleurs adaptés : remplacement de `find()`, `findById()`, `save()`, `findByIdAndUpdate()` par `findAll()`, `findByPk()`, `create()`, `update()`, `destroy()` Sequelize
   - Suppression du dossier `Agent.ia/` (déplacé dans `.opencode/`)
   - Ajout des fichiers de configuration opencode (`.opencode/rules/`, `.opencode/skills/`, `opencode.json`)
-  - Mise à jour de la documentation technique (`docs/05_Documentation_Technique.md`) et plan projet (`docs/01_Plan_Organisation_Projet.md`)
-  - Commit: `b960d08`
+   - Mise à jour de la documentation technique (`docs/05_Documentation_Technique.md`) et plan projet (`docs/01_Plan_Organisation_Projet.md`)
+   - Commit: `b960d08`
+---
+
+## 📅 2026-06-07 — 15:24
+- **Tâche** : Phase 6.2 (suite) — UI envoi d'emails : bouton "Envoyer les emails" + tableau d'historique dans l'onglet Échantillonnage + corrections adaptation MySQL
+- **Durée estimée** : 2h
+- **Durée réelle** : ⏳ à compléter
+- **Statut** : ✅ terminée
+- **Fichiers modifiés** : `frontend/js/detail.js`, `frontend/js/dashboard.js`, `frontend/js/api.js`, `backend/controllers/campagneController.js`, `backend/controllers/logementController.js`, `backend/models/Campagne.js`, `backend/models/Logement.js`, `backend/services/emailService.js`, `backend/services/setCoverService.js`, `backend/db/migrate.js`, `backend/db/migration.sql`, `backend/seed.js`, `backend/tests/envoyer-emails.test.js`, `testdb.sql`
+- **Notes** :
+  - Bouton "Envoyer les emails" ajouté dans l'onglet Échantillonnage (detail.js)
+  - Tableau d'historique des envois avec statuts (date, destinataire, type, statut) dans l'onglet Échantillonnage
+  - Appels API frontend mis à jour pour récupérer l'historique des emails depuis la campagne
+  - Corrections MySQL :
+    - Harmonisation des types Sequelize (`STRING(1)` pour champs `statut` au lieu de `ENUM` problématique)
+    - Ajustement des requêtes `LIKE`/`ILIKE` pour compatibilité MySQL (remplacement par `LIKE` uniquement)
+    - Correction des scripts `seed.js` et `migration.sql` (syntaxe, types)
+    - Mise à jour des contrôleurs campagneController et logementController
+    - Adaptation du service setCoverService aux nouveaux schémas MySQL
+  - Commit : `752fe30`
+---
+
+## 📅 2026-06-07 — 15:24
+- **Tâche** : Phase 6.2 — Relance email : route POST .../relancer + UI relance individuelle et masse
+- **Durée estimée** : 1h
+- **Durée réelle** : ⏳ à compléter
+- **Statut** : ✅ terminée
+- **Fichiers modifiés** : `backend/controllers/campagneController.js`, `backend/routes/campagneRoutes.js`, `backend/services/emailService.js`, `frontend/js/api.js`, `frontend/js/detail.js`
+- **Notes** :
+  - Nouveau controller `envoyerRelances()` : filtre les locataires sélectionnés sans créneau (non-répondants), envoie email de relance via `templateRelance`, enregistre dans `email_envoyes` avec `type='relance'`
+  - Nouvelle route `POST /api/entrepreneur/campagnes/:id/relancer`
+  - Nouveau template HTML `templateRelance` dans `emailService.js` avec lien `/rendez-vous/:token`
+  - Correction URL des templates existants : `/liens/` → `/rendez-vous/`
+  - Frontend : fonction `apiCampagneRelancer(id)` dans `api.js`
+  - Bouton relance individuelle et bouton "Relancer tous les non-répondants" branchés sur l'API réelle (plus mock)
+  - Rafraîchissement de l'historique des emails après chaque relance
+  - Commit : `79d2c93`
 ---

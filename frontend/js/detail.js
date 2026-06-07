@@ -108,7 +108,17 @@ async function showDetail(id) {
 
   renderReponses(camp);
   renderPlanningTab(camp);
-  renderJoursDisponibles(camp);
+  if (camp.id_campagne) {
+    apiCampagneJoursLoad(camp.id_campagne).then(jours => {
+      camp.joursDisponibles = jours;
+      renderJoursDisponibles(camp);
+      $('#detailSubtitle').textContent = `${jours.length} jours disponibles · ${camp.nbLogements} logements`;
+    }).catch(() => {
+      renderJoursDisponibles(camp);
+    });
+  } else {
+    renderJoursDisponibles(camp);
+  }
   renderEchantillonnage(camp);
   activateTab('reponses');
 }
@@ -215,20 +225,38 @@ function renderJoursDisponibles(camp) {
   });
 }
 
-$('#saveJoursBtn')?.addEventListener('click', () => {
+$('#saveJoursBtn')?.addEventListener('click', async () => {
   const camp = APP.campaigns.find(c => String(c.id) === String(APP.currentCampaignId));
   if (!camp) return;
 
   const selected = [...$$('.jour-chip--selected')].map(chip => chip.dataset.date);
+
+  if (selected.length === 0) {
+    toast('Sélectionnez au moins un jour disponible', 'warning');
+    return;
+  }
+
   camp.joursDisponibles = selected;
-  toast(`Jours disponibles mis à jour (${selected.length} jour(s))`, 'success');
+
+  if (camp.id_campagne) {
+    const result = await apiCampagneJoursSave(camp.id_campagne, selected);
+    if (!result) {
+      toast('Impossible de sauvegarder les jours sur le serveur, mais ils sont enregistrés localement', 'warning');
+    } else {
+      toast(`Jours disponibles mis à jour (${selected.length} jour(s))`, 'success');
+    }
+  } else {
+    toast(`Jours disponibles mis à jour (${selected.length} jour(s))`, 'success');
+  }
 
   const container = $('#joursDisponiblesContainer');
-  const allChips = [...container.querySelectorAll('.jour-chip')];
-  const joursSet = new Set(selected);
-  allChips.forEach(chip => {
-    chip.classList.toggle('jour-chip--selected', joursSet.has(chip.dataset.date));
-  });
+  if (container) {
+    const allChips = [...container.querySelectorAll('.jour-chip')];
+    const joursSet = new Set(selected);
+    allChips.forEach(chip => {
+      chip.classList.toggle('jour-chip--selected', joursSet.has(chip.dataset.date));
+    });
+  }
   $('#detailSubtitle').textContent = `${selected.length} jours disponibles · ${camp.nbLogements} logements`;
 });
 
