@@ -24,6 +24,8 @@ async function migrate() {
     await sequelize.query(`ALTER TABLE immeubles ADD COLUMN IF NOT EXISTS plancher_haut VARCHAR(100) NULL`);
     await sequelize.query(`ALTER TABLE immeubles ADD COLUMN IF NOT EXISTS surface_totale FLOAT NULL`);
 
+    await sequelize.query(`ALTER TABLE locataires ADD COLUMN IF NOT EXISTS prenom VARCHAR(255) NOT NULL DEFAULT ''`);
+
     console.log('Migration terminée avec succès');
     process.exit(0);
   } catch (err) {

@@ -504,3 +504,17 @@ Audit du plan d'attaque et du code existant pour identifier les failles pouvant 
   - Rafraîchissement de l'historique des emails après chaque relance
   - Commit : `79d2c93`
 ---
+
+## 📅 2026-06-07 — 17:58
+- **Tâche** : Correction chemin script rdv.html + chargement asynchrone des jours disponibles
+- **Durée estimée** : 30 min
+- **Durée réelle** : ⏳ à compléter
+- **Statut** : ✅ terminée
+- **Fichiers modifiés** : `frontend/rdv.html`, `frontend/js/api.js`, `frontend/js/detail.js`, `docs/03_Journal_de_Bord.md`
+- **Notes** :
+  - `frontend/rdv.html` : correction du chemin du script `js/rdv.js` → `/js/rdv.js` (chemin absolu)
+  - `frontend/js/api.js` : ajout de la fonction `apiCampagneJoursLoad(id)` pour charger les jours disponibles depuis l'API
+  - `frontend/js/detail.js` : chargement asynchrone des jours disponibles via API au lieu des données locales ; sauvegarde côté serveur via `apiCampagneJoursSave()` ; validation empêchant la sélection vide ; toast d'avertissement si sauvegarde serveur échoue (fallback local)
+  - `docs/03_Journal_de_Bord.md` : ajout des entrées journal pour les commits précédents
+  - Commit : `75c9395`
+---

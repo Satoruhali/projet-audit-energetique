@@ -316,8 +316,8 @@ $('#campaignForm').addEventListener('submit', (e) => {
         etage: l.etage,
         surface: 50,
         typologie: l.typologie || 'T1',
-        plancher_bas: l.plancherBas || 'dalle',
-        plancher_haut: l.plancherHaut || 'combles',
+        plancher_bas: l.plancherBas || 'dalle-béton',
+        plancher_haut: l.plancherHaut || 'combles-perdus',
         position: l.position || 'intermediaire',
       }));
       const logementsCreated = await apiCampagneLogementsStore(id_campagne, logementsPayload);
@@ -335,7 +335,8 @@ $('#campaignForm').addEventListener('submit', (e) => {
           telephone: l.tel,
         };
       });
-      await apiCampagneLocatairesStore(id_campagne, locatairesPayload);
+      const locatairesCreated = await apiCampagneLocatairesStore(id_campagne, locatairesPayload);
+      if (!locatairesCreated) throw new Error('Échec création locataires');
 
       campaignId = id_campagne;
       const campaign = {

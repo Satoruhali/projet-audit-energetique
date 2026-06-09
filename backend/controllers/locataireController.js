@@ -21,6 +21,7 @@ exports.storeBatch = async (req, res) => {
     }
 
     const locataireData = req.body.map(l => ({
+      prenom: l.prenom,
       nom: l.nom,
       email: l.email ? l.email.toLowerCase().trim() : undefined,
       telephone: l.telephone || '',

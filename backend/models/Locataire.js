@@ -7,6 +7,10 @@ const Locataire = sequelize.define('locataires', {
     autoIncrement: true,
     primaryKey: true
   },
+  prenom: {
+    type: DataTypes.STRING(255),
+    allowNull: false
+  },
   nom: {
     type: DataTypes.STRING(255),
     allowNull: false

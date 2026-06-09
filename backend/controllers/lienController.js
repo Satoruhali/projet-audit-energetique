@@ -58,7 +58,7 @@ exports.getLien = async (req, res) => {
     res.json({
       locataire: {
         nom: locataire.nom,
-        prenom: ''
+        prenom: locataire.prenom
       },
       campagne: {
         id: campagne.id,

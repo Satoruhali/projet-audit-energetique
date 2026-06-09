@@ -187,16 +187,15 @@ const APP = {
     { id: 'T5', label: 'T5' },
   ],
   plancherBas: [
-    { id: 'pb-dalle', label: 'Dalle béton sur terre-plein' },
-    { id: 'pb-cave', label: 'Plancher bas sur cave' },
-    { id: 'pb-vide-sanitaire', label: 'Plancher bas sur vide sanitaire' },
-    { id: 'pb-bois', label: 'Plancher bois surélevé' },
+    { id: 'dalle-béton', label: 'Dalle béton' },
+    { id: 'terre-plein', label: 'Sur terre-plein' },
+    { id: 'vide-sanitaire', label: 'Sur vide sanitaire' },
+    { id: 'sous-sol', label: 'Sur sous-sol' },
   ],
   plancherHaut: [
-    { id: 'ph-combles-perdus', label: 'Plafond sous combles perdus' },
-    { id: 'ph-toiture-terrasse', label: 'Toiture-terrasse' },
-    { id: 'ph-combles-amenages', label: 'Combles aménagés' },
-    { id: 'ph-dalle-etage', label: 'Dalle béton entre étages' },
+    { id: 'combles-perdus', label: 'Combles non aménagés' },
+    { id: 'toiture-terrasse', label: 'Toiture terrasse' },
+    { id: 'rampants', label: 'Rampants' },
   ],
   positions: [
     { id: 'bas', label: 'Bas (RDC/rez-de-chaussée)' },
