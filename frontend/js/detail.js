@@ -29,7 +29,7 @@ async function showDetail(id) {
         })),
         locataires: (detail.locataires || []).map(l => {
           const logement = l.logement || l.logements?.[0] || {};
-          const creneau = creneaux.find(c => String(c.locataire_id) === String(l.id));
+          const creneau = creneaux.find(c => String(c.id_logement) === String(logement.id));
           return {
             id: l.id,
             nom: l.nom || '',
@@ -78,7 +78,7 @@ async function showDetail(id) {
         const creneaux = detail.creneaux || [];
         camp.locataires = detail.locataires.map(l => {
           const logement = l.logement || l.logements?.[0] || {};
-          const creneau = creneaux.find(c => String(c.locataire_id) === String(l.id));
+          const creneau = creneaux.find(c => String(c.id_logement) === String(logement.id));
           return {
             id: l.id,
             nom: l.nom || '',
@@ -264,10 +264,78 @@ $('#saveJoursBtn')?.addEventListener('click', async () => {
 function activateTab(name) {
   $$('.tab').forEach(t => t.classList.toggle('tab--active', t.dataset.tab === name));
   $$('.tab-content').forEach(tc => tc.classList.toggle('tab-content--active', tc.id === 'tab-' + name));
+  if (name === 'reponses') {
+    startPolling();
+    refreshCampaignData();
+  } else {
+    stopPolling();
+  }
 }
 
 $$('[data-tab]').forEach(tab => {
   tab.addEventListener('click', () => activateTab(tab.dataset.tab));
+});
+
+/* ---------- POLLING RÉPONSES ---------- */
+let pollInterval = null;
+
+function refreshCampaignData() {
+  const camp = APP.campaigns.find(c => String(c.id) === String(APP.currentCampaignId));
+  if (!camp || !camp.id_campagne) return;
+
+  apiCampagneShow(camp.id_campagne).then(detail => {
+    if (!detail) return;
+
+    const creneaux = detail.creneaux || [];
+    const newLocataires = (detail.locataires || []).map(l => {
+      const logement = l.logement || l.logements?.[0] || {};
+      const creneau = creneaux.find(c => String(c.id_logement) === String(logement.id));
+      return {
+        id: l.id,
+        nom: l.nom || '',
+        email: l.email || '',
+        logement: logement.numero || l.numero || '',
+        etage: logement.etage ?? l.etage ?? 0,
+        etageLabel: (logement.etage ?? l.etage ?? 0) === 0 ? 'RDC' : (logement.etage ?? l.etage ?? 0) === -1 ? 'Sous-sol' : (logement.etage ?? l.etage ?? 0) + 'e',
+        statut: creneau ? 'repondu' : 'attente',
+        creneau: creneau ? {
+          date: new Date(creneau.date_visite).toISOString().split('T')[0],
+          debut: creneau.heure_debut,
+          fin: creneau.heure_fin,
+        } : null,
+      };
+    });
+
+    const changed = JSON.stringify(camp.locataires) !== JSON.stringify(newLocataires);
+    if (!changed) return;
+
+    camp.locataires = newLocataires;
+
+    const stats = campaignStats(camp);
+    $('#detailRepondu').textContent = stats.repondu;
+    $('#detailEnAttente').textContent = stats.attente;
+    $('#detailTotal').textContent = stats.total;
+
+    renderReponses(camp);
+    renderPlanningTab(camp);
+  });
+}
+
+function startPolling() {
+  stopPolling();
+  pollInterval = setInterval(refreshCampaignData, 30000);
+}
+
+function stopPolling() {
+  if (pollInterval) {
+    clearInterval(pollInterval);
+    pollInterval = null;
+  }
+}
+
+$('#refreshReponsesBtn')?.addEventListener('click', () => {
+  refreshCampaignData();
+  toast('Données actualisées', 'success');
 });
 
 /* ---------- BACK NAV ---------- */
