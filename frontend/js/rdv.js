@@ -5,7 +5,7 @@
 const $ = (s, ctx) => (ctx || document).querySelector(s);
 const $$ = (s, ctx) => [...(ctx || document).querySelectorAll(s)];
 
-const API_ORIGIN = 'http://localhost:3001';
+const API_ORIGIN = window.location.origin;
 const API_PUBLIC = API_ORIGIN + '/api';
 
 const RDV = {

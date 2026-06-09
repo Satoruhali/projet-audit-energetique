@@ -188,15 +188,16 @@ async function seed() {
   console.log('  3. Va sur /detail?id=' + campagne.id);
   console.log('  4. Onglet "Emails" → cliquer "Envoyer les emails"');
   console.log('  Ou via curl :');
-  console.log('    curl -X POST http://localhost:3001/api/auth/login \\');
+  const port = process.env.PORT || 3000;
+  console.log(`    curl -X POST http://localhost:${port}/api/auth/login \\`);
   console.log('      -H "Content-Type: application/json" \\');
   console.log('      -d \'{"email":"test@diag.fr","mot_de_passe":"password123"}\'');
   console.log('    (récupérer le token, puis)');
-  console.log('    curl -X POST http://localhost:3001/api/entrepreneur/campagnes/' + campagne.id + '/envoyer-emails \\');
+  console.log(`    curl -X POST http://localhost:${port}/api/entrepreneur/campagnes/${campagne.id}/envoyer-emails \\`);
   console.log('      -H "Authorization: Bearer <TOKEN>"');
 
   console.log('\nPour voir le planning optimisé :');
-  console.log('  http://localhost:3001/planning?id=' + campagne.id);
+  console.log(`  http://localhost:${port}/planning?id=${campagne.id}`);
   console.log('  5 locataires ont des créneaux → ils apparaîtront dans le planning');
   console.log('  2 locataires sans créneau → en "attente"');
 

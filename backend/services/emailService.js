@@ -23,7 +23,7 @@ function getTransporter() {
   return transporter;
 }
 
-const BASE_URL = process.env.BASE_URL || 'http://localhost:3001';
+const BASE_URL = process.env.BASE_URL || `http://localhost:${process.env.PORT || 3000}`;
 
 function templateVisiteProgrammee({ prenom, nom, nom_campagne, nom_immeuble, token }) {
   const lien = `${BASE_URL}/rendez-vous/${token}`;

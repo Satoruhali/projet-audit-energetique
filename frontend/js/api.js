@@ -14,7 +14,7 @@ function setUser(u) { localStorage.setItem('planif_user', JSON.stringify(u)); }
 function clearUser() { localStorage.removeItem('planif_user'); }
 
 /* ---------- API HELPERS ---------- */
-const API_ORIGIN = 'http://localhost:3001';
+const API_ORIGIN = window.location.origin;
 const API_BASE = API_ORIGIN + '/api/entrepreneur';
 const API_AUTH = API_ORIGIN + '/api/auth';
 const API_PUBLIC = API_ORIGIN + '/api';
