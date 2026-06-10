@@ -105,10 +105,9 @@ frontend/
 
 ## 🟢 Bonnes pratiques (à faire)
 
-### 8. Changer JWT_SECRET actuel
+### 8. Changer JWT_SECRET actuel — ✅ Fait
 
-- Valeur actuelle : `'mon_secret_jwt_super_securise_2026'`
-- Conseil : Générer un secret fort (64+ caractères aléatoires)
+- Nouveau secret : 64 caractères hexadécimaux (généré via `RNGCryptoServiceProvider`)
 
 ### 9. Ajouter favicon et balises meta
 
