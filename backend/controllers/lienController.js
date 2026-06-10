@@ -161,11 +161,19 @@ exports.postCreneau = async (req, res) => {
       statut: 'reserve'
     });
 
+    const { sendMail, templateConfirmation } = require('../services/emailService');
+
     if (locataire.email) {
-      console.log(`[EMAIL SIMULÉ] Confirmation envoyée à ${locataire.email}`);
-      console.log(`[EMAIL SIMULÉ] Sujet: Confirmation de votre rendez-vous`);
-      console.log(`[EMAIL SIMULÉ] Corps: Bonjour ${locataire.nom},`);
-      console.log(`[EMAIL SIMULÉ] Votre rendez-vous est confirmé le ${dateStr} de ${heure_debut} à ${heure_fin}.`);
+      const { sujet, corps } = templateConfirmation({
+        prenom: locataire.prenom,
+        nom: locataire.nom,
+        date_visite: dateStr,
+        heure_debut,
+        heure_fin,
+        nom_immeuble: immeuble.nom,
+        nom_campagne: campagne.nom
+      });
+      await sendMail({ to: locataire.email, subject: sujet, html: corps });
     }
 
     res.status(201).json({

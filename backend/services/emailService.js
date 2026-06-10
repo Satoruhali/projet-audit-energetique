@@ -75,6 +75,21 @@ function templateRelance({ prenom, nom, nom_campagne, nom_immeuble, token }) {
   return { sujet, corps };
 }
 
+function templateConfirmation({ prenom, nom, date_visite, heure_debut, heure_fin, nom_immeuble, nom_campagne }) {
+  const sujet = `Confirmation de votre rendez-vous — ${nom_campagne}`;
+  const corps = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px;">
+      <h2>Bonjour ${prenom} ${nom},</h2>
+      <p>Votre rendez-vous pour la visite de votre logement dans l'immeuble <strong>${nom_immeuble}</strong> dans le cadre de la campagne <strong>${nom_campagne}</strong> est confirmé.</p>
+      <p><strong>Date :</strong> ${date_visite}</p>
+      <p><strong>Créneau :</strong> de ${heure_debut} à ${heure_fin}</p>
+      <p>Merci de vous présenter à l'heure convenue. Un email de rappel vous sera envoyé avant la visite.</p>
+      <p>Cordialement,<br>L'équipe Planif'Audit</p>
+    </div>
+  `;
+  return { sujet, corps };
+}
+
 async function sendMail({ to, subject, html }) {
   const transport = getTransporter();
 
@@ -103,5 +118,6 @@ module.exports = {
   sendMail,
   templateVisiteProgrammee,
   templatePasDeVisite,
-  templateRelance
+  templateRelance,
+  templateConfirmation
 };
