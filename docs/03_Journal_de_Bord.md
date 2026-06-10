@@ -533,3 +533,56 @@ Audit du plan d'attaque et du code existant pour identifier les failles pouvant 
   - Exclus : `analyse-deploiement.md`, `tools/mailpit.exe`, `server.err`, `server.log`
   - Commit : `2b50d3b`
 ---
+
+## 📅 2026-06-09 — 17:30
+- **Tâche** : Ajout fichier `.env.template` + correction auth (PORT dynamique, `window.location.origin`)
+- **Durée estimée** : 30 min
+- **Durée réelle** : ⏳ à compléter
+- **Statut** : ✅ terminée
+- **Fichiers modifiés** : `.env.template` (créé), `backend/server.js`, `backend/services/emailService.js`, `frontend/js/api.js`, `frontend/js/rdv.js`, `backend/seed-campagne-test.js`
+- **Notes** :
+  - Création de `.env.template` documentant toutes les variables d'environnement
+  - `frontend/js/api.js` : `API_ORIGIN` utilise `window.location.origin` au lieu de `http://localhost:3001` en dur
+  - `frontend/js/rdv.js` : `API_ORIGIN` utilise `window.location.origin`
+  - `backend/server.js` : fallback du port sur `process.env.PORT`
+  - Commits : `51f31c4`, `2a8cfc2`
+---
+
+## 📅 2026-06-10 — 11:15
+- **Tâche** : Corrections déploiement — guards BASE_URL/JWT_SECRET, analyse déploiement, conditionnement données mockées
+- **Durée estimée** : 1h
+- **Durée réelle** : ⏳ à compléter
+- **Statut** : ✅ terminée
+- **Fichiers modifiés** : `backend/server.js`, `backend/services/emailService.js`, `frontend/js/utils.js`, `analyse-deploiement.md`, `.env.template`, `.gitignore`
+- **Notes** :
+  - `backend/server.js` : ajout guards JWT_SECRET et BASE_URL au démarrage
+  - `backend/services/emailService.js` : suppression fallback `http://localhost:3001`
+  - `frontend/js/utils.js` : données mockées conditionnées à `location.hostname === 'localhost'`
+  - `analyse-deploiement.md` : création du document d'analyse de déploiement listant 11 problèmes
+  - Commits : `78e6919`, `b0e910a`
+---
+
+## 📅 2026-06-10 — 11:55
+- **Tâche** : Remplacement du `console.log('[CONFIRMATION]')` par un véritable envoi d'email de confirmation après réservation de créneau
+- **Durée estimée** : 20 min
+- **Durée réelle** : ⏳ à compléter
+- **Statut** : ✅ terminée
+- **Fichiers modifiés** : `backend/controllers/lienController.js`, `backend/services/emailService.js`
+- **Notes** :
+  - `lienController.js` : appel à `sendMail()` avec template de confirmation au lieu de `console.log`
+  - `emailService.js` : ajout template `templateConfirmation` avec les détails du rendez-vous (date, heure, adresse)
+  - Commit : `4a803af`
+---
+
+## 📅 2026-06-10 — 12:05
+- **Tâche** : Uniformisation CSS de `rdv.html` — liaison de `css/style.css`, suppression de 52 lignes de CSS redondant
+- **Durée estimée** : 15 min
+- **Durée réelle** : ⏳ à compléter
+- **Statut** : ✅ terminée
+- **Fichiers modifiés** : `frontend/rdv.html`
+- **Notes** :
+  - Ajout `<link rel="stylesheet" href="/css/style.css">`
+  - Suppression des règles partagées déjà présentes dans `style.css` (reset, body, `.btn`, `.btn--primary`, `.btn--block`, `.form-group`, `.form-label`, `.form-input`, `.form-row`, `@media 480px`)
+  - Conservation uniquement des classes spécifiques à la page rdv (`.rdv-*`)
+  - Commit : `1b913f8`
+---
