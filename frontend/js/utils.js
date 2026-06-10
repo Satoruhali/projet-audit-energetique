@@ -114,8 +114,10 @@ function genererToken() {
 }
 
 /* ---------- APPLICATION STATE ---------- */
+const IS_DEV = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+
 const APP = {
-  campaigns: [
+  campaigns: IS_DEV ? [
     {
       id: 'c1',
       id_campagne: null,
@@ -177,7 +179,7 @@ const APP = {
         { id: 'l15', nom: 'Marie Lambert', email: 'marie.lambert@email.fr', tel: '', logement: 'J5', etage: 2, etageLabel: '2e', digicode: '', statut: 'repondu', creneau: { date: '2026-05-04', debut: '09:00', fin: '09:30' } },
       ]
     },
-  ],
+  ] : [],
   currentCampaignId: null,
   typologies: [
     { id: 'T1', label: 'T1' },

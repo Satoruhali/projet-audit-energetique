@@ -1,5 +1,17 @@
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
+
+const requiredEnvVars = [
+  { key: 'JWT_SECRET', message: 'JWT_SECRET manquant — tokens non sécurisés' },
+  { key: 'BASE_URL', message: 'BASE_URL manquante — liens emails invalides' },
+];
+for (const { key, message } of requiredEnvVars) {
+  if (!process.env[key]) {
+    console.error(`FATAL: ${message}`);
+    process.exit(1);
+  }
+}
+
 const express = require('express');
 const { sequelize } = require('./models');
 const app = require('./app');
