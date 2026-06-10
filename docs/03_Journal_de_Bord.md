@@ -518,3 +518,18 @@ Audit du plan d'attaque et du code existant pour identifier les failles pouvant 
   - `docs/03_Journal_de_Bord.md` : ajout des entrées journal pour les commits précédents
   - Commit : `75c9395`
 ---
+
+## 📅 2026-06-09 — 15:23
+- **Tâche** : Script seed test campagne+email + rafraîchissement réponses en temps réel
+- **Durée estimée** : 30 min
+- **Durée réelle** : ⏳ à compléter
+- **Statut** : ✅ terminée
+- **Fichiers modifiés** : `backend/seed-campagne-test.js` (créé), `frontend/detail.html`, `frontend/js/detail.js`, `.gitignore`
+- **Notes** :
+  - `backend/seed-campagne-test.js` : Script de seed complet — entrepreneur, immeuble, campagne, 10 logements, 7 locataires, 5 créneaux, référentiels ; instructions pour test envoi d'emails
+  - `frontend/detail.html` : ajout bouton "↻ Rafraîchir" dans l'onglet Réponses
+  - `frontend/js/detail.js` : correction matching créneau↔locataire ; polling auto 30s + rafraîchissement manuel
+  - `.gitignore` : ajout `server.err`, `server.log`, `tools/`
+  - Exclus : `analyse-deploiement.md`, `tools/mailpit.exe`, `server.err`, `server.log`
+  - Commit : `2b50d3b`
+---
