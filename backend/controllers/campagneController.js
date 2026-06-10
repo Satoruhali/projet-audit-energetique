@@ -93,6 +93,13 @@ exports.show = async (req, res) => {
       where: { id_campagne: campagne.id }
     });
 
+    const relanceIds = new Set(
+      (await EmailEnvoye.findAll({
+        where: { id_campagne: campagne.id, type: 'relance' },
+        attributes: ['id_locataire']
+      })).map(r => r.id_locataire)
+    );
+
     const result = campagne.toJSON();
     result.logements = logements.map(l => {
       const plain = l.toJSON();
@@ -103,7 +110,11 @@ exports.show = async (req, res) => {
         plancher_haut: plain.plancherHaut?.nom || null
       };
     });
-    result.locataires = locataires;
+    result.locataires = locataires.map(l => {
+      const plain = l.toJSON();
+      plain.relance_envoye = relanceIds.has(plain.id);
+      return plain;
+    });
     result.creneaux = creneaux;
 
     res.json(result);
@@ -345,7 +356,12 @@ exports.envoyerRelances = async (req, res) => {
     });
     const locatairesAvecCreneau = new Set(logementsAvecCreneau.map(l => l.locataire_id));
 
-    const nonRepondants = locatairesAvecEmail.filter(l => !locatairesAvecCreneau.has(l.id));
+    let nonRepondants = locatairesAvecEmail.filter(l => !locatairesAvecCreneau.has(l.id));
+
+    if (req.body.ids && Array.isArray(req.body.ids) && req.body.ids.length > 0) {
+      const ids = req.body.ids.map(Number);
+      nonRepondants = nonRepondants.filter(l => ids.includes(l.id));
+    }
 
     if (nonRepondants.length === 0) {
       return res.json({ message: 'Tous les locataires ont déjà répondu', total: 0, total_envoyes: 0, total_erreurs: 0, details: [] });

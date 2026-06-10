@@ -73,14 +73,16 @@ async function setup() {
   const crypto = require('crypto');
 
   const locataire1 = await Locataire.create({
-    nom: 'Jean Martin',
+    prenom: 'Jean',
+    nom: 'Martin',
     email: 'jean.martin@email.com',
     telephone: '0612345678',
     token_acces: crypto.randomBytes(32).toString('hex')
   });
 
   const locataire2 = await Locataire.create({
-    nom: 'Marie Dupont',
+    prenom: 'Marie',
+    nom: 'Dupont',
     email: 'marie.dupont@email.com',
     telephone: '0698765432',
     token_acces: crypto.randomBytes(32).toString('hex')

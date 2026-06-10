@@ -143,13 +143,15 @@ async function apiCampagneEnvoyerEmails(id) {
   } catch { return { error: 'Serveur injoignable' }; }
 }
 
-async function apiCampagneRelancer(id) {
+async function apiCampagneRelancer(id, ids = null) {
   try {
     const token = getToken();
     if (!token) return null;
+    const body = ids && ids.length > 0 ? JSON.stringify({ ids }) : null;
     const res = await fetch(`${API_BASE}/campagnes/${id}/relancer`, {
       method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }
+      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+      body
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));

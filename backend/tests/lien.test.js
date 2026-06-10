@@ -118,6 +118,7 @@ describe('API /api/liens', () => {
     });
 
     const locataire = await Locataire.create({
+      prenom: 'Jean',
       nom: 'Dupont',
       email: 'jean.dupont@example.com',
       token_acces: 'token-valide-abc'
@@ -200,6 +201,7 @@ describe('API /api/liens', () => {
       });
 
       const locataire = await Locataire.create({
+        prenom: 'Sophie',
         nom: 'Martin',
         email: 'sophie.martin@example.com',
         token_acces: 'token-creneaux-valid'
@@ -277,6 +279,7 @@ describe('API /api/liens', () => {
       });
 
       const autreLocataire = await Locataire.create({
+        prenom: 'Pierre',
         nom: 'Durand',
         email: 'pierre.durand@example.com',
         token_acces: 'token-autre-locataire'

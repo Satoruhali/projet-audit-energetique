@@ -37,7 +37,7 @@ async function showDetail(id) {
             logement: logement.numero || l.numero || '',
             etage: logement.etage ?? l.etage ?? 0,
             etageLabel: (logement.etage ?? l.etage ?? 0) === 0 ? 'RDC' : (logement.etage ?? l.etage ?? 0) === -1 ? 'Sous-sol' : (logement.etage ?? l.etage ?? 0) + 'e',
-            statut: creneau ? 'repondu' : 'attente',
+            statut: creneau ? 'repondu' : l.relance_envoye ? 'relance' : 'attente',
             creneau: creneau ? {
               date: new Date(creneau.date_visite).toISOString().split('T')[0],
               debut: creneau.heure_debut,
@@ -74,7 +74,7 @@ async function showDetail(id) {
       if (detail.selection) {
         camp.selection = detail.selection;
       }
-      if (detail.locataires && detail.locataires.length > 0) {
+        if (detail.locataires && detail.locataires.length > 0) {
         const creneaux = detail.creneaux || [];
         camp.locataires = detail.locataires.map(l => {
           const logement = l.logement || l.logements?.[0] || {};
@@ -86,7 +86,7 @@ async function showDetail(id) {
             logement: logement.numero || l.numero || '',
             etage: logement.etage ?? l.etage ?? 0,
             etageLabel: (logement.etage ?? l.etage ?? 0) === 0 ? 'RDC' : (logement.etage ?? l.etage ?? 0) === -1 ? 'Sous-sol' : (logement.etage ?? l.etage ?? 0) + 'e',
-            statut: creneau ? 'repondu' : 'attente',
+            statut: creneau ? 'repondu' : l.relance_envoye ? 'relance' : 'attente',
             creneau: creneau ? {
               date: new Date(creneau.date_visite).toISOString().split('T')[0],
               debut: creneau.heure_debut,
@@ -154,11 +154,12 @@ function renderReponses(camp) {
       const loc = camp.locataires.find(l => String(l.id) === btn.dataset.relance);
       if (!loc || !camp.id_campagne) return;
       btn.disabled = true;
-      const result = await apiCampagneRelancer(camp.id_campagne);
+      const result = await apiCampagneRelancer(camp.id_campagne, [loc.id]);
       btn.disabled = false;
       if (result && !result.error) {
-        const nb = result.total_envoyes || 0;
-        toast(`Relance envoyée à ${loc.logement} (${nb} locataire(s) relancé(s))`, 'success');
+        loc.statut = 'relance';
+        toast(`Relance envoyée à ${loc.logement}`, 'success');
+        renderReponses(camp);
         renderEmailHistory(camp);
       } else {
         toast('Erreur lors de la relance', 'warning');
@@ -297,7 +298,7 @@ function refreshCampaignData() {
         logement: logement.numero || l.numero || '',
         etage: logement.etage ?? l.etage ?? 0,
         etageLabel: (logement.etage ?? l.etage ?? 0) === 0 ? 'RDC' : (logement.etage ?? l.etage ?? 0) === -1 ? 'Sous-sol' : (logement.etage ?? l.etage ?? 0) + 'e',
-        statut: creneau ? 'repondu' : 'attente',
+        statut: creneau ? 'repondu' : l.relance_envoye ? 'relance' : 'attente',
         creneau: creneau ? {
           date: new Date(creneau.date_visite).toISOString().split('T')[0],
           debut: creneau.heure_debut,

@@ -4,6 +4,7 @@ const Campagne = require('../models/Campagne');
 const Immeuble = require('../models/Immeuble');
 const Creneau = require('../models/Creneau');
 const JoursDisponible = require('../models/JoursDisponible');
+const EmailEnvoye = require('../models/EmailEnvoye');
 const { creneauSchema } = require('../validations/lien');
 
 function timeToMinutes(t) {
@@ -173,7 +174,17 @@ exports.postCreneau = async (req, res) => {
         nom_immeuble: immeuble.nom,
         nom_campagne: campagne.nom
       });
-      await sendMail({ to: locataire.email, subject: sujet, html: corps });
+      const { success, error } = await sendMail({ to: locataire.email, subject: sujet, html: corps });
+      await EmailEnvoye.create({
+        id_campagne: campagne.id,
+        id_locataire: locataire.id,
+        destinataire: locataire.email,
+        sujet,
+        corps,
+        type: 'visite_programmee',
+        statut: success ? 'envoye' : 'echec',
+        erreur: error || null
+      });
     }
 
     res.status(201).json({
