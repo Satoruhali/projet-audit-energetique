@@ -10,6 +10,7 @@
     "test:unit": "set NODE_ENV=testing&& node --test --test-name-pattern='timeToMinutes|chevauche' backend/tests/lien.test.js",
     "test:int": "set NODE_ENV=testing&& node --test --test-name-pattern='API' backend/tests/lien.test.js",
     "seed": "node backend/seed.js",
+    "seed:email": "node backend/seed-email-test.js",
     "migrate": "node backend/db/migrate.js"
   },
   "dependencies": {
