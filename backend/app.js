@@ -11,7 +11,10 @@ const lienRoutes = require('./routes/lienRoutes');
 
 const app = express();
 
-app.use(cors());
+const helmet = require('helmet');
+
+app.use(cors({ origin: process.env.CORS_ORIGIN || 'http://localhost:3001' }));
+app.use(helmet());
 app.use(express.json());
 
 const isTest = process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'testing';
