@@ -586,3 +586,18 @@ Audit du plan d'attaque et du code existant pour identifier les failles pouvant 
   - Conservation uniquement des classes spécifiques à la page rdv (`.rdv-*`)
   - Commit : `1b913f8`
 ---
+
+## 📅 2026-06-10 — 13:30
+- **Tâche** : Correction des bugs critiques des emails de relance
+- **Durée estimée** : 1h
+- **Durée réelle** : ⏳ à compléter
+- **Statut** : ✅ terminée
+- **Fichiers modifiés** : `backend/controllers/campagneController.js`, `backend/controllers/lienController.js`, `frontend/js/api.js`, `frontend/js/detail.js`, `backend/tests/envoyer-emails.test.js`, `backend/tests/lien.test.js`
+- **Notes** :
+  - **P1** : Ajout paramètre `ids[]` optionnel à la route `POST /:id/relancer` — la relance individuelle ne relance plus tous les non-répondants mais seulement le locataire ciblé
+  - **P2** : Le statut `relance` est désormais remonté par l'API via une requête à `EmailEnvoye` dans le `show` endpoint. L'interface affiche correctement "Relancé" au lieu de "En attente" après une relance
+  - **P3** : Historisation de l'email de confirmation dans `EmailEnvoye.create()` après réservation de créneau (manquait dans `lienController.postCreneau`)
+  - Correction des tests : ajout du champ `prenom` manquant dans toutes les occurrences `Locataire.create()` des fichiers de test
+  - Tests : 21/21 ✅ (lien.test.js) + envoyer-emails.test.js ✅
+  - Commit : `edbc6fd`
+---

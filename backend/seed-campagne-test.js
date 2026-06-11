@@ -11,25 +11,30 @@ const Creneau = require('./models/Creneau');
 const JoursDisponible = require('./models/JoursDisponible');
 const Typologie = require('./models/Typologie');
 const TypePlancher = require('./models/TypePlancher');
+const EmailEnvoye = require('./models/EmailEnvoye');
+const { sendMail, templateConfirmation } = require('./services/emailService');
 
 async function seed() {
   await sequelize.authenticate();
   console.log('MySQL connecté');
 
-  await sequelize.sync({ force: true });
+  await sequelize.sync();
   console.log('Tables créées');
 
   // 1. Référentiels
-  await Typologie.bulkCreate([
+  const typologiesData = [
     { code: 'T1', nb_pieces: 1, surface_min_m2: 20, surface_max_m2: 35 },
     { code: 'T2', nb_pieces: 2, surface_min_m2: 35, surface_max_m2: 50 },
     { code: 'T3', nb_pieces: 3, surface_min_m2: 50, surface_max_m2: 70 },
     { code: 'T4', nb_pieces: 4, surface_min_m2: 70, surface_max_m2: 90 },
     { code: 'T5', nb_pieces: 5, surface_min_m2: 90, surface_max_m2: 110 },
     { code: 'T6', nb_pieces: 6, surface_min_m2: 110, surface_max_m2: 130 }
-  ]);
+  ];
+  for (const data of typologiesData) {
+    await Typologie.findOrCreate({ where: { code: data.code }, defaults: data });
+  }
 
-  await TypePlancher.bulkCreate([
+  const typesPlancherData = [
     { categorie: 'bas', nom: 'terre-plein', description: 'Sur terre-plein' },
     { categorie: 'bas', nom: 'vide-sanitaire', description: 'Sur vide sanitaire' },
     { categorie: 'bas', nom: 'dalle-béton', description: 'Dalle béton' },
@@ -37,20 +42,27 @@ async function seed() {
     { categorie: 'haut', nom: 'combles-perdus', description: 'Combles non aménagés' },
     { categorie: 'haut', nom: 'toiture-terrasse', description: 'Toiture terrasse' },
     { categorie: 'haut', nom: 'rampants', description: 'Rampants' }
-  ]);
+  ];
+  for (const data of typesPlancherData) {
+    await TypePlancher.findOrCreate({ where: { nom: data.nom }, defaults: data });
+  }
 
   console.log('Référentiels créés');
 
   // 2. Entrepreneur
-  const entrepreneur = await Entrepreneur.create({
-    nom: 'Test Diagnostic',
-    email: 'test@diag.fr',
-    mot_de_passe_hash: 'password123',
-    telephone: '0601020304'
+  const [entrepreneur] = await Entrepreneur.findOrCreate({
+    where: { email: 'test@diag.fr' },
+    defaults: {
+      nom: 'Test Diagnostic',
+      email: 'test@diag.fr',
+      mot_de_passe_hash: 'password123',
+      telephone: '0601020304'
+    }
   });
   console.log('Entrepreneur créé:', entrepreneur.email);
 
-  // 3. Jours disponibles (3 jours)
+  // 3. Jours disponibles (3 jours) — on remplace ceux du seed
+  await JoursDisponible.destroy({ where: { id_entrepreneur: entrepreneur.id } });
   await JoursDisponible.bulkCreate([
     { id_entrepreneur: entrepreneur.id, date: '2026-06-10', est_disponible: true },
     { id_entrepreneur: entrepreneur.id, date: '2026-06-12', est_disponible: true },
@@ -59,16 +71,19 @@ async function seed() {
   console.log('3 jours disponibles créés');
 
   // 4. Immeuble
-  const immeuble = await Immeuble.create({
-    nom: 'Résidence des Alpes',
-    adresse: '25 avenue des Sommets, 74000 Annecy',
-    nb_etages: 10,
-    id_entrepreneur: entrepreneur.id
+  const [immeuble] = await Immeuble.findOrCreate({
+    where: { nom: 'Résidence des Alpes', id_entrepreneur: entrepreneur.id },
+    defaults: {
+      nom: 'Résidence des Alpes',
+      adresse: '25 avenue des Sommets, 74000 Annecy',
+      nb_etages: 10,
+      id_entrepreneur: entrepreneur.id
+    }
   });
-  console.log('Immeuble créé:', immeuble.nom);
+  console.log('Immeuble:', immeuble.nom);
 
   // 5. Campagne
-  const campagne = await Campagne.create({
+  const campagneDefaults = {
     batiment_id: immeuble.id,
     nom: 'Campagne Test - Juin 2026',
     date_debut_possible: '2026-06-01',
@@ -89,8 +104,26 @@ async function seed() {
       couvertureComplete: true,
       criteresManquants: []
     }
+  };
+  const [campagne, created] = await Campagne.findOrCreate({
+    where: { nom: 'Campagne Test - Juin 2026', batiment_id: immeuble.id },
+    defaults: campagneDefaults
   });
-  console.log('Campagne créée:', campagne.nom);
+
+  if (!created) {
+    console.log('Campagne existante, nettoyage des données liées...');
+    await EmailEnvoye.destroy({ where: { id_campagne: campagne.id } });
+    await Creneau.destroy({ where: { id_campagne: campagne.id } });
+    const logementsExistants = await Logement.findAll({ where: { batiment_id: immeuble.id } });
+    for (const logement of logementsExistants) {
+      if (logement.locataire_id) {
+        await Locataire.destroy({ where: { id: logement.locataire_id } });
+      }
+    }
+    await Logement.destroy({ where: { batiment_id: immeuble.id } });
+  }
+
+  console.log('Campagne:', campagne.nom);
 
   // 6. Dix logements avec diversité de critères
   const logementsData = [
@@ -163,6 +196,58 @@ async function seed() {
   }
   console.log('5 créneaux créés (3 le 10/06, 2 le 12/06)');
 
+  // 9. Envoi des emails de confirmation pour chaque créneau
+  console.log('\n--- Envoi des emails de confirmation ---');
+  const confirmations = [];
+
+  for (const cd of creneauxData) {
+    const logement = logements[cd.logementIdx];
+    const locataire = await Locataire.findByPk(logement.locataire_id);
+    if (!locataire || !locataire.email) {
+      console.log(`  Logement ${logement.numero} : pas de locataire avec email, ignoré`);
+      continue;
+    }
+
+    const { sujet, corps } = templateConfirmation({
+      prenom: locataire.prenom,
+      nom: locataire.nom,
+      date_visite: cd.date,
+      heure_debut: cd.debut,
+      heure_fin: cd.fin,
+      nom_immeuble: immeuble.nom,
+      nom_campagne: campagne.nom
+    });
+
+    const { success, error } = await sendMail({
+      to: locataire.email,
+      subject: sujet,
+      html: corps
+    });
+
+    await EmailEnvoye.create({
+      id_campagne: campagne.id,
+      id_locataire: locataire.id,
+      destinataire: locataire.email,
+      sujet,
+      corps,
+      type: 'visite_programmee',
+      statut: success ? 'envoye' : 'echec',
+      erreur: error || null
+    });
+
+    confirmations.push({
+      logement: logement.numero,
+      locataire: `${locataire.prenom} ${locataire.nom}`,
+      email: locataire.email,
+      creneau: `${cd.date} ${cd.debut}-${cd.fin}`,
+      statut: success ? 'envoye' : 'echec'
+    });
+
+    console.log(`  ${logement.numero} → ${locataire.email} : ${success ? '✅ envoyé' : '❌ échec'}`);
+  }
+
+  console.log(`  Total : ${confirmations.filter(c => c.statut === 'envoye').length} envoyé(s), ${confirmations.filter(c => c.statut === 'echec').length} échec(s)`);
+
   // Résumé
   console.log('\n=== RÉSUMÉ ===');
   console.log('Entrepreneur:       test@diag.fr / password123');
@@ -172,6 +257,7 @@ async function seed() {
   console.log('  Sélectionnés:    ' + logements.filter(l => l.selectionne_visite).length);
   console.log('  Avec locataire:  ' + locataires.length);
   console.log('  Avec créneau:    ' + creneauxData.length);
+  console.log('Emails confirmation: ' + confirmations.filter(c => c.statut === 'envoye').length + ' envoyé(s)');
 
   console.log('\n--- Locataires ---');
   for (let i = 0; i < locataires.length; i++) {
@@ -182,7 +268,7 @@ async function seed() {
     console.log('  ' + l.numero + ' → ' + loc.prenom + ' ' + loc.nom + ' (' + loc.email + ')' + (creneau ? ' [créneau]' : ''));
   }
 
-  console.log('\nPour envoyer les emails (5+ attendus) :');
+  console.log('\nPour envoyer les emails de visite (5+ attendus) :');
   console.log('  1. Lance le serveur: npm run dev');
   console.log('  2. Login: test@diag.fr / password123');
   console.log('  3. Va sur /detail?id=' + campagne.id);
@@ -200,6 +286,9 @@ async function seed() {
   console.log(`  http://localhost:${port}/planning?id=${campagne.id}`);
   console.log('  5 locataires ont des créneaux → ils apparaîtront dans le planning');
   console.log('  2 locataires sans créneau → en "attente"');
+
+  console.log('\n✅ Les emails de confirmation ont déjà été envoyés automatiquement par le seed.');
+  console.log('   Consulte les logs ci-dessus et la table "emails_envoyes" en base.');
 
   await sequelize.close();
 }
