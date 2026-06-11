@@ -598,6 +598,43 @@ Audit du plan d'attaque et du code existant pour identifier les failles pouvant 
   - **P2** : Le statut `relance` est désormais remonté par l'API via une requête à `EmailEnvoye` dans le `show` endpoint. L'interface affiche correctement "Relancé" au lieu de "En attente" après une relance
   - **P3** : Historisation de l'email de confirmation dans `EmailEnvoye.create()` après réservation de créneau (manquait dans `lienController.postCreneau`)
   - Correction des tests : ajout du champ `prenom` manquant dans toutes les occurrences `Locataire.create()` des fichiers de test
-  - Tests : 21/21 ✅ (lien.test.js) + envoyer-emails.test.js ✅
-  - Commit : `edbc6fd`
+   - Tests : 21/21 ✅ (lien.test.js) + envoyer-emails.test.js ✅
+   - Commit : `edbc6fd`
+---
+
+## 📅 2026-06-11 — 12:02
+- **Tâche** : Correction des 3 points bloquants avant déploiement — CORS restrictif, sécurité HTTP (helmet), CASCADE sur les associations Sequelize
+- **Durée estimée** : 30 min
+- **Durée réelle** : ⏳ à compléter
+- **Statut** : ✅ terminée
+- **Fichiers modifiés** : `backend/app.js`, `backend/models/index.js`, `package.json`, `package-lock.json`, `.env.template`
+- **Notes** :
+  - CORS restrictif via `CORS_ORIGIN` depuis `.env` dans `app.js`
+  - Ajout de `helmet()` pour les en-têtes de sécurité HTTP
+  - Correction `onDelete: 'CASCADE'` sur toutes les associations `hasMany` dans `models/index.js`
+  - Commit : `a37a6c1`
+---
+
+## 📅 2026-06-11 — 12:10
+- **Tâche** : Uniformisation CSS — déplacement des 189 lignes de styles `.rdv-*` de `rdv.html` vers `style.css`
+- **Durée estimée** : 15 min
+- **Durée réelle** : ⏳ à compléter
+- **Statut** : ✅ terminée
+- **Fichiers modifiés** : `frontend/rdv.html`, `frontend/css/style.css`
+- **Notes** :
+  - Déplacement des classes `rdv-*` (`.rdv-page`, `.rdv-header`, `.rdv-card`, etc.) de `rdv.html` vers `css/style.css`
+  - Suppression nette de 189 lignes dans `rdv.html`, ajout de 189 lignes dans `style.css`
+  - Commit : `42a1a6c`
+---
+
+## 📅 2026-06-11 — 16:10
+- **Tâche** : Création du script `seed-email-test.js` pour tester l'envoi d'emails + suppression de l'ancien `seed-campagne-test.js`
+- **Durée estimée** : 30 min
+- **Durée réelle** : ⏳ à compléter
+- **Statut** : ✅ terminée
+- **Fichiers modifiés** : `backend/seed-email-test.js` (créé), `backend/seed-campagne-test.js` (supprimé), `package.json`
+- **Notes** :
+  - Nouveau script `seed-email-test.js` (225 lignes) : seed complet entrepreneur, immeuble, campagne, logements, locataires, créneaux, emails envoyés
+  - Suppression de l'ancien `seed-campagne-test.js` (299 lignes) — remplacé par une version plus ciblée pour le test d'emails
+  - Commit : `bec3fe7`
 ---
