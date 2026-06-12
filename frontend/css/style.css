@@ -338,6 +338,21 @@ select.form-input { appearance: auto; }
 
 .th-actions { text-align: center; width: 100px; }
 
+/* ---------- STICKY ACTIONS COLUMN (mobile) ---------- */
+@media (max-width: 767px) {
+  .table-responsive .table th:last-child,
+  .table-responsive .table td:last-child {
+    position: sticky;
+    right: 0;
+    background: #fff;
+    z-index: 2;
+    box-shadow: -4px 0 8px rgba(0,0,0,.06);
+  }
+  .table-responsive .table tbody tr:hover td:last-child {
+    background: #f8fafc;
+  }
+}
+
 /* ---------- BADGES ---------- */
 .badge {
   display: inline-block;
@@ -671,6 +686,31 @@ select.form-input { appearance: auto; }
 @media (min-width: 480px) {
   .stats { grid-template-columns: repeat(3, 1fr); }
   .form-row { grid-template-columns: 1fr 1fr; }
+}
+
+/* ---------- RESPONSIVE : VERY SMALL (max 479px) ---------- */
+@media (max-width: 479px) {
+  .container { padding: 0 12px; }
+
+  .page-header { flex-direction: column; align-items: stretch; }
+  .page-header .btn { width: 100%; justify-content: center; }
+  .page-title { font-size: 1.15rem; word-break: break-word; }
+
+  .stats { gap: 8px; }
+  .stat-card { padding: 14px 16px; }
+  .stat-card__value { font-size: 1.35rem; }
+
+  .card { padding: 16px; }
+
+  .table-responsive {
+    margin: 0 -16px;
+    padding: 0 16px;
+  }
+  .table { min-width: 420px; }
+  .table td,
+  .table th { padding: 8px; }
+
+  .tabs { flex-direction: column; }
 }
 
 /* ---------- RESPONSIVE : DESKTOP (768px+) ---------- */
