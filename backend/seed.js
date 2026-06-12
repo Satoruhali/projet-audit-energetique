@@ -109,7 +109,8 @@ async function seed() {
 
   // 7. Locataire
   const locataire = await Locataire.create({
-    nom: 'Jean Martin',
+    prenom: 'Jean',
+    nom: 'Martin',
     email: 'jean.martin@email.com',
     telephone: '0612345678',
     token_acces: crypto.randomBytes(32).toString('hex')
