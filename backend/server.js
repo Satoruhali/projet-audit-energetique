@@ -17,6 +17,7 @@ const { sequelize } = require('./models');
 const app = require('./app');
 
 const PORT = process.env.PORT || 3000;
+const HOST = process.env.IP || '0.0.0.0';
 const FRONTEND = path.join(__dirname, '..', 'frontend');
 
 app.use(express.static(FRONTEND));
@@ -37,7 +38,7 @@ sequelize.authenticate()
     return sequelize.sync();
   })
   .then(() => {
-    app.listen(PORT, () => console.log(`Serveur démarré sur http://localhost:${PORT}`));
+    app.listen(PORT, HOST, () => console.log(`Serveur démarré sur http://${HOST}:${PORT}`));
   })
   .catch(err => {
     console.error('Erreur MySQL:', err);
