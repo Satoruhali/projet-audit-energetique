@@ -1,0 +1,106 @@
+erDiagram
+    entrepreneurs ||--o{ immeubles : "gère"
+    immeubles ||--o{ logements : "contient"
+    immeubles ||--o{ campagnes : "audité"
+    typologies ||--o{ logements : "typologie"
+    types_plancher ||--o{ logements : "plancher bas"
+    types_plancher ||--o{ logements : "plancher haut"
+    locataires ||--o{ logements : "occupe"
+    locataires ||--o{ emails_envoyes : "reçoit"
+    campagnes ||--o{ creneaux : "planifie"
+    campagnes ||--o{ emails_envoyes : "concerne"
+    logements ||--o{ creneaux : "visité"
+    entrepreneurs ||--o{ jours_disponibles : "disponibilité"
+    jours_disponibles ||--o{ creneaux : "créneau"
+
+    entrepreneurs {
+        int id PK
+        varchar nom
+        varchar email UK
+        varchar mot_de_passe_hash
+        varchar telephone
+        datetime date_creation
+    }
+
+    locataires {
+        int id PK
+        varchar nom
+        varchar email UK
+        varchar telephone
+        datetime date_inscription
+        varchar token_acces UK
+    }
+
+    immeubles {
+        int id PK
+        varchar nom
+        text adresse
+        int nb_etages
+        int id_entrepreneur FK
+    }
+
+    typologies {
+        int id PK
+        varchar code UK
+        int nb_pieces
+        int surface_min_m2
+        int surface_max_m2
+    }
+
+    types_plancher {
+        int id PK
+        enum categorie
+        varchar nom UK
+        text description
+    }
+
+    logements {
+        int id PK
+        int batiment_id FK
+        varchar numero
+        int etage
+        int locataire_id FK
+        int id_typologie FK
+        int id_type_plancher_bas FK
+        int id_type_plancher_haut FK
+        enum position
+        bool selectionne_visite
+    }
+
+    campagnes {
+        int id PK
+        int batiment_id FK
+        date date_debut_possible
+        date date_fin_possible
+        enum statut
+        int nb_min_visites
+        decimal pct_min_visites
+    }
+
+    jours_disponibles {
+        int id PK
+        int id_entrepreneur FK
+        date date
+        bool est_disponible
+    }
+
+    creneaux {
+        int id PK
+        int id_logement FK
+        int id_campagne FK
+        int id_jour_disponible FK
+        date date_visite
+        time heure_debut
+        time heure_fin
+        int ordre_visite
+        enum statut
+    }
+
+    emails_envoyes {
+        int id PK
+        int id_locataire FK
+        int id_campagne FK
+        enum type
+        timestamp date_envoi
+        enum statut
+    }

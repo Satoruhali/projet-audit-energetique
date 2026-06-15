@@ -6,6 +6,31 @@ Base de données MySQL pour la gestion d'audits énergétiques : gestion des imm
 
 ---
 
+---
+
+## Modèle Conceptuel de Données (MCD)
+
+```mermaid
+erDiagram
+    Entrepreneur ||--o{ Immeuble : gère
+    Immeuble ||--o{ Logement : contient
+    Immeuble ||--o{ Campagne : "audité par"
+    Typologie ||--o{ Logement : "classifie"
+    TypePlancher ||--o{ Logement : "caractérise (bas)"
+    TypePlancher ||--o{ Logement : "caractérise (haut)"
+    Locataire ||--o{ Logement : occupe
+    Locataire ||--o{ EmailEnvoye : reçoit
+    Campagne ||--o{ Creneau : planifie
+    Campagne ||--o{ EmailEnvoye : concerne
+    Logement ||--o{ Creneau : "visité dans"
+    Entrepreneur ||--o{ JourDisponible : dispose
+    JourDisponible ||--o{ Creneau : "lié à"
+```
+
+![MCD](mcd.png)
+
+---
+
 ## Tables (après migration)
 
 ### 1. `locataires` — Locataires
