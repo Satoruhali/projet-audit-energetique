@@ -636,5 +636,42 @@ Audit du plan d'attaque et du code existant pour identifier les failles pouvant 
 - **Notes** :
   - Nouveau script `seed-email-test.js` (225 lignes) : seed complet entrepreneur, immeuble, campagne, logements, locataires, créneaux, emails envoyés
   - Suppression de l'ancien `seed-campagne-test.js` (299 lignes) — remplacé par une version plus ciblée pour le test d'emails
-  - Commit : `bec3fe7`
+   - Commit : `bec3fe7`
+---
+
+## 📅 2026-06-12 — 11:20
+- **Tâche** : Fix mobile — colonne Actions sticky + responsive max-479px
+- **Durée estimée** : 20 min
+- **Durée réelle** : ⏳ à compléter
+- **Statut** : ✅ terminée
+- **Fichiers modifiés** : `frontend/css/style.css`
+- **Notes** :
+  - Ajout d'un bloc `@media (max-width: 767px)` rendant la colonne Actions sticky à droite avec `position: sticky`, ombre portée et fond blanc pour rester lisible lors du défilement horizontal sur mobile
+  - Ajout d'un bloc `@media (max-width: 479px)` pour les très petits écrans : container réduit, header en colonne, boutons pleine largeur, stats et cards compactées, tableau avec `min-width: 420px`, tabs en colonne
+  - Améliore significativement l'expérience mobile sans breakpoint existant pour les écrans < 480px
+  - Commit : `fc70ad5`
+---
+
+## 📅 2026-06-12 — 11:40
+- **Tâche** : Fix déploiement Alwaysdata — écoute sur `process.env.IP`
+- **Durée estimée** : 10 min
+- **Durée réelle** : ⏳ à compléter
+- **Statut** : ✅ terminée
+- **Fichiers modifiés** : `backend/server.js`
+- **Notes** :
+  - Ajout de la variable `HOST = process.env.IP || '0.0.0.0'` passée à `app.listen(PORT, HOST, ...)`
+  - Alwaysdata fournit l'IP via la variable d'environnement `IP` ; le serveur n'écoutait que sur `localhost` et ne répondait pas sur l'interface réseau externe
+  - Commit : `c2dc034`
+---
+
+## 📅 2026-06-12 — 12:08
+- **Tâche** : Fix seed — ajout du champ `prenom` manquant dans `backend/seed.js`
+- **Durée estimée** : 5 min
+- **Durée réelle** : ⏳ à compléter
+- **Statut** : ✅ terminée
+- **Fichiers modifiés** : `backend/seed.js`
+- **Notes** :
+  - Le modèle `Locataire` exige désormais un champ `prenom` (non nullable) ; le seed de base créait un locataire avec seulement `nom`, provoquant une erreur `ValidationError` au lancement
+  - Correction : `prenom: 'Jean'` + `nom: 'Martin'` au lieu de `nom: 'Jean Martin'`
+  - Commit : `f16ef51`
 ---
