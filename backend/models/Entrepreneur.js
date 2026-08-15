@@ -34,6 +34,30 @@ const Entrepreneur = sequelize.define('entrepreneurs', {
     type: DataTypes.STRING(500),
     allowNull: true
   },
+  smtp_host: {
+    type: DataTypes.STRING(255),
+    allowNull: true
+  },
+  smtp_port: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
+  smtp_user: {
+    type: DataTypes.STRING(255),
+    allowNull: true
+  },
+  smtp_pass_encrypted: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  smtp_from: {
+    type: DataTypes.STRING(255),
+    allowNull: true
+  },
+  smtp_from_nom: {
+    type: DataTypes.STRING(255),
+    allowNull: true
+  },
   date_creation: {
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW

@@ -28,6 +28,12 @@ async function migrate() {
 
     await sequelize.query(`ALTER TABLE entrepreneurs ADD COLUMN IF NOT EXISTS nom_entreprise VARCHAR(255) NULL`);
     await sequelize.query(`ALTER TABLE entrepreneurs ADD COLUMN IF NOT EXISTS logo_url VARCHAR(500) NULL`);
+    await sequelize.query(`ALTER TABLE entrepreneurs ADD COLUMN IF NOT EXISTS smtp_host VARCHAR(255) NULL`);
+    await sequelize.query(`ALTER TABLE entrepreneurs ADD COLUMN IF NOT EXISTS smtp_port INT NULL`);
+    await sequelize.query(`ALTER TABLE entrepreneurs ADD COLUMN IF NOT EXISTS smtp_user VARCHAR(255) NULL`);
+    await sequelize.query(`ALTER TABLE entrepreneurs ADD COLUMN IF NOT EXISTS smtp_pass_encrypted TEXT NULL`);
+    await sequelize.query(`ALTER TABLE entrepreneurs ADD COLUMN IF NOT EXISTS smtp_from VARCHAR(255) NULL`);
+    await sequelize.query(`ALTER TABLE entrepreneurs ADD COLUMN IF NOT EXISTS smtp_from_nom VARCHAR(255) NULL`);
 
     console.log('Migration terminée avec succès');
     process.exit(0);
