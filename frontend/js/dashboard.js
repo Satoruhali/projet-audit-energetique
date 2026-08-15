@@ -5,6 +5,7 @@
 /* ---------- DASHBOARD ---------- */
 async function showDashboard() {
   updateTopbarUser(getUser());
+  injecterBranding();
 
   const apiCampagnes = await apiCampagnesList();
 

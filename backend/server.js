@@ -21,6 +21,7 @@ const HOST = process.env.IP || '0.0.0.0';
 const FRONTEND = path.join(__dirname, '..', 'frontend');
 
 app.use(express.static(FRONTEND));
+app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 
 app.get('/', (req, res) => res.sendFile(path.join(FRONTEND, 'dashboard.html')));
 app.get('/auth', (req, res) => res.sendFile(path.join(FRONTEND, 'auth.html')));
@@ -28,6 +29,7 @@ app.get('/dashboard', (req, res) => res.sendFile(path.join(FRONTEND, 'dashboard.
 app.get('/detail', (req, res) => res.sendFile(path.join(FRONTEND, 'detail.html')));
 app.get('/jours', (req, res) => res.sendFile(path.join(FRONTEND, 'jours.html')));
 app.get('/planning', (req, res) => res.sendFile(path.join(FRONTEND, 'planning.html')));
+app.get('/parametres', (req, res) => res.sendFile(path.join(FRONTEND, 'parametres.html')));
 app.get('/rendez-vous/:token', (req, res) => res.sendFile(path.join(FRONTEND, 'rdv.html')));
 
 app.get('/api/*', (req, res) => res.status(404).json({ message: 'Route API inconnue' }));

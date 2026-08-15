@@ -56,6 +56,13 @@ a:hover { text-decoration: underline; }
 }
 .topbar__logo span { color: #2ecc71; }
 .topbar__logo:hover { text-decoration: none; }
+.topbar__logo-img {
+  height: 36px;
+  width: auto;
+  max-width: 160px;
+  object-fit: contain;
+  vertical-align: middle;
+}
 
 .topbar__nav {
   display: none;

@@ -8,6 +8,7 @@ const immeubleRoutes = require('./routes/immeubleRoutes');
 const referentielRoutes = require('./routes/referentielRoutes');
 const campagneRoutes = require('./routes/campagneRoutes');
 const lienRoutes = require('./routes/lienRoutes');
+const settingsRoutes = require('./routes/settingsRoutes');
 
 const app = express();
 
@@ -42,6 +43,7 @@ app.use('/api/entrepreneur/campagnes', campagneRoutes);
 app.use('/api/entrepreneur/campagnes/:id', campagneJoursRoutes);
 app.use('/api/liens', lienRoutes);
 app.use('/api/referentiel', referentielRoutes);
+app.use('/api/entrepreneur', settingsRoutes);
 
 app.use(errorHandler);
 

@@ -26,6 +26,14 @@ const Entrepreneur = sequelize.define('entrepreneurs', {
   telephone: {
     type: DataTypes.STRING(50)
   },
+  nom_entreprise: {
+    type: DataTypes.STRING(255),
+    allowNull: true
+  },
+  logo_url: {
+    type: DataTypes.STRING(500),
+    allowNull: true
+  },
   date_creation: {
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW

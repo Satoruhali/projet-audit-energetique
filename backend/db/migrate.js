@@ -26,6 +26,9 @@ async function migrate() {
 
     await sequelize.query(`ALTER TABLE locataires ADD COLUMN IF NOT EXISTS prenom VARCHAR(255) NOT NULL DEFAULT ''`);
 
+    await sequelize.query(`ALTER TABLE entrepreneurs ADD COLUMN IF NOT EXISTS nom_entreprise VARCHAR(255) NULL`);
+    await sequelize.query(`ALTER TABLE entrepreneurs ADD COLUMN IF NOT EXISTS logo_url VARCHAR(500) NULL`);
+
     console.log('Migration terminée avec succès');
     process.exit(0);
   } catch (err) {

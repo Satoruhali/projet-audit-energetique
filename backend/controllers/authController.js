@@ -2,7 +2,7 @@ const Entrepreneur = require('../models/Entrepreneur');
 
 exports.register = async (req, res) => {
   try {
-    const { nom, email, motDePasse, telephone, entreprise, password } = req.body;
+    const { nom, email, motDePasse, telephone, entreprise, nomEntreprise, password } = req.body;
     const mdp = motDePasse || password;
 
     const existant = await Entrepreneur.findOne({ where: { email } });
@@ -14,7 +14,8 @@ exports.register = async (req, res) => {
       nom,
       email,
       mot_de_passe_hash: mdp,
-      telephone
+      telephone,
+      nom_entreprise: entreprise || nomEntreprise || null
     });
 
     const token = entrepreneur.genererToken();

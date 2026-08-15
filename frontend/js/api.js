@@ -62,7 +62,7 @@ async function apiAuthRegister(name, email, password) {
     const res = await fetch(API_AUTH + '/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ nom: name, email, password }),
+      body: JSON.stringify({ nom: name, email, password, entreprise: name }),
     });
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
@@ -177,4 +177,69 @@ async function apiCampagneJoursLoad(id) {
   const result = await apiFetch('GET', `/campagnes/${id}/jours-disponibles`);
   if (result && result.jours) return result.jours;
   return [];
+}
+
+/* ---------- PARAMÈTRES / PERSONNALISATION API ---------- */
+async function apiParametresGet() {
+  try {
+    const token = getToken();
+    if (!token) return null;
+    const res = await fetch(API_BASE + '/parametres', {
+      headers: { 'Authorization': 'Bearer ' + token },
+    });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch { return null; }
+}
+
+async function apiParametresUpdate(data) {
+  try {
+    const token = getToken();
+    if (!token) return { error: 'Non connecté' };
+    const res = await fetch(API_BASE + '/parametres', {
+      method: 'PUT',
+      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      return { error: err.message || 'Erreur lors de la mise à jour' };
+    }
+    return await res.json();
+  } catch { return { error: 'Serveur injoignable' }; }
+}
+
+async function apiParametresUpload(file) {
+  try {
+    const token = getToken();
+    if (!token) return { error: 'Non connecté' };
+    const fd = new FormData();
+    fd.append('logo', file);
+    const res = await fetch(API_BASE + '/parametres/logo', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + token },
+      body: fd,
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      return { error: err.message || 'Erreur lors de l\'upload du logo' };
+    }
+    return await res.json();
+  } catch { return { error: 'Serveur injoignable' }; }
+}
+
+/* ---------- BRANDING (logo + nom entreprise) ---------- */
+async function injecterBranding(element = null) {
+  const el = element || $('#brandingLogo');
+  if (!el) return;
+  if (!getToken()) return;
+  const data = await apiParametresGet();
+  if (!data) return;
+
+  if (data.logo_url) {
+    const alt = data.nom_entreprise || '';
+    el.innerHTML = `<img src="${data.logo_url}" alt="${alt.replace(/"/g, '&quot;')}" class="topbar__logo-img">`;
+  } else if (data.nom_entreprise) {
+    el.textContent = data.nom_entreprise;
+  }
 }

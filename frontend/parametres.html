@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Paramètres — Planif'Audit</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="container topbar__inner">
+      <a href="/dashboard" class="topbar__logo" id="brandingLogo">Planif'<span>Audit</span></a>
+      <nav class="topbar__nav" id="mainNav">
+        <a href="/dashboard" class="topbar__link">Tableau de bord</a>
+        <a href="/parametres" class="topbar__link active">Paramètres</a>
+      </nav>
+      <div class="topbar__user" id="topbarUser" style="display:none">
+        <span class="topbar__user-name" id="userName"></span>
+        <button class="btn btn--outline btn--xs" id="logoutBtn">Déconnexion</button>
+      </div>
+      <button class="topbar__toggle" id="menuToggle" aria-label="Menu">☰</button>
+    </div>
+  </header>
+
+  <main class="main container">
+
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Paramètres</h1>
+        <p class="page-subtitle">Personnalisez votre espace de travail</p>
+      </div>
+    </div>
+
+    <!-- PERSONNALISATION -->
+    <div class="card">
+      <h2 class="card__title">Personnalisation de l'entreprise</h2>
+      <div class="form-group">
+        <label class="form-label">Logo</label>
+        <div id="logoPreviewWrap" style="margin-bottom:12px">
+          <img id="logoPreview" alt="Aperçu du logo" style="display:none;max-height:64px;max-width:200px;object-fit:contain;border:1px solid #eef2f7;border-radius:8px;padding:8px;background:#fafbfc">
+          <p id="logoPlaceholder" style="color:#7a8a9e;font-size:.85rem">Aucun logo configuré.</p>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <input type="file" id="logoInput" accept="image/jpeg,image/png,image/svg+xml">
+          <button type="button" class="btn btn--primary btn--sm" id="logoUploadBtn">Enregistrer le logo</button>
+        </div>
+        <p style="color:#7a8a9e;font-size:.78rem;margin-top:8px">JPG, PNG ou SVG — 500 Ko maximum.</p>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="nomEntreprise">Nom de l'entreprise</label>
+        <input class="form-input" type="text" id="nomEntreprise" placeholder="Diagnostic Énergie Pro">
+      </div>
+
+      <div class="form-actions">
+        <button class="btn btn--primary" id="saveInfosBtn">Enregistrer</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="card__title">Informations du compte</h2>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Nom</label>
+          <input class="form-input" type="text" id="profilNom" readonly>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input class="form-input" type="email" id="profilEmail" readonly>
+        </div>
+      </div>
+      <p id="smtpStatus" style="color:#7a8a9e;font-size:.85rem"></p>
+    </div>
+  </main>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="js/api.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/parametres.js"></script>
+</body>
+</html>

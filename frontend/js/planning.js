@@ -157,6 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return;
   }
   updateTopbarUser(getUser());
+  injecterBranding();
 
   const params = new URLSearchParams(window.location.search);
   const id = params.get('id');
