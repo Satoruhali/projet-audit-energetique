@@ -366,14 +366,23 @@ MODIFICATIONS TECHNIQUES NE NÉCESSITANT PAS D'ACTION IMMÉDIATE
 
 Prochains ajouts à implémenter (par ordre de priorité) :
 1. Phase 4.1 — Champs typologie/plancher/position dans le formulaire : Le formulaire de création campagne (index.html:114-146) ne collecte que l'adresse et le nombre de logements. Il manque les sélecteurs Typologie (T1-T6), Plancher bas, Plancher haut, Position par logement, branchés sur GET /api/referentiel/typologies et plancher-*.
+
 2. Phase 4.2 — Brancher frontend aux vraies API : creerCampagne() (script.js) push encore dans APP.campaigns (mock). Il faut le remplacer par POST /api/entrepreneur/campagnes, puis POST /.../logements, et brancher le dashboard sur GET /api/entrepreneur/campagnes.
+
 3. Phase 6.1 — Onglet "Échantillonnage" : Nouvel onglet dans view-detail pour lancer l'algo (POST /:id/lancer-selection), afficher le seuil, la couverture des typologies/planchers/positions, et la liste des logements sélectionnés.
+
 4. Phase 6.2 — Route email manquante : POST /api/entrepreneur/campagnes/:id/envoyer-emails n'existe pas côté backend (ni route, ni controller). À créer avec nodemailer + template différencié visité/non-visité + historique emails_envoyes.
+
 5. Phase 6.2 (suite) — UI envoi d'emails : Bouton "Envoyer les emails" + tableau d'historique dans l'onglet Échantillonnage.
- 6. Relance email : Route POST .../relancer et UI pour relancer les non-répondants (prévu Phase 6.2, champ emails_envoyes.type = 'relance' existe dans le plan mais pas de code).
+
+ 6. Relance email : Route POST .../relancer et UI pour relancer les non-répondansts (prévu Phase 6.2, champ emails_envoyes.type = 'relance' existe dans le plan mais pas de code).
+
  7. Pagination : Routes GET listes (immeubles, campagnes, logements) sans ?page=&limit=.
+
  8. RG14 : À définir et intégrer (mentionné comme oubli dans l'amendement).
+
  9. Refresh token : POST /api/auth/refresh-token avec httpOnly cookie (prévu v2.0 post-MVP).
+
 10. Tests Phase 7.1-7.2 : Tests intégration supplémentaires (auth, CRUD, algo) + test E2E parcours complet.
 
 

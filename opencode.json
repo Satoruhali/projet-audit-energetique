@@ -1,5 +1,6 @@
 {
   "$schema": "https://opencode.ai/config.json",
+
   "instructions": [
     ".opencode/rules/regle-acces-fichiers.md",
     ".opencode/rules/regle-analyse-pre-tache.md"
