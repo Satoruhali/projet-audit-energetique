@@ -1,0 +1,317 @@
+---
+title: "Algorithme Set Cover — Explication détaillée"
+author: "Projet Audit Énergétique"
+date: "Juin 2026"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Contexte réglementaire
+
+Sélectionner un **nombre minimal de logements** à visiter dans un immeuble,
+tout en couvrant **obligatoirement** certains critères (RG11 à RG15 de l'arrêté
+DPE collectif).
+
+C'est le **Set Cover Problem** (NP-difficile) → solution **gloutonne approchée**.
+
+---
+
+## Les 4 grandes étapes
+
+### 1. `construireCriteres()` — L'univers à couvrir
+
+| Règle | Critères | Exemple |
+|-------|----------|---------|
+| RG11 | Une visite par **typologie** présente | `typo:T1, typo:T2, …` |
+| RG12 | Une visite par **plancher bas** présent | `pb:terre-plein, pb:vide-sanitaire, …` |
+| RG13 | Une visite par **plancher haut** présent | `ph:combles-perdus, ph:toiture-terrasse, …` |
+| RG14 | Un logement en **étage intermédiaire** (si > 2 étages) | `etage:intermediaire` |
+
+### 2. `criteresCouvertPar()` — Ce que couvre chaque logement
+
+Chaque logement couvre exactement 3 ou 4 critères :
+
+```
+logement A1 (étage 0, T1, terre-plein, combles-perdus)
+  → typo:T1, pb:terre-plein, ph:combles-perdus
+
+logement B1 (étage 1, T2, vide-sanitaire, combles-perdus)
+  → typo:T2, pb:vide-sanitaire, ph:combles-perdus, etage:intermediaire
+```
+
+### 3. `selectionSetCover()` — L'algorithme glouton
+
+```
+Initialisation :
+  criteresRestants = TOUS les critères obligatoires (Set)
+  selection = []
+
+Tant qu'il reste des critères à couvrir :
+  1. Pour chaque logement PAS ENCORE sélectionné :
+       Compter combien de critères PARMI criteresRestants il couvre
+  2. Choisir le logement qui en couvre le PLUS (meilleur score)
+  3. Si aucun logement n'apporte de nouveau critère → STOP (échec)
+  4. Ajouter ce logement à selection
+  5. RETIRER les critères qu'il couvre de criteresRestants
+
+Retourner { selectionnes, ilRestait }
+```
+
+### 4. `calculerSeuilMinimal()` + `completerJusquaSeuil()` — RG15
+
+| Logements | Seuil |
+|-----------|-------|
+| < 31 | 0 (pas de seuil) |
+| 31–100 | ceil(n × 10%) |
+| > 100 | max(10, ceil(n × 5%)) |
+
+Si la sélection est sous le seuil → on complète avec des logements triés par étage.
+
+---
+
+## Exécution pas à pas
+
+### Données
+
+```
+A1 (0, T1, terre-plein, combles-perdus)      →  3 critères
+A2 (0, T2, terre-plein, combles-perdus)      →  3
+B1 (1, T2, vide-sanitaire, combles-perdus)   →  4  ← intermédiaire
+B2 (1, T3, vide-sanitaire, toiture-terrasse) →  4  ← intermédiaire
+C1 (2, T3, sur-local, toiture-terrasse)      →  4  ← intermédiaire
+C2 (2, T4, sur-local, combles-amenages)      →  4  ← intermédiaire
+D1 (3, T4, garage, combles-amenages)         →  4  ← intermédiaire
+D2 (3, T5, garage, exterieur)                →  4  ← intermédiaire
+E1 (4, T5, autre, exterieur)                 →  3
+E2 (4, T6, autre, combles-perdus)            →  3
+```
+
+Univers initial : **16 critères**
+
+```
+{ typo:T1, typo:T2, typo:T3, typo:T4, typo:T5, typo:T6,
+  pb:terre-plein, pb:vide-sanitaire, pb:sur-local, pb:garage, pb:autre,
+  ph:combles-perdus, ph:toiture-terrasse, ph:combles-amenages, ph:exterieur,
+  etage:intermediaire }
+```
+
+---
+
+### Itération 1
+
+| Logement | Nouveaux critères | Score |
+|----------|-------------------|:-----:|
+| A1 | T1, terre-plein, combles-perdus | 3 |
+| A2 | T2, terre-plein, combles-perdus | 3 |
+| **→ B1** | **T2, vide-sanitaire, combles-perdus, intermediaire** | **4** |
+| B2 | T3, vide-sanitaire, toiture-terrasse, intermediaire | 4 |
+| C1 | T3, sur-local, toiture-terrasse, intermediaire | 4 |
+| C2 | T4, sur-local, combles-amenages, intermediaire | 4 |
+| D1 | T4, garage, combles-amenages, intermediaire | 4 |
+| D2 | T5, garage, exterieur, intermediaire | 4 |
+| E1 | T5, autre, exterieur | 3 |
+| E2 | T6, autre, combles-perdus | 3 |
+
+> **B1** élu (premier à 4 — condition `>` et non `>=`)
+
+Retrait : `{T2, vide-sanitaire, combles-perdus, intermediaire}`  
+→ **Restant : 12 critères**
+
+```
+{ typo:T1, typo:T3, typo:T4, typo:T5, typo:T6,
+  pb:terre-plein, pb:sur-local, pb:garage, pb:autre,
+  ph:toiture-terrasse, ph:combles-amenages, ph:exterieur }
+```
+
+---
+
+### Itération 2
+
+| Logement | Nouveaux critères | Score |
+|----------|-------------------|:-----:|
+| A1 | T1, terre-plein | 2 |
+| A2 | terre-plein | 1 |
+| ~~B1~~ | *(déjà pris)* | – |
+| B2 | T3, toiture-terrasse | 2 |
+| **→ C1** | **T3, sur-local, toiture-terrasse** | **3** |
+| C2 | T4, sur-local, combles-amenages | 3 |
+| D1 | T4, garage, combles-amenages | 3 |
+| D2 | T5, garage, exterieur | 3 |
+| E1 | T5, autre, exterieur | 3 |
+| E2 | T6, autre | 2 |
+
+> **C1** élu (premier à 3)
+
+Retrait : `{T3, sur-local, toiture-terrasse}`  
+→ **Restant : 9 critères**
+
+```
+{ typo:T1, typo:T4, typo:T5, typo:T6,
+  pb:terre-plein, pb:garage, pb:autre,
+  ph:combles-amenages, ph:exterieur }
+```
+
+---
+
+### Itération 3
+
+| Logement | Nouveaux critères | Score |
+|----------|-------------------|:-----:|
+| A1 | T1, terre-plein | 2 |
+| A2 | terre-plein | 1 |
+| B2 | *(rien)* | 0 |
+| C2 | T4, combles-amenages | 2 |
+| **→ D1** | **T4, garage, combles-amenages** | **3** |
+| D2 | T5, garage, exterieur | 3 |
+| E1 | T5, autre, exterieur | 3 |
+| E2 | T6, autre | 2 |
+
+> **D1** élu (premier à 3)
+
+Retrait : `{T4, garage, combles-amenages}`  
+→ **Restant : 6 critères**
+
+```
+{ typo:T1, typo:T5, typo:T6,
+  pb:terre-plein, pb:autre,
+  ph:exterieur }
+```
+
+---
+
+### Itération 4
+
+| Logement | Nouveaux critères | Score |
+|----------|-------------------|:-----:|
+| A1 | T1, terre-plein | 2 |
+| A2 | terre-plein | 1 |
+| B2 | 0 | 0 |
+| C2 | 0 | 0 |
+| D2 | T5, exterieur | 2 |
+| **→ E1** | **T5, autre, exterieur** | **3** |
+| E2 | T6, autre | 2 |
+
+> **E1** élu (premier à 3)
+
+Retrait : `{T5, autre, exterieur}`  
+→ **Restant : 3 critères**
+
+```
+{ typo:T1, typo:T6,
+  pb:terre-plein }
+```
+
+---
+
+### Itération 5
+
+| Logement | Nouveaux critères | Score |
+|----------|-------------------|:-----:|
+| **→ A1** | **T1, terre-plein** | **2** |
+| A2 | terre-plein | 1 |
+| D2 | 0 | 0 |
+| E2 | T6 | 1 |
+
+> **A1** élu (score 2)
+
+Retrait : `{T1, terre-plein}`  
+→ **Restant : 1 critère**
+
+```
+{ typo:T6 }
+```
+
+---
+
+### Itération 6
+
+| Logement | Nouveaux critères | Score |
+|----------|-------------------|:-----:|
+| **→ E2** | **T6** | **1** |
+| (autres) | 0 | 0 |
+
+> **E2** élu (score 1)
+
+Retrait : `{T6}`  
+→ **Restant : 0 critère ✓**
+
+---
+
+## Résultat final
+
+```
+Sélection : [B1, C1, D1, E1, A1, E2]  →  6 logements sur 10 (60%)
+Tous les critères couverts             →  success: true
+```
+
+### Couverture obtenue
+
+| Catégorie | Valeurs couvertes |
+|-----------|-------------------|
+| Typologies | T1, T2, T3, T4, T5, T6 |
+| Planchers bas | terre-plein, vide-sanitaire, sur-local, garage, autre |
+| Planchers haut | combles-perdus, toiture-terrasse, combles-amenages, exterieur |
+| Intermédiaire | ✓ (B1, C1, D1) |
+
+---
+
+## Pourquoi "glouton" ?
+
+L'algorithme prend à chaque étape la **meilleure décision immédiate**
+(sans anticiper les conséquences).
+
+**Exemple de non-optimalité :**
+
+```
+Logement A : {1, 2, 3, 4, 5}
+Logement B : {6, 7, 8, 9, 10}
+Logement C : {1, 2, 3, 4, 5, 6}
+```
+
+- Glouton → C (6 critères), puis A ou B → **3 logements**
+- Optimal → {A, B} → **2 logements**
+
+Garantie théorique : solution au pire **ln(n)** fois l'optimum.
+
+---
+
+## Schéma récapitulatif
+
+```
+                    ┌──────────────────────────┐
+                    │   Tous les logements      │
+                    │   (ex: 10 logements)      │
+                    └──────────┬───────────────┘
+                               │
+                               ▼
+                    ┌──────────────────────────┐
+                    │  construireCriteres()     │
+                    │  → Univers U (16 crit.)   │
+                    └──────────┬───────────────┘
+                               │
+                               ▼
+                    ┌──────────────────────────┐
+                    │  Tant que U ≠ ∅ :        │
+                    │  1. Compter les scores   │
+                    │  2. Prendre le meilleur  │
+                    │  3. Retirer ses critères │
+                    │  4. L'ajouter à selection │
+                    └──────────┬───────────────┘
+                               │
+                               ▼
+                    ┌──────────────────────────┐
+                    │  U = ∅ ?                 │
+                    │  ├─ Oui → success: true  │
+                    │  └─ Non → success: false │
+                    └──────────┬───────────────┘
+                               │
+                               ▼
+                    ┌──────────────────────────┐
+                    │  calculerSeuilMinimal()    │
+                    │  completerJusquaSeuil()    │
+                    │  → Sélection finale       │
+                    └──────────────────────────┘
+```
