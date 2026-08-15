@@ -4,6 +4,7 @@ require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 const requiredEnvVars = [
   { key: 'JWT_SECRET', message: 'JWT_SECRET manquant — tokens non sécurisés' },
   { key: 'BASE_URL', message: 'BASE_URL manquante — liens emails invalides' },
+  { key: 'SMTP_ENCRYPTION_KEY', message: 'SMTP_ENCRYPTION_KEY manquante — chiffrement des mots de passe SMTP impossible' },
 ];
 for (const { key, message } of requiredEnvVars) {
   if (!process.env[key]) {
