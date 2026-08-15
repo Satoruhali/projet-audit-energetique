@@ -1,4 +1,5 @@
 const { Op } = require('sequelize');
+const Entrepreneur = require('../models/Entrepreneur');
 const Locataire = require('../models/Locataire');
 const Campagne = require('../models/Campagne');
 const Immeuble = require('../models/Immeuble');
@@ -162,7 +163,10 @@ exports.postCreneau = async (req, res) => {
       statut: 'reserve'
     });
 
-    const { sendMail, templateConfirmation } = require('../services/emailService');
+    const { sendMail, construireSmtpConfig, templateConfirmation } = require('../services/emailService');
+    const entrepreneur = await Entrepreneur.findByPk(immeuble.id_entrepreneur);
+    const smtpConfig = construireSmtpConfig(entrepreneur);
+    const nomEntreprise = entrepreneur ? entrepreneur.nom_entreprise || null : null;
 
     if (locataire.email) {
       const { sujet, corps } = templateConfirmation({
@@ -172,9 +176,10 @@ exports.postCreneau = async (req, res) => {
         heure_debut,
         heure_fin,
         nom_immeuble: immeuble.nom,
-        nom_campagne: campagne.nom
+        nom_campagne: campagne.nom,
+        nomEntreprise
       });
-      const { success, error } = await sendMail({ to: locataire.email, subject: sujet, html: corps });
+      const { success, error } = await sendMail({ to: locataire.email, subject: sujet, html: corps, smtpConfig, nomEntreprise });
       await EmailEnvoye.create({
         id_campagne: campagne.id,
         id_locataire: locataire.id,

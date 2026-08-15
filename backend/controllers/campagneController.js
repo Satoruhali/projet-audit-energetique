@@ -1,5 +1,6 @@
 const { Op } = require('sequelize');
 const Campagne = require('../models/Campagne');
+const Entrepreneur = require('../models/Entrepreneur');
 const Immeuble = require('../models/Immeuble');
 const Logement = require('../models/Logement');
 const Locataire = require('../models/Locataire');
@@ -9,7 +10,7 @@ const Typologie = require('../models/Typologie');
 const TypePlancher = require('../models/TypePlancher');
 const { creerCampagne } = require('../validations/campagne');
 const { lancerSelection } = require('../services/setCoverService');
-const { sendMail, templateVisiteProgrammee, templatePasDeVisite, templateRelance } = require('../services/emailService');
+const { sendMail, construireSmtpConfig, templateVisiteProgrammee, templatePasDeVisite, templateRelance } = require('../services/emailService');
 
 exports.store = async (req, res) => {
   try {
@@ -254,6 +255,9 @@ exports.envoyerEmails = async (req, res) => {
     }
 
     const immeuble = await Immeuble.findByPk(campagne.batiment_id);
+    const entrepreneur = await Entrepreneur.findByPk(req.entrepreneur.id);
+    const smtpConfig = construireSmtpConfig(entrepreneur);
+    const nomEntreprise = entrepreneur ? entrepreneur.nom_entreprise || null : null;
 
     const resultats = [];
 
@@ -268,19 +272,23 @@ exports.envoyerEmails = async (req, res) => {
             nom: locataire.nom,
             nom_campagne: campagne.nom,
             nom_immeuble: immeuble ? immeuble.nom : '',
-            token: locataire.token_acces
+            token: locataire.token_acces,
+            nomEntreprise
           })
         : templatePasDeVisite({
             prenom: locataire.prenom,
             nom: locataire.nom,
             nom_campagne: campagne.nom,
-            nom_immeuble: immeuble ? immeuble.nom : ''
+            nom_immeuble: immeuble ? immeuble.nom : '',
+            nomEntreprise
           });
 
       const { success, error } = await sendMail({
         to: locataire.email,
         subject: template.sujet,
-        html: template.corps
+        html: template.corps,
+        smtpConfig,
+        nomEntreprise
       });
 
       const emailRecord = await EmailEnvoye.create({
@@ -368,6 +376,10 @@ exports.envoyerRelances = async (req, res) => {
     }
 
     const immeuble = await Immeuble.findByPk(campagne.batiment_id);
+    const entrepreneur = await Entrepreneur.findByPk(req.entrepreneur.id);
+    const smtpConfig = construireSmtpConfig(entrepreneur);
+    const nomEntreprise = entrepreneur ? entrepreneur.nom_entreprise || null : null;
+
     const resultats = [];
 
     for (const locataire of nonRepondants) {
@@ -376,13 +388,16 @@ exports.envoyerRelances = async (req, res) => {
         nom: locataire.nom,
         nom_campagne: campagne.nom,
         nom_immeuble: immeuble ? immeuble.nom : '',
-        token: locataire.token_acces
+        token: locataire.token_acces,
+        nomEntreprise
       });
 
       const { success, error } = await sendMail({
         to: locataire.email,
         subject: template.sujet,
-        html: template.corps
+        html: template.corps,
+        smtpConfig,
+        nomEntreprise
       });
 
       const emailRecord = await EmailEnvoye.create({
