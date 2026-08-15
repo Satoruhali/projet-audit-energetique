@@ -8,27 +8,6 @@ Base de données MySQL pour la gestion d'audits énergétiques : gestion des imm
 
 ---
 
-## Modèle Conceptuel de Données (MCD)
-
-```mermaid
-erDiagram
-    Entrepreneur ||--o{ Immeuble : gère
-    Immeuble ||--o{ Logement : contient
-    Immeuble ||--o{ Campagne : "audité par"
-    Typologie ||--o{ Logement : "classifie"
-    TypePlancher ||--o{ Logement : "caractérise (bas)"
-    TypePlancher ||--o{ Logement : "caractérise (haut)"
-    Locataire ||--o{ Logement : occupe
-    Locataire ||--o{ EmailEnvoye : reçoit
-    Campagne ||--o{ Creneau : planifie
-    Campagne ||--o{ EmailEnvoye : concerne
-    Logement ||--o{ Creneau : "visité dans"
-    Entrepreneur ||--o{ JourDisponible : dispose
-    JourDisponible ||--o{ Creneau : "lié à"
-```
-
-![MCD](mcd.png)
-
 ---
 
 ## Tables (après migration)
@@ -205,17 +184,17 @@ erDiagram
 ```mermaid
 erDiagram
     entrepreneurs ||--o{ immeubles : "gère"
-    immeubles ||--o{ logements : "contient"
-    immeubles ||--o{ campagnes : "audité"
+    immeubles ||--|{ logements : "contient"
+    immeubles ||--|{ campagnes : "audité"
     typologies ||--o{ logements : "typologie"
     types_plancher ||--o{ logements : "plancher bas"
     types_plancher ||--o{ logements : "plancher haut"
     locataires ||--o{ logements : "occupe"
-    locataires ||--o{ emails_envoyes : "reçoit"
-    campagnes ||--o{ creneaux : "planifie"
-    campagnes ||--o{ emails_envoyes : "concerne"
-    logements ||--o{ creneaux : "visité"
-    entrepreneurs ||--o{ jours_disponibles : "disponibilité"
+    locataires ||--|{ emails_envoyes : "reçoit"
+    campagnes ||--|{ creneaux : "planifie"
+    campagnes ||--|{ emails_envoyes : "concerne"
+    logements ||--|{ creneaux : "visité"
+    entrepreneurs ||--|{ jours_disponibles : "disponibilité"
     jours_disponibles ||--o{ creneaux : "créneau"
 
     entrepreneurs {

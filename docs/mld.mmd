@@ -1,16 +1,16 @@
 erDiagram
     entrepreneurs ||--o{ immeubles : "gère"
-    immeubles ||--o{ logements : "contient"
-    immeubles ||--o{ campagnes : "audité"
+    immeubles ||--|{ logements : "contient"
+    immeubles ||--|{ campagnes : "audité"
     typologies ||--o{ logements : "typologie"
     types_plancher ||--o{ logements : "plancher bas"
     types_plancher ||--o{ logements : "plancher haut"
     locataires ||--o{ logements : "occupe"
-    locataires ||--o{ emails_envoyes : "reçoit"
-    campagnes ||--o{ creneaux : "planifie"
-    campagnes ||--o{ emails_envoyes : "concerne"
-    logements ||--o{ creneaux : "visité"
-    entrepreneurs ||--o{ jours_disponibles : "disponibilité"
+    locataires ||--|{ emails_envoyes : "reçoit"
+    campagnes ||--|{ creneaux : "planifie"
+    campagnes ||--|{ emails_envoyes : "concerne"
+    logements ||--|{ creneaux : "visité"
+    entrepreneurs ||--|{ jours_disponibles : "disponibilité"
     jours_disponibles ||--o{ creneaux : "créneau"
 
     entrepreneurs {
