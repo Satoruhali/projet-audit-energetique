@@ -58,6 +58,47 @@
       </div>
     </div>
 
+    <!-- CONFIGURATION SMTP -->
+    <div class="card">
+      <h2 class="card__title">Configuration email</h2>
+      <p style="color:#7a8a9e;font-size:.85rem;margin-bottom:16px">Envoyez vos emails depuis votre propre adresse. Laissez le champ vide pour conserver la valeur actuelle.</p>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="smtpHost">Serveur SMTP (hôte)</label>
+          <input class="form-input" type="text" id="smtpHost" placeholder="smtp.votreserveur.fr">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="smtpPort">Port</label>
+          <input class="form-input" type="number" id="smtpPort" placeholder="587">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="smtpUser">Utilisateur</label>
+          <input class="form-input" type="text" id="smtpUser" autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="smtpPass">Mot de passe</label>
+          <input class="form-input" type="password" id="smtpPass" placeholder="Laisser vide pour conserver" autocomplete="new-password">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="smtpFrom">Adresse d'émission</label>
+          <input class="form-input" type="email" id="smtpFrom" placeholder="contact@votreserveur.fr">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="smtpFromNom">Nom d'affichage</label>
+          <input class="form-input" type="text" id="smtpFromNom" placeholder="Votre Entreprise">
+        </div>
+      </div>
+      <div class="form-actions" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <button class="btn btn--primary" id="saveSmtpBtn">Enregistrer</button>
+        <button class="btn btn--outline" id="testSmtpBtn">Tester l'envoi</button>
+      </div>
+      <p id="smtpTestResult" style="font-size:.85rem;margin-top:10px"></p>
+    </div>
+
     <div class="card">
       <h2 class="card__title">Informations du compte</h2>
       <div class="form-row">

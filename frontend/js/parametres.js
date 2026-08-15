@@ -29,6 +29,12 @@ async function chargerParametres() {
     $('#logoPlaceholder').style.display = 'none';
   }
 
+  if (data.smtp_host) $('#smtpHost').value = data.smtp_host;
+  if (data.smtp_port) $('#smtpPort').value = data.smtp_port;
+  if (data.smtp_user) $('#smtpUser').value = data.smtp_user;
+  if (data.smtp_from) $('#smtpFrom').value = data.smtp_from;
+  if (data.smtp_from_nom) $('#smtpFromNom').value = data.smtp_from_nom;
+
   $('#smtpStatus').textContent = data.smtp_configured
     ? 'Email : envoi via votre propre serveur SMTP.'
     : 'Email : envoi via le serveur SMTP par défaut.';
@@ -101,6 +107,50 @@ $('#saveInfosBtn').addEventListener('click', async () => {
   }
   toast('Paramètres enregistrés', 'success');
   injecterBranding();
+});
+
+/* ---------- SMTP ---------- */
+$('#saveSmtpBtn').addEventListener('click', async () => {
+  const btn = $('#saveSmtpBtn');
+  const data = {
+    host: $('#smtpHost').value.trim(),
+    port: $('#smtpPort').value.trim(),
+    user: $('#smtpUser').value.trim(),
+    pass: $('#smtpPass').value,
+    from: $('#smtpFrom').value.trim(),
+    fromNom: $('#smtpFromNom').value.trim()
+  };
+  btn.disabled = true; btn.textContent = 'Enregistrement…';
+  const result = await apiParametresSmtpSave(data);
+  btn.disabled = false; btn.textContent = 'Enregistrer';
+
+  if (result && result.error) {
+    toast(result.error, 'error');
+    return;
+  }
+  $('#smtpPass').value = '';
+  $('#smtpTestResult').textContent = '';
+  toast('Configuration SMTP enregistrée', 'success');
+  $('#smtpStatus').textContent = result.smtp_configured
+    ? 'Email : envoi via votre propre serveur SMTP.'
+    : 'Email : envoi via le serveur SMTP par défaut.';
+});
+
+$('#testSmtpBtn').addEventListener('click', async () => {
+  const btn = $('#testSmtpBtn');
+  const resultEl = $('#smtpTestResult');
+  btn.disabled = true; btn.textContent = 'Envoi du test…';
+  resultEl.textContent = '';
+  const result = await apiParametresSmtpTest();
+  btn.disabled = false; btn.textContent = 'Tester l\'envoi';
+
+  if (result && result.success) {
+    resultEl.textContent = result.message;
+    resultEl.style.color = '#16a34a';
+  } else {
+    resultEl.textContent = (result && result.error) || 'Échec de l\'envoi du test';
+    resultEl.style.color = '#dc2626';
+  }
 });
 
 /* ---------- MENU MOBILE ---------- */

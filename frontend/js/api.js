@@ -228,6 +228,39 @@ async function apiParametresUpload(file) {
   } catch { return { error: 'Serveur injoignable' }; }
 }
 
+async function apiParametresSmtpSave(data) {
+  try {
+    const token = getToken();
+    if (!token) return { error: 'Non connecté' };
+    const res = await fetch(API_BASE + '/parametres/smtp', {
+      method: 'PUT',
+      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      return { error: err.message || 'Erreur lors de l\'enregistrement SMTP' };
+    }
+    return await res.json();
+  } catch { return { error: 'Serveur injoignable' }; }
+}
+
+async function apiParametresSmtpTest() {
+  try {
+    const token = getToken();
+    if (!token) return { error: 'Non connecté' };
+    const res = await fetch(API_BASE + '/parametres/smtp/test', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + token },
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      return { error: err.message || 'Échec de l\'envoi du test' };
+    }
+    return await res.json();
+  } catch { return { error: 'Serveur injoignable' }; }
+}
+
 /* ---------- BRANDING (logo + nom entreprise) ---------- */
 async function injecterBranding(element = null) {
   const el = element || $('#brandingLogo');
